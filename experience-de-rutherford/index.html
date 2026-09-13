@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'expérience de Rutherford — 1911</title>
+<style>
+  :root {
+    --radius: 10px;
+    --border: rgba(255,255,255,0.12);
+    --border-strong: rgba(255,255,255,0.24);
+    --surface-1: #151b26;
+    --text-primary: #e7ebf0;
+    --text-secondary: #9aa5b1;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    padding: 16px;
+    background: #05070d;
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, Helvetica, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .page {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .back-link {
+    display: inline-block;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .back-link:hover {
+    color: var(--text-primary);
+  }
+  @media (max-width: 480px) {
+    body {
+      padding: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+<a class="back-link" href="../premiere/">&larr; Retour aux animations de Première</a>
+<h2 class="sr-only">Simulation 3D interactive de l'expérience de Rutherford : trajectoire des particules alpha à travers une feuille d'or, vue d'ensemble du dispositif, vue atomique zoomée avec suivi cinématique d'une particule rétrodiffusée, et statistiques cumulées des résultats.</h2>
+<style>
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+.ruth-outer{position:relative;width:100%;}
+.ruth-titlebar{display:flex;align-items:center;gap:9px;padding:9px 14px;margin-bottom:12px;border-radius:var(--radius,10px);border:0.5px solid var(--border,rgba(255,255,255,0.12));background:linear-gradient(135deg, rgba(22,28,42,0.7), rgba(9,12,20,0.7));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+.ruth-titlebar-dot{width:7px;height:7px;border-radius:50%;background:#e24b4a;box-shadow:0 0 9px 2px rgba(226,75,74,0.75);flex:0 0 auto;}
+.ruth-titlebar-text{font-size:11.5px;letter-spacing:0.07em;text-transform:uppercase;font-weight:700;color:var(--text-primary,#e7ebf0);}
+.ruth-tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.ruth-tab-btn{font-size:13.5px;padding:9px 16px;min-height:40px;border-radius:var(--radius,10px);border:0.5px solid var(--border,rgba(255,255,255,0.12));background:transparent;color:var(--text-secondary,#9aa5b1);cursor:pointer;transition:background .15s,color .15s,border-color .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.ruth-tab-btn:hover{color:var(--text-primary,#e7ebf0);}
+.ruth-tab-btn.active{background:var(--surface-1,#151b26);border-color:var(--border-strong,rgba(255,255,255,0.24));color:var(--text-primary,#e7ebf0);}
+.ruth-canvas-wrap{position:relative;border-radius:var(--radius,10px);overflow:hidden;background:radial-gradient(ellipse at 28% 18%, rgba(70,95,150,0.28), transparent 55%),radial-gradient(ellipse at 78% 82%, rgba(140,80,40,0.14), transparent 55%),radial-gradient(circle at 50% 50%, #0a0e18 0%, #05070d 70%, #020305 100%);}
+.ruth-canvas-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0.55;background-image:radial-gradient(1px 1px at 15% 25%, rgba(255,255,255,0.55), transparent),radial-gradient(1px 1px at 65% 15%, rgba(255,255,255,0.4), transparent),radial-gradient(1.5px 1.5px at 85% 60%, rgba(255,255,255,0.45), transparent),radial-gradient(1px 1px at 40% 78%, rgba(255,255,255,0.32), transparent),radial-gradient(1px 1px at 24% 88%, rgba(255,255,255,0.28), transparent),radial-gradient(1.5px 1.5px at 92% 32%, rgba(255,255,255,0.4), transparent),radial-gradient(1px 1px at 55% 45%, rgba(255,255,255,0.22), transparent);}
+.ruth-canvas{width:100%;height:460px;display:block;touch-action:none;position:relative;z-index:1;}
+.ruth-tag{position:absolute;left:0;top:0;transform:translate(-50%,-125%);display:flex;align-items:center;gap:7px;background:rgba(11,15,24,0.86);border:0.5px solid rgba(255,255,255,0.2);border-radius:999px;padding:6px 12px 6px 8px;font-size:11.5px;line-height:1.35;color:#e7ebf0;max-width:250px;pointer-events:none;opacity:0;transition:opacity .2s ease;box-shadow:0 6px 16px rgba(0,0,0,0.4);z-index:5;}
+.ruth-tag.visible{opacity:1;}
+.ruth-tag::after{content:'';position:absolute;left:50%;bottom:-4px;width:8px;height:8px;background:rgba(11,15,24,0.86);border-right:0.5px solid rgba(255,255,255,0.2);border-bottom:0.5px solid rgba(255,255,255,0.2);transform:translateX(-50%) rotate(45deg);}
+.ruth-tag-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 6px currentColor;}
+.ruth-caption{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(0.85);font-size:23px;font-weight:700;letter-spacing:0.01em;color:#fff;text-shadow:0 0 20px rgba(226,75,74,0.95), 0 2px 12px rgba(0,0,0,0.65);opacity:0;pointer-events:none;transition:opacity .35s ease, transform .35s ease;z-index:6;text-align:center;}
+.ruth-caption.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.ruth-legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;font-size:13px;color:var(--text-secondary,#9aa5b1);}
+.ruth-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px;}
+.ruth-stats{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;}
+.ruth-stat{background:var(--surface-1,#151b26);border-radius:var(--radius,10px);padding:8px 12px;font-size:13px;color:var(--text-secondary,#9aa5b1);}
+.ruth-stat b{color:var(--text-primary,#e7ebf0);font-weight:600;}
+.ruth-controls{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap;}
+.ruth-controls label{font-size:13px;color:var(--text-secondary,#9aa5b1);}
+.ruth-controls input[type="range"]{height:36px;touch-action:none;-webkit-tap-highlight-color:transparent;}
+.ruth-controls input[type="range"]::-webkit-slider-runnable-track{height:5px;border-radius:3px;background:var(--border,rgba(255,255,255,0.18));}
+.ruth-controls input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:24px;height:24px;margin-top:-10px;border-radius:50%;background:#4d94ff;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(0,0,0,0.4);cursor:pointer;}
+.ruth-controls input[type="range"]::-moz-range-track{height:5px;border-radius:3px;background:var(--border,rgba(255,255,255,0.18));}
+.ruth-controls input[type="range"]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#4d94ff;border:2px solid rgba(255,255,255,0.85);box-shadow:0 2px 6px rgba(0,0,0,0.4);cursor:pointer;}
+.ruth-btn{font-size:13px;padding:9px 16px;min-height:40px;border-radius:var(--radius,10px);border:0.5px solid var(--border,rgba(255,255,255,0.12));background:var(--surface-1,#151b26);color:var(--text-secondary,#9aa5b1);cursor:pointer;transition:all .15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+.ruth-btn:hover{color:var(--text-primary,#e7ebf0);border-color:var(--border-strong,rgba(255,255,255,0.24));}
+.ruth-btn.on{color:#a9edb8;border-color:rgba(120,220,150,0.6);background:rgba(60,150,95,0.16);}
+.ruth-btn.off-state{color:#e7a9a8;border-color:rgba(220,110,110,0.55);background:rgba(140,60,60,0.14);}
+.ruth-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.ruth-stats-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:13px;color:var(--text-secondary,#9aa5b1);}
+.ruth-chart-wrap{border-radius:var(--radius,10px);background:linear-gradient(180deg, rgba(22,28,42,0.55), rgba(8,11,18,0.55));border:0.5px solid var(--border,rgba(255,255,255,0.1));padding:12px;}
+.ruth-stats-canvas{width:100%;height:320px;display:block;}
+.ruth-stats-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;}
+.ruth-stats-legend-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-secondary,#9aa5b1);background:var(--surface-1,#151b26);padding:7px 12px;border-radius:var(--radius,10px);}
+.ruth-stats-legend-item b{color:var(--text-primary,#e7ebf0);font-size:15px;}
+.ruth-dog-canvas{position:absolute;top:0;left:0;z-index:8;pointer-events:none;display:none;background:transparent;}
+.ruth-conclusion{display:flex;flex-direction:column;gap:14px;}
+.ruth-concl-item{display:flex;align-items:flex-start;gap:12px;background:var(--surface-1,#151b26);border:0.5px solid var(--border,rgba(255,255,255,0.12));border-radius:var(--radius,10px);padding:12px 14px;}
+.ruth-concl-icon{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;}
+.ruth-concl-item b{color:var(--text-primary,#e7ebf0);font-size:14.5px;display:block;margin-bottom:4px;}
+.ruth-concl-item p{margin:0;color:var(--text-secondary,#9aa5b1);font-size:13.5px;line-height:1.5;}
+.ruth-concl-summary{background:linear-gradient(135deg, rgba(77,148,255,0.14), rgba(226,75,74,0.1));border:0.5px solid var(--border-strong,rgba(255,255,255,0.24));border-radius:var(--radius,10px);padding:14px 16px;color:var(--text-primary,#e7ebf0);font-size:14px;line-height:1.6;}
+</style>
+<div class="ruth-outer" id="ruthOuter">
+  <div class="ruth-tabs">
+    <button class="ruth-tab-btn active" data-tab="overview" aria-pressed="true">Vue d'ensemble</button>
+    <button class="ruth-tab-btn" data-tab="zoom" aria-pressed="false">Zoom sur la feuille d'or</button>
+    <button class="ruth-tab-btn" data-tab="stats" aria-pressed="false">Stats des résultats</button>
+    <button class="ruth-tab-btn" data-tab="conclusion" aria-pressed="false">Conclusion</button>
+  </div>
+
+  <div class="ruth-panel" id="panelOverview">
+    <div class="ruth-canvas-wrap" id="wrapOverview">
+      <canvas class="ruth-canvas" id="ruthCanvas"></canvas>
+      <canvas class="ruth-canvas ruth-dog-canvas" id="dogCanvas"></canvas>
+      <div class="ruth-tag" id="tagGun"><span class="ruth-tag-dot" style="background:#4d94ff;color:#4d94ff;"></span>Canon à particules alpha (α)</div>
+      <div class="ruth-tag" id="tagFoil"><span class="ruth-tag-dot" style="background:#d4af37;color:#d4af37;"></span>Feuille d'or — ≈ 0,0004 mm d'épaisseur, soit environ 2000 atomes d'or empilés</div>
+      <div class="ruth-tag" id="tagScreen"><span class="ruth-tag-dot" style="background:#6fa8ff;color:#6fa8ff;"></span>Écran de détection (scintillation)</div>
+    </div>
+    <div class="ruth-legend">
+      <span><span class="ruth-dot" style="background:#9fc6ff"></span>Impact direct (vide)</span>
+      <span><span class="ruth-dot" style="background:#f0997b"></span>Impact dévié</span>
+      <span><span class="ruth-dot" style="background:#e24b4a"></span>Rétrodiffusion</span>
+    </div>
+    <div class="ruth-stats">
+      <div class="ruth-stat">Traversées <b id="cntThrough">0</b></div>
+      <div class="ruth-stat">Déviées <b id="cntSide">0</b></div>
+      <div class="ruth-stat">Rétrodiffusées <b id="cntBack">0</b></div>
+    </div>
+    <div class="ruth-controls">
+      <label for="ruthSpeed">Vitesse</label>
+      <input type="range" id="ruthSpeed" min="0.3" max="2.5" step="0.1" value="1" style="width:140px;">
+      <button id="ruthPause" class="ruth-btn">Pause</button>
+      <button id="gunToggle" class="ruth-btn off-state">Allumer le canon</button>
+      <button id="tagToggle" class="ruth-btn">Afficher la légende (étiquettes)</button>
+      <button id="persistToggle" class="ruth-btn">Persistance des impacts</button>
+      <button id="dogBtn" class="ruth-btn">🐶 Chien</button>
+    </div>
+  </div>
+
+  <div class="ruth-panel" id="panelZoom" style="display:none;">
+    <div class="ruth-canvas-wrap" id="wrapZoom">
+      <canvas class="ruth-canvas" id="ruthCanvasZoom"></canvas>
+      <div class="ruth-caption" id="trackCaption"></div>
+    </div>
+    <div class="ruth-legend">
+      <span><span class="ruth-dot" style="background:#4d94ff"></span>Particule alpha</span>
+      <span><span class="ruth-dot" style="background:#d6362f"></span>Noyau (dur, opaque)</span>
+      <span><span class="ruth-dot" style="background:#f4d35e"></span>Nuage électronique (translucide)</span>
+    </div>
+    <div class="ruth-stats">
+      <div class="ruth-stat">Traversées <b id="cntThroughZ">0</b></div>
+      <div class="ruth-stat">Déviées <b id="cntSideZ">0</b></div>
+      <div class="ruth-stat">Rétrodiffusées <b id="cntBackZ">0</b></div>
+    </div>
+    <div class="ruth-controls">
+      <label for="ruthSpeedZ">Vitesse</label>
+      <input type="range" id="ruthSpeedZ" min="0.3" max="2.5" step="0.1" value="1" style="width:140px;">
+      <button id="ruthPauseZ" class="ruth-btn">Pause</button>
+      <button id="trackBtn" class="ruth-btn">Suivre une particule rétrodiffusée</button>
+      <button id="throughBtn" class="ruth-btn">Suivre une particule qui traverse la feuille d'or</button>
+    </div>
+  </div>
+
+  <div class="ruth-panel" id="panelStats" style="display:none;">
+    <div class="ruth-stats-head">
+      <span>Bilan cumulé de l'expérience (onglets 1 et 2 confondus)</span>
+      <button id="statsReset" class="ruth-btn">Réinitialiser</button>
+    </div>
+    <div class="ruth-chart-wrap">
+      <canvas id="statsCanvas" class="ruth-stats-canvas"></canvas>
+    </div>
+    <div class="ruth-stats-legend">
+      <div class="ruth-stats-legend-item"><span class="ruth-dot" style="background:#b39ddb"></span>Envoyées : <b id="statSent">0</b></div>
+      <div class="ruth-stats-legend-item"><span class="ruth-dot" style="background:#f0997b"></span>Déviées : <b id="statSide">0</b></div>
+      <div class="ruth-stats-legend-item"><span class="ruth-dot" style="background:#9fc6ff"></span>Traversées : <b id="statThrough">0</b></div>
+      <div class="ruth-stats-legend-item"><span class="ruth-dot" style="background:#e24b4a"></span>Rétrodiffusées : <b id="statBack">0</b></div>
+    </div>
+  </div>
+
+  <div class="ruth-panel" id="panelConclusion" style="display:none;">
+    <div class="ruth-conclusion">
+      <div class="ruth-concl-item">
+        <span class="ruth-concl-icon" style="background:rgba(159,198,255,0.16);color:#9fc6ff;">①</span>
+        <div>
+          <b>Presque toutes les particules traversent la feuille sans dévier.</b>
+          <p>L'atome est donc surtout... du vide ! La matière n'est pas pleine comme on le pensait.</p>
+        </div>
+      </div>
+      <div class="ruth-concl-item">
+        <span class="ruth-concl-icon" style="background:rgba(240,153,123,0.16);color:#f0997b;">②</span>
+        <div>
+          <b>Quelques particules sont légèrement déviées.</b>
+          <p>Elles passent près d'une charge positive concentrée quelque part dans l'atome, qui les repousse un peu.</p>
+        </div>
+      </div>
+      <div class="ruth-concl-item">
+        <span class="ruth-concl-icon" style="background:rgba(226,75,74,0.16);color:#e24b4a;">③</span>
+        <div>
+          <b>Une infime partie rebondit complètement en arrière.</b>
+          <p>Cela veut dire qu'elles ont percuté quelque chose de très petit, très dense et chargé positivement : le noyau.</p>
+        </div>
+      </div>
+      <div class="ruth-concl-summary">
+        <b>En résumé :</b> l'atome n'est pas une boule pleine. C'est un tout petit noyau, dense et chargé positivement, entouré d'un immense espace presque vide où se déplacent les électrons. C'est le modèle « planétaire » de Rutherford, qui remplace l'ancien modèle du « pudding » de Thomson.
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var UP_AXIS = new THREE.Vector3(0,1,0);
+
+  /* ---------- shared visual helpers ---------- */
+
+  function makeRadialTexture(hex, size){
+    size = size||128;
+    var c = document.createElement('canvas'); c.width=c.height=size;
+    var ctx = c.getContext('2d');
+    var r = size/2;
+    var col = new THREE.Color(hex);
+    var rgb = Math.round(col.r*255)+','+Math.round(col.g*255)+','+Math.round(col.b*255);
+    var g = ctx.createRadialGradient(r,r,0,r,r,r);
+    g.addColorStop(0, 'rgba('+rgb+',1)');
+    g.addColorStop(0.35, 'rgba('+rgb+',0.55)');
+    g.addColorStop(1, 'rgba('+rgb+',0)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,size,size);
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function makeRayTexture(){
+    var w=64,h=256;
+    var c=document.createElement('canvas'); c.width=w; c.height=h;
+    var ctx=c.getContext('2d');
+    var g=ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,'rgba(255,255,255,0)');
+    g.addColorStop(0.55,'rgba(255,255,255,0.95)');
+    g.addColorStop(1,'rgba(255,255,255,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    ctx.moveTo(w/2,h);
+    ctx.lineTo(w*0.82,h*0.5);
+    ctx.lineTo(w/2,0);
+    ctx.lineTo(w*0.18,h*0.5);
+    ctx.closePath();
+    ctx.fill();
+    var tex=new THREE.CanvasTexture(c); tex.needsUpdate=true; return tex;
+  }
+
+  function makeNoiseTexture(size, baseHex){
+    size = size||256;
+    var c=document.createElement('canvas'); c.width=c.height=size;
+    var ctx=c.getContext('2d');
+    var base = new THREE.Color(baseHex);
+    var img = ctx.createImageData(size,size);
+    for (var i=0;i<size*size;i++){
+      var n = 0.82+Math.random()*0.36;
+      img.data[i*4]   = Math.min(255, base.r*255*n);
+      img.data[i*4+1] = Math.min(255, base.g*255*n);
+      img.data[i*4+2] = Math.min(255, base.b*255*n);
+      img.data[i*4+3] = 255;
+    }
+    ctx.putImageData(img,0,0);
+    var tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function makeEnvTexture(){
+    var w=256,h=128;
+    var c=document.createElement('canvas'); c.width=w;c.height=h;
+    var ctx=c.getContext('2d');
+    var g=ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0,'#3d4d6e');
+    g.addColorStop(0.45,'#1a2436');
+    g.addColorStop(1,'#05070d');
+    ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+    var rg = ctx.createRadialGradient(w*0.66,h*0.24,2,w*0.66,h*0.24,64);
+    rg.addColorStop(0,'rgba(255,236,205,0.9)');
+    rg.addColorStop(1,'rgba(255,236,205,0)');
+    ctx.fillStyle=rg; ctx.fillRect(0,0,w,h);
+    var rg2 = ctx.createRadialGradient(w*0.15,h*0.75,2,w*0.15,h*0.75,50);
+    rg2.addColorStop(0,'rgba(150,190,255,0.35)');
+    rg2.addColorStop(1,'rgba(150,190,255,0)');
+    ctx.fillStyle=rg2; ctx.fillRect(0,0,w,h);
+    var tex = new THREE.CanvasTexture(c);
+    tex.mapping = THREE.EquirectangularReflectionMapping;
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function easeInOutCubic(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+
+  /* Pointer-based orbit controls: one-finger / mouse drag to rotate, two-finger
+     pinch (or mouse wheel) to zoom. Pointer Events unify mouse, touch and pen,
+     so the same handlers work for a touchscreen with no extra code. */
+  function setupOrbitControls(canvas, camState, updateCamera, opts){
+    opts = opts || {};
+    var minRadius = opts.minRadius, maxRadius = opts.maxRadius;
+    var guard = opts.guard || function(){ return false; };
+    var onDragStart = opts.onDragStart || function(){};
+    var wheelFactor = opts.wheelFactor || 0.35;
+    var dragging = false;
+    var lastX = 0, lastY = 0;
+    var pointers = new Map();
+    var pinchStartDist = 0, pinchStartRadius = camState.radius;
+
+    function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+    function firstTwo(){
+      var vals = [];
+      pointers.forEach(function(v){ if (vals.length<2) vals.push(v); });
+      return vals;
+    }
+
+    canvas.addEventListener('pointerdown', function(e){
+      if (guard()) return;
+      try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+      pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if (pointers.size === 1){
+        dragging = true;
+        lastX = e.clientX; lastY = e.clientY;
+        onDragStart();
+      } else if (pointers.size === 2){
+        dragging = false;
+        var pts = firstTwo();
+        pinchStartDist = Math.max(1, dist(pts[0], pts[1]));
+        pinchStartRadius = camState.radius;
+        onDragStart();
+      }
+    });
+    window.addEventListener('pointermove', function(e){
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if (pointers.size >= 2){
+        var pts = firstTwo();
+        var d = dist(pts[0], pts[1]);
+        var scale = d / pinchStartDist;
+        camState.radius = Math.max(minRadius, Math.min(maxRadius, pinchStartRadius / scale));
+        updateCamera();
+        return;
+      }
+      if (!dragging) return;
+      var dx = e.clientX-lastX, dy = e.clientY-lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      camState.theta -= dx*0.006;
+      camState.phi -= dy*0.006;
+      camState.phi = Math.max(0.35, Math.min(Math.PI-0.35, camState.phi));
+      updateCamera();
+    });
+    function endPointer(e){
+      if (!pointers.has(e.pointerId)) return;
+      pointers.delete(e.pointerId);
+      if (pointers.size === 1){
+        var remaining = firstTwo()[0];
+        lastX = remaining.x; lastY = remaining.y;
+        dragging = true;
+      } else if (pointers.size === 0){
+        dragging = false;
+      }
+    }
+    window.addEventListener('pointerup', endPointer);
+    window.addEventListener('pointercancel', endPointer);
+
+    canvas.addEventListener('wheel', function(e){
+      if (guard()) return;
+      e.preventDefault();
+      camState.radius += e.deltaY*wheelFactor;
+      camState.radius = Math.max(minRadius, Math.min(maxRadius, camState.radius));
+      updateCamera();
+    }, {passive:false});
+
+    return {
+      isDragging: function(){ return dragging; },
+      forceStop: function(){ dragging=false; pointers.clear(); }
+    };
+  }
+
+  function roundRectTop(ctx,x,y,w,h,r){
+    r = Math.max(0, Math.min(r, w/2, Math.max(h,0.01)));
+    ctx.beginPath();
+    ctx.moveTo(x, y+h);
+    ctx.lineTo(x, y+r);
+    ctx.arcTo(x,y,x+r,y,r);
+    ctx.lineTo(x+w-r,y);
+    ctx.arcTo(x+w,y,x+w,y+r,r);
+    ctx.lineTo(x+w,y+h);
+    ctx.closePath();
+  }
+
+  function shadeColor(hex, percent){
+    var f=parseInt(hex.slice(1),16), t=percent<0?0:255, p=Math.abs(percent)/100;
+    var R=f>>16, G=f>>8&0x00FF, B=f&0x0000FF;
+    var nr = Math.round((t-R)*p)+R, ng=Math.round((t-G)*p)+G, nb=Math.round((t-B)*p)+B;
+    return '#'+(0x1000000+nr*0x10000+ng*0x100+nb).toString(16).slice(1);
+  }
+
+  function wrapText(ctx,text,cx,y,maxWidth,lineHeight,maxLines){
+    var words = text.split(' ');
+    var line=''; var lines=[];
+    for (var i=0;i<words.length;i++){
+      var test = line + (line?' ':'') + words[i];
+      if (ctx.measureText(test).width > maxWidth && line){ lines.push(line); line=words[i]; }
+      else line=test;
+    }
+    lines.push(line);
+    if (maxLines && lines.length>maxLines) lines = lines.slice(0,maxLines);
+    ctx.textAlign='center';
+    for (var j=0;j<lines.length;j++){
+      ctx.fillText(lines[j], cx, y+j*lineHeight);
+    }
+  }
+
+  /* shared state across both particle scenes */
+  var SHARED = {
+    gunEnabled: false,
+    stats: { sent:0, through:0, side:0, back:0 }
+  };
+
+  /* ================= OVERVIEW SCENE ================= */
+
+  function createOverviewScene(canvas, getWidth, opts){
+    opts = opts || {};
+    var height = 460;
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(50, getWidth()/height, 1, 3000);
+    var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:true});
+    renderer.setSize(getWidth(), height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+    if (THREE.ACESFilmicToneMapping) { renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15; }
+
+    var envTex = makeEnvTexture();
+
+    scene.add(new THREE.AmbientLight(0x8899aa, 0.5));
+    var dl = new THREE.DirectionalLight(0xfff2e0, 0.85);
+    dl.position.set(150,220,180);
+    scene.add(dl);
+    var rimLight = new THREE.DirectionalLight(0x6fa8ff, 0.55);
+    rimLight.position.set(-190,90,-160);
+    scene.add(rimLight);
+    var pl = new THREE.PointLight(0xffe6b3, 1.1, 520, 2);
+    pl.position.set(0,60,40);
+    scene.add(pl);
+    var pl2 = new THREE.PointLight(0x4d7bff, 0.55, 420, 2);
+    pl2.position.set(0,-40,-150);
+    scene.add(pl2);
+
+    var GUN_Z = -214;
+    var START_Z = GUN_Z + 25;
+    var FOIL_HALF = 24;
+    var SCREEN_R = 200;
+    var SCREEN_HALF_H = FOIL_HALF;
+    var GAP_HALF = 0.18;
+    var ALPHA_COLOR = 0x4d94ff;
+
+    var foilTex = makeNoiseTexture(256, 0xd4af37);
+    var foilGeo = new THREE.BoxGeometry(FOIL_HALF*2, FOIL_HALF*2, 3);
+    var foilMat = new THREE.MeshPhysicalMaterial({color:0xd4af37, map:foilTex, transparent:true, opacity:0.32, metalness:0.85, roughness:0.3, clearcoat:0.35, clearcoatRoughness:0.28, envMap:envTex, envMapIntensity:1.05, side:THREE.DoubleSide});
+    scene.add(new THREE.Mesh(foilGeo, foilMat));
+
+    var midRow = [];
+    var NUC_R = 3.2;
+    var nucGeo = new THREE.SphereGeometry(NUC_R, 16, 16);
+    var nucMat = new THREE.MeshPhysicalMaterial({color:0xff9944, emissive:0x552200, emissiveIntensity:0.9, metalness:0.25, roughness:0.4, envMap:envTex, envMapIntensity:0.7, clearcoat:0.2});
+    var nucMeshes = [];
+    var GRID = 7;
+    var spacing = NUC_R*2;
+    var offset = (GRID-1)/2;
+    for (var gx=0; gx<GRID; gx++){
+      for (var gy=0; gy<GRID; gy++){
+        var nx = (gx-offset)*spacing;
+        var ny = (gy-offset)*spacing;
+        var m = new THREE.Mesh(nucGeo, nucMat.clone());
+        m.position.set(nx, ny, 0);
+        scene.add(m);
+        nucMeshes.push(m);
+        if (gy === offset) midRow.push(nx);
+      }
+    }
+
+    function buildScreenBand(radius, halfHeight, gapHalfAngle, segments){
+      var positions = [];
+      var totalAngle = Math.PI*2 - gapHalfAngle*2;
+      var thetaStart = Math.PI + gapHalfAngle;
+      for (var i=0;i<segments;i++){
+        var t0 = thetaStart + totalAngle*(i/segments);
+        var t1 = thetaStart + totalAngle*((i+1)/segments);
+        var x0=radius*Math.sin(t0), z0=radius*Math.cos(t0);
+        var x1=radius*Math.sin(t1), z1=radius*Math.cos(t1);
+        positions.push(x0,halfHeight,z0,  x0,-halfHeight,z0,  x1,halfHeight,z1);
+        positions.push(x0,-halfHeight,z0,  x1,-halfHeight,z1,  x1,halfHeight,z1);
+      }
+      var geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
+      geo.computeVertexNormals();
+      return geo;
+    }
+    function buildRim(radius, y, gapHalfAngle, segments){
+      var pts=[];
+      var totalAngle = Math.PI*2 - gapHalfAngle*2;
+      var thetaStart = Math.PI + gapHalfAngle;
+      for (var i=0;i<=segments;i++){
+        var t = thetaStart + totalAngle*(i/segments);
+        pts.push(new THREE.Vector3(radius*Math.sin(t), y, radius*Math.cos(t)));
+      }
+      return new THREE.BufferGeometry().setFromPoints(pts);
+    }
+
+    var screenMat = new THREE.MeshPhysicalMaterial({color:0xbfd9ff, transparent:true, opacity:0.2, side:THREE.DoubleSide, metalness:0.08, roughness:0.55, envMap:envTex, envMapIntensity:0.5, depthWrite:false});
+    scene.add(new THREE.Mesh(buildScreenBand(SCREEN_R, SCREEN_HALF_H, GAP_HALF, 64), screenMat));
+    var rimMat = new THREE.LineBasicMaterial({color:0x6fa8ff, transparent:true, opacity:0.55});
+    scene.add(new THREE.Line(buildRim(SCREEN_R, SCREEN_HALF_H, GAP_HALF, 64), rimMat));
+    scene.add(new THREE.Line(buildRim(SCREEN_R, -SCREEN_HALF_H, GAP_HALF, 64), rimMat));
+
+    var gunGroup = new THREE.Group();
+    var gunBody = new THREE.Mesh(new THREE.CylinderGeometry(9,9,50,20), new THREE.MeshPhysicalMaterial({color:0x556070, metalness:0.75, roughness:0.35, envMap:envTex, envMapIntensity:0.8, clearcoat:0.3}));
+    gunBody.rotation.x = Math.PI/2; gunBody.position.z = -25; gunGroup.add(gunBody);
+    var gunNozzle = new THREE.Mesh(new THREE.CylinderGeometry(4,7,18,20), new THREE.MeshPhysicalMaterial({color:0x8a94a0, metalness:0.75, roughness:0.25, envMap:envTex, envMapIntensity:0.9, clearcoat:0.4}));
+    gunNozzle.rotation.x = Math.PI/2; gunNozzle.position.z = 5; gunGroup.add(gunNozzle);
+    var gunLed = new THREE.Mesh(new THREE.SphereGeometry(1.4,10,10), new THREE.MeshBasicMaterial({color:0x6fff9a}));
+    gunLed.position.set(6,6,-2);
+    gunGroup.add(gunLed);
+    gunGroup.position.set(0,0,GUN_Z);
+    scene.add(gunGroup);
+
+    var camState = {theta: 0.5, phi: 1.15, radius: 400, autorotate:true};
+    function updateCamera(){
+      var p = camState;
+      camera.position.x = p.radius*Math.sin(p.phi)*Math.sin(p.theta);
+      camera.position.z = p.radius*Math.sin(p.phi)*Math.cos(p.theta) - 40;
+      camera.position.y = p.radius*Math.cos(p.phi);
+      camera.lookAt(0,0,-40);
+    }
+    updateCamera();
+
+    var orbitControls = setupOrbitControls(canvas, camState, updateCamera, {
+      minRadius: 220, maxRadius: 700, wheelFactor: 0.35,
+      onDragStart: function(){ camState.autorotate = false; }
+    });
+
+    var POOL = 26;
+    var particles = [];
+    var speedFactor = 1;
+    var paused = false;
+    var counts = {through:0, side:0, back:0};
+
+    var glowTex = makeRadialTexture(0xffffff, 128);
+    var particleGeo = new THREE.SphereGeometry(2.1, 8, 8);
+    var flashColByType = {through:0x9fc6ff, side:0xf0997b, back:0xe24b4a};
+
+    function pickFate(){
+      var r = Math.random();
+      if (r < 0.03) return 'back';
+      if (r < 0.13) return 'side';
+      return 'through';
+    }
+
+    function makeParticleMesh(color){
+      var mesh = new THREE.Mesh(particleGeo, new THREE.MeshBasicMaterial({color:color}));
+      var glow = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color:color, transparent:true, opacity:0.55, blending:THREE.AdditiveBlending, depthWrite:false}));
+      glow.scale.setScalar(7);
+      mesh.add(glow);
+      return mesh;
+    }
+
+    function newParticle(startDelay){
+      var type = pickFate();
+      var start = new THREE.Vector3(0, 0, START_Z);
+      var foilPoint;
+      if (type === 'through'){
+        foilPoint = new THREE.Vector3(0, 0, 0);
+      } else {
+        var nx = midRow[Math.floor(Math.random()*midRow.length)];
+        foilPoint = new THREE.Vector3(nx, 0, 0);
+      }
+      var dir1 = new THREE.Vector3().subVectors(foilPoint, start).normalize();
+      var dist1 = start.distanceTo(foilPoint);
+
+      var dir2 = dir1.clone();
+      if (type !== 'through'){
+        var angleDeg = type === 'back' ? (130 + Math.random()*45) : (15 + Math.random()*55);
+        var angle = (angleDeg*Math.PI/180) * (Math.random()<0.5?-1:1);
+        dir2.applyAxisAngle(UP_AXIS, angle);
+      }
+
+      var P = foilPoint;
+      var dx = dir2.x, dz = dir2.z;
+      var a = dx*dx+dz*dz;
+      var b = 2*(P.x*dx+P.z*dz);
+      var c = P.x*P.x+P.z*P.z - SCREEN_R*SCREEN_R;
+      var disc = Math.max(b*b-4*a*c, 0);
+      var sq = Math.sqrt(disc);
+      var tA = (-b+sq)/(2*a);
+      var tB = (-b-sq)/(2*a);
+      var t2 = tA > 1e-6 ? tA : tB;
+      if (t2 <= 1e-6) t2 = SCREEN_R;
+
+      var mesh = makeParticleMesh(ALPHA_COLOR);
+      scene.add(mesh);
+
+      SHARED.stats.sent++;
+
+      return {type:type, start:start, foilPoint:foilPoint, dir1:dir1, dir2:dir2, dist1:dist1, dist2:t2, s: -startDelay, mesh:mesh};
+    }
+
+    for (var i=0;i<POOL;i++) particles.push(newParticle(Math.random()*260));
+
+    var flashPool = [];
+    var flashGeo = new THREE.SphereGeometry(1,10,10);
+    function spawnFlash(pos, type){
+      var mat = new THREE.MeshBasicMaterial({color: flashColByType[type], transparent:true, opacity:0.9});
+      var m = new THREE.Mesh(flashGeo, mat);
+      m.position.copy(pos); m.scale.setScalar(1);
+      scene.add(m);
+      var glow = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color:flashColByType[type], transparent:true, opacity:0.8, blending:THREE.AdditiveBlending, depthWrite:false}));
+      glow.scale.setScalar(6);
+      m.add(glow);
+      flashPool.push({mesh:m, life:0, maxLife:0.7});
+    }
+
+    /* persistent impact points */
+    var PERSIST_MAX = 20000;
+    var persistGeo = new THREE.BufferGeometry();
+    var persistPosArr = new Float32Array(PERSIST_MAX*3);
+    var persistColArr = new Float32Array(PERSIST_MAX*3);
+    persistGeo.setAttribute('position', new THREE.BufferAttribute(persistPosArr,3));
+    persistGeo.setAttribute('color', new THREE.BufferAttribute(persistColArr,3));
+    persistGeo.setDrawRange(0,0);
+    var persistMat = new THREE.PointsMaterial({size:11, map:glowTex, vertexColors:true, transparent:true, opacity:1, sizeAttenuation:false, depthWrite:false, depthTest:false, blending:THREE.AdditiveBlending});
+    var persistPoints = new THREE.Points(persistGeo, persistMat);
+    persistPoints.renderOrder = 10;
+    scene.add(persistPoints);
+    var persistCount = 0;
+    var persistOn = false;
+    function addPersistPoint(pos, colorHex){
+      if (persistCount >= PERSIST_MAX) return;
+      var idx = persistCount*3;
+      var jx = (Math.random()*2-1)*3.5;
+      var jy = (Math.random()*2-1)*3.5;
+      var jz = (Math.random()*2-1)*1.2;
+      persistPosArr[idx]=pos.x+jx; persistPosArr[idx+1]=pos.y+jy; persistPosArr[idx+2]=pos.z+jz;
+      var col = new THREE.Color(colorHex);
+      persistColArr[idx]=col.r; persistColArr[idx+1]=col.g; persistColArr[idx+2]=col.b;
+      persistCount++;
+      persistGeo.attributes.position.needsUpdate = true;
+      persistGeo.attributes.color.needsUpdate = true;
+      persistGeo.setDrawRange(0, persistCount);
+    }
+
+    /* floating tag labels */
+    var tagsOn = false;
+    var tagEls = opts.tagEls || {};
+    var gunAnchor = new THREE.Vector3(0, 14, GUN_Z+10);
+    var foilAnchor = new THREE.Vector3(0, FOIL_HALF*0.95, 0);
+    var screenAnchor = new THREE.Vector3(0, SCREEN_HALF_H*0.85, SCREEN_R-40);
+    function updateTagPos(el, worldPos){
+      if (!el) return;
+      var v = worldPos.clone().project(camera);
+      var rect = canvas.getBoundingClientRect();
+      var w = rect.width || getWidth();
+      var x = (v.x*0.5+0.5)*w;
+      var y = (-v.y*0.5+0.5)*height;
+      var inFront = v.z < 1 && x>4 && x<w-4 && y>4 && y<height-4;
+      if (!inFront){ el.classList.remove('visible'); return; }
+      var elW = el.offsetWidth || 160;
+      var elH = el.offsetHeight || 28;
+      var halfW = elW/2;
+      var xClamped = Math.max(halfW+6, Math.min(w-halfW-6, x));
+      var yMin = elH*1.25+6;
+      var yClamped = Math.max(yMin, Math.min(height-6, y));
+      el.style.left = xClamped+'px';
+      el.style.top = yClamped+'px';
+      el.classList.add('visible');
+    }
+
+    var cntThrough, cntSide, cntBack;
+    function updateCounters(){
+      if (cntThrough) cntThrough.textContent = counts.through;
+      if (cntSide) cntSide.textContent = counts.side;
+      if (cntBack) cntBack.textContent = counts.back;
+    }
+
+    var clockT = 0;
+
+    return {
+      animateStep: function(dt){
+        try{
+          if (!paused){
+            clockT += dt;
+            if (camState.autorotate && !orbitControls.isDragging()){ camState.theta += dt*0.08; updateCamera(); }
+            for (var n=0;n<nucMeshes.length;n++){
+              var nm = nucMeshes[n];
+              nm.material.emissiveIntensity = 0.7 + Math.sin(clockT*1.6 + n*0.4)*0.25;
+            }
+            gunLed.material.color.setHex(SHARED.gunEnabled ? 0x6fff9a : 0xff5a5a);
+            for (var i=0;i<particles.length;i++){
+              var p = particles[i];
+              if (p.inactive){
+                if (SHARED.gunEnabled){ particles[i] = newParticle(Math.random()*40); }
+                continue;
+              }
+              p.s += (SHARED.gunEnabled || p.s >= 0) ? dt*150*speedFactor : 0;
+              var pos;
+              if (p.s < 0){ p.mesh.visible = false; continue; }
+              p.mesh.visible = true;
+              if (p.s <= p.dist1){ pos = p.start.clone().addScaledVector(p.dir1, p.s); }
+              else if (p.s <= p.dist1+p.dist2) { pos = p.foilPoint.clone().addScaledVector(p.dir2, p.s-p.dist1); }
+              else {
+                var finalPos = p.foilPoint.clone().addScaledVector(p.dir2, p.dist2);
+                spawnFlash(finalPos, p.type);
+                if (persistOn) addPersistPoint(finalPos, flashColByType[p.type]);
+                counts[p.type]++; SHARED.stats[p.type]++; updateCounters();
+                scene.remove(p.mesh);
+                if (SHARED.gunEnabled){ particles[i] = newParticle(Math.random()*80); }
+                else { particles[i] = {inactive:true}; }
+                continue;
+              }
+              p.mesh.position.copy(pos);
+            }
+            for (var j=flashPool.length-1;j>=0;j--){
+              var f = flashPool[j];
+              f.life += dt; var k = f.life/f.maxLife;
+              if (k>=1){ scene.remove(f.mesh); flashPool.splice(j,1); continue; }
+              f.mesh.scale.setScalar(1 + k*5);
+              f.mesh.material.opacity = 0.9*(1-k);
+            }
+            if (tagsOn){
+              updateTagPos(tagEls.gun, gunAnchor);
+              updateTagPos(tagEls.foil, foilAnchor);
+              updateTagPos(tagEls.screen, screenAnchor);
+            } else {
+              if (tagEls.gun) tagEls.gun.classList.remove('visible');
+              if (tagEls.foil) tagEls.foil.classList.remove('visible');
+              if (tagEls.screen) tagEls.screen.classList.remove('visible');
+            }
+          }
+        } catch(err){ if (window.console) console.error('ruth overview error', err); }
+        renderer.render(scene, camera);
+      },
+      resize: function(){
+        var w = getWidth();
+        camera.aspect = w/height; camera.updateProjectionMatrix();
+        renderer.setSize(w, height);
+      },
+      setSpeed: function(v){ speedFactor = v; },
+      setPaused: function(v){ paused = v; },
+      bindCounters: function(a,b,c){ cntThrough=a; cntSide=b; cntBack=c; },
+      setTagsOn: function(v){ tagsOn = v; },
+      setPersistOn: function(v){ persistOn = v; }
+    };
+  }
+
+  /* ================= ZOOM SCENE ================= */
+
+  function createZoomScene(canvas, getWidth, opts){
+    opts = opts || {};
+    var height = 460;
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(50, getWidth()/height, 1, 2000);
+    var renderer = new THREE.WebGLRenderer({canvas:canvas, antialias:true, alpha:true});
+    renderer.setSize(getWidth(), height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+    if (THREE.ACESFilmicToneMapping) { renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15; }
+
+    var envTex = makeEnvTexture();
+
+    scene.add(new THREE.AmbientLight(0x8899aa, 0.55));
+    var dl = new THREE.DirectionalLight(0xfff2e0, 0.65);
+    dl.position.set(120,180,150);
+    scene.add(dl);
+    var rimLight = new THREE.DirectionalLight(0x6fa8ff, 0.4);
+    rimLight.position.set(-140,60,-120);
+    scene.add(rimLight);
+
+    var RC = 9;
+    var RN = 1.3;
+    var GRID = 6;
+    var spacing = RC*2;
+    var offset = (GRID-1)/2;
+    var atomsXY = [];
+    var cloudGeo = new THREE.SphereGeometry(RC,20,16);
+    var cloudMat = new THREE.MeshBasicMaterial({color:0xf4d35e, transparent:true, opacity:0.2, depthWrite:false});
+    var nucGeo = new THREE.SphereGeometry(RN,12,12);
+    var nucMat = new THREE.MeshPhysicalMaterial({color:0xd6362f, emissive:0x4a0e0b, emissiveIntensity:1, metalness:0.15, roughness:0.45, envMap:envTex, envMapIntensity:0.6, clearcoat:0.25});
+    var nucMeshes = [];
+    for (var gx=0; gx<GRID; gx++){
+      for (var gy=0; gy<GRID; gy++){
+        var nx=(gx-offset)*spacing, ny=(gy-offset)*spacing;
+        var cloud = new THREE.Mesh(cloudGeo, cloudMat); cloud.position.set(nx,ny,0); scene.add(cloud);
+        var nuc = new THREE.Mesh(nucGeo, nucMat.clone()); nuc.position.set(nx,ny,0); scene.add(nuc);
+        nucMeshes.push(nuc);
+        atomsXY.push({x:nx,y:ny});
+      }
+    }
+
+    var camState = {theta:0.4, phi:1.2, radius:210, autorotate:true};
+    function updateCamera(){
+      var p=camState;
+      camera.position.x = p.radius*Math.sin(p.phi)*Math.sin(p.theta);
+      camera.position.z = p.radius*Math.sin(p.phi)*Math.cos(p.theta);
+      camera.position.y = p.radius*Math.cos(p.phi);
+      camera.lookAt(0,0,0);
+    }
+    updateCamera();
+
+    var orbitControlsZ = setupOrbitControls(canvas, camState, updateCamera, {
+      minRadius: 90, maxRadius: 320, wheelFactor: 0.25,
+      guard: function(){ return track.phase!=='none'; },
+      onDragStart: function(){ camState.autorotate = false; }
+    });
+
+    var BEAM_R = offset*spacing + RC*1.2;
+    var Z_START = -150, DIST_AFTER = 130, DIST_THROUGH = 150;
+    var B_BACK = 3, B_SIDE = 8;
+    var ALPHA_COLOR = 0x4d94ff;
+    var glowTex = makeRadialTexture(0xffffff, 128);
+    var rayTex = makeRayTexture();
+    var particleGeo = new THREE.SphereGeometry(1.6,8,8);
+    var flashColByType = {through:0x9fc6ff, side:0xf0997b, back:0xe24b4a};
+
+    var particles=[];
+    var POOL=34;
+    var speedFactor=1, paused=false;
+    var counts={through:0, side:0, back:0};
+
+    function nearestAtom(x,y){
+      var best=null, bd=Infinity;
+      for (var i=0;i<atomsXY.length;i++){
+        var a=atomsXY[i];
+        var d=Math.hypot(a.x-x,a.y-y);
+        if (d<bd){bd=d;best=a;}
+      }
+      return {atom:best, dist:bd};
+    }
+
+    function makeParticleMesh(color, scale){
+      var mesh = new THREE.Mesh(particleGeo, new THREE.MeshBasicMaterial({color:color}));
+      var glow = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color:color, transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false}));
+      glow.scale.setScalar((scale||1)*6);
+      mesh.add(glow);
+      return mesh;
+    }
+
+    function newParticle(startDelay){
+      var sx=(Math.random()*2-1)*BEAM_R;
+      var sy=(Math.random()*2-1)*BEAM_R;
+      var near = nearestAtom(sx,sy);
+      var type;
+      if (near.dist < B_BACK) type='back';
+      else if (near.dist < B_SIDE) type='side';
+      else type='through';
+
+      var start = new THREE.Vector3(sx,sy,Z_START);
+      var foilPoint = new THREE.Vector3(sx,sy,0);
+      var dir1 = new THREE.Vector3(0,0,1);
+      var dist1 = -Z_START;
+
+      var dir2 = dir1.clone();
+      var flashPos = null;
+      if (type!=='through'){
+        var angleDeg = type==='back' ? (135+Math.random()*40) : (18+Math.random()*50);
+        var angle = (angleDeg*Math.PI/180)*(Math.random()<0.5?-1:1);
+        dir2.applyAxisAngle(UP_AXIS, angle);
+        flashPos = new THREE.Vector3(near.atom.x, near.atom.y, 0);
+      }
+      var dist2 = type==='through' ? DIST_THROUGH : DIST_AFTER;
+
+      var mesh = makeParticleMesh(ALPHA_COLOR);
+      scene.add(mesh);
+
+      SHARED.stats.sent++;
+
+      return {type:type, start:start, foilPoint:foilPoint, dir1:dir1, dir2:dir2, dist1:dist1, dist2:dist2, s:-startDelay, mesh:mesh, flashPos:flashPos, flashed:false};
+    }
+
+    for (var i=0;i<POOL;i++) particles.push(newParticle(Math.random()*220));
+
+    var flashPool=[];
+    var flashGeo=new THREE.SphereGeometry(1,10,10);
+    function spawnFlash(pos,type){
+      var mat=new THREE.MeshBasicMaterial({color:flashColByType[type],transparent:true,opacity:0.9});
+      var m=new THREE.Mesh(flashGeo,mat); m.position.copy(pos); m.scale.setScalar(1);
+      var glow = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color:flashColByType[type], transparent:true, opacity:0.8, blending:THREE.AdditiveBlending, depthWrite:false}));
+      glow.scale.setScalar(6);
+      m.add(glow);
+      scene.add(m); flashPool.push({mesh:m,life:0,maxLife:0.5});
+    }
+
+    var cntThroughZ, cntSideZ, cntBackZ;
+    function updateCounters(){
+      if (cntThroughZ) cntThroughZ.textContent = counts.through;
+      if (cntSideZ) cntSideZ.textContent = counts.side;
+      if (cntBackZ) cntBackZ.textContent = counts.back;
+    }
+
+    /* -------- tracked backscatter cinematic -------- */
+    var trackBtnEl = opts.trackBtn || null;
+    var throughBtnEl = opts.throughBtn || null;
+    var captionEl = opts.captionEl || null;
+    var captionVisible = false;
+    function showCaption(v, text){
+      captionVisible = v;
+      if (captionEl){
+        if (v && text) captionEl.textContent = text;
+        captionEl.classList.toggle('show', v);
+      }
+    }
+
+    var passGlows = [];
+    function spawnPassGlow(pos){
+      var core = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color:0xbfe0ff, transparent:true, opacity:0.95, blending:THREE.AdditiveBlending, depthWrite:false}));
+      core.position.copy(pos);
+      core.scale.setScalar(2);
+      core.userData.life = 0;
+      scene.add(core);
+      passGlows.push(core);
+    }
+    function updatePassGlows(dt){
+      for (var i=passGlows.length-1;i>=0;i--){
+        var g = passGlows[i];
+        g.userData.life += dt;
+        var t = Math.min(1, g.userData.life/0.7);
+        g.scale.setScalar(2+t*10);
+        g.material.opacity = Math.max(0, 0.95*(1-t));
+        if (t>=1){ scene.remove(g); passGlows.splice(i,1); }
+      }
+    }
+
+    var burstGroup = null;
+    function spawnStarburst(pos){
+      if (burstGroup){ scene.remove(burstGroup); burstGroup=null; }
+      var group = new THREE.Group();
+      group.position.copy(pos);
+      var core = new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex, color:0xfff2c0, transparent:true, opacity:1, blending:THREE.AdditiveBlending, depthWrite:false}));
+      core.scale.setScalar(2);
+      core.userData.isCore = true;
+      group.add(core);
+      var rayCount = 12;
+      for (var i=0;i<rayCount;i++){
+        var ang = (i/rayCount)*Math.PI*2 + (Math.random()*0.2-0.1);
+        var mat = new THREE.SpriteMaterial({map:rayTex, color:0xffe9b0, transparent:true, opacity:0.95, blending:THREE.AdditiveBlending, depthWrite:false, rotation:ang});
+        var ray = new THREE.Sprite(mat);
+        ray.center.set(0.5,0);
+        var len = 6+Math.random()*4;
+        ray.scale.set(2.4, 0.001, 1);
+        ray.userData.isRay = true;
+        ray.userData.baseLen = len;
+        group.add(ray);
+      }
+      group.userData.life = 0;
+      scene.add(group);
+      burstGroup = group;
+    }
+    function updateStarburst(dt){
+      if (!burstGroup) return;
+      burstGroup.userData.life += dt;
+      var life = burstGroup.userData.life;
+      var maxLife = 0.9;
+      var t = Math.min(1, life/maxLife);
+      for (var c=0;c<burstGroup.children.length;c++){
+        var child = burstGroup.children[c];
+        if (child.userData.isCore){
+          var s = 2+t*11;
+          child.scale.setScalar(s*(1-t*0.25));
+          child.material.opacity = Math.max(0, 1-t*1.4);
+        } else if (child.userData.isRay){
+          var grow = Math.min(1, life/0.28);
+          var fade = t<0.4 ? 1 : Math.max(0, 1-(t-0.4)/0.6);
+          child.scale.y = child.userData.baseLen*grow;
+          child.material.opacity = 0.95*fade;
+        }
+      }
+      if (t>=1){ scene.remove(burstGroup); burstGroup=null; }
+    }
+
+    var TRACK_SPEED = 55;
+    var ORBIT_DURATION = 2.6;
+    var ORBIT_ANGLE = 45*Math.PI/180;
+    var CAPTION_HOLD = 1.9;
+    var CAPTION_FADE = 0.4;
+
+    var track = {
+      mode:'back',
+      phase:'none',
+      particle:null,
+      timer:0,
+      crossedFoil:false,
+      captionOffTimer:0,
+      savedAutorotate:true,
+      camFrom:new THREE.Vector3(), lookFrom:new THREE.Vector3(),
+      camTo:new THREE.Vector3(), lookTo:new THREE.Vector3(),
+      finFrom:new THREE.Vector3(), finLookFrom:new THREE.Vector3(),
+      screenMesh:null, screenFadeTarget:0.22, screenFlash:0
+    };
+
+    function setTrackButtonsBusy(busyLabel){
+      if (trackBtnEl){ trackBtnEl.disabled = true; if (busyLabel==='back') trackBtnEl.textContent = 'Suivi en cours…'; }
+      if (throughBtnEl){ throughBtnEl.disabled = true; if (busyLabel==='through') throughBtnEl.textContent = 'Suivi en cours…'; }
+    }
+    function resetTrackButtons(){
+      if (trackBtnEl){ trackBtnEl.disabled = !SHARED.gunEnabled; trackBtnEl.textContent = 'Suivre une particule rétrodiffusée'; }
+      if (throughBtnEl){ throughBtnEl.disabled = !SHARED.gunEnabled; throughBtnEl.textContent = 'Suivre une particule qui traverse la feuille d\'or'; }
+    }
+
+    function pickTrackTarget(){
+      var best=null,bd=Infinity;
+      for (var i=0;i<atomsXY.length;i++){
+        var a=atomsXY[i]; var d=Math.hypot(a.x,a.y);
+        if (d<bd){bd=d;best=a;}
+      }
+      return best;
+    }
+
+    function ensureTrackScreen(tp, color){
+      if (track.screenMesh){ scene.remove(track.screenMesh); track.screenMesh=null; }
+      var endPos = tp.foilPoint.clone().addScaledVector(tp.dir2, tp.dist2);
+      var geo = new THREE.CircleGeometry(30, 40);
+      var mat = new THREE.MeshBasicMaterial({color:color||0x8fc0ff, transparent:true, opacity:0, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, depthWrite:false});
+      var mesh = new THREE.Mesh(geo, mat);
+      mesh.position.copy(endPos);
+      mesh.lookAt(tp.foilPoint);
+      scene.add(mesh);
+      track.screenMesh = mesh;
+      track.screenFadeTarget = 0.22;
+      track.screenFlash = 0;
+    }
+    function flashTrackScreen(){
+      track.screenFlash = 1;
+    }
+    function updateTrackScreen(dt){
+      if (!track.screenMesh) return;
+      track.screenFlash = Math.max(0, track.screenFlash - dt*1.5);
+      var base = (track.phase==='none') ? 0 : track.screenFadeTarget;
+      var target = base + track.screenFlash*0.55;
+      var m = track.screenMesh;
+      m.material.opacity += (target - m.material.opacity)*Math.min(1, dt*4);
+      if (track.phase==='none' && m.material.opacity<0.01){
+        scene.remove(m); track.screenMesh=null;
+      }
+    }
+
+    function startTracking(){
+      if (track.phase!=='none' || !SHARED.gunEnabled) return;
+      var targetAtom = pickTrackTarget();
+      var sx = targetAtom.x + (Math.random()*2-1)*1.1;
+      var sy = targetAtom.y + (Math.random()*2-1)*1.1;
+      var start = new THREE.Vector3(sx,sy,Z_START);
+      var foilPoint = new THREE.Vector3(targetAtom.x, targetAtom.y, 0);
+      var dir1 = new THREE.Vector3(0,0,1);
+      var dist1 = -Z_START;
+      var angleDeg = 150+Math.random()*20;
+      var dir2 = dir1.clone().applyAxisAngle(UP_AXIS, (angleDeg*Math.PI/180)*(Math.random()<0.5?-1:1));
+      var dist2 = 150;
+
+      var mesh = makeParticleMesh(ALPHA_COLOR, 1.5);
+      mesh.scale.setScalar(1.35);
+      scene.add(mesh);
+
+      track.mode = 'back';
+      track.particle = {start:start, foilPoint:foilPoint, dir1:dir1, dir2:dir2, dist1:dist1, dist2:dist2, s:0, mesh:mesh};
+      track.phase = 'approaching';
+      track.timer = 0;
+      track.savedAutorotate = camState.autorotate;
+      camState.autorotate = false;
+      orbitControlsZ.forceStop();
+
+      track.camFrom.copy(camera.position);
+      track.lookFrom.set(0,0,0);
+      var approachDir = camera.position.clone().sub(foilPoint).normalize();
+      track.camTo.copy(foilPoint).addScaledVector(approachDir, 46).add(new THREE.Vector3(0,10,0));
+      track.lookTo.copy(foilPoint);
+
+      SHARED.stats.sent++;
+      setTrackButtonsBusy('back');
+    }
+
+    function startTrackingThrough(){
+      if (track.phase!=='none' || !SHARED.gunEnabled) return;
+      var start = new THREE.Vector3(0,0,Z_START);
+      var foilPoint = new THREE.Vector3(0,0,0);
+      var dir1 = new THREE.Vector3(0,0,1);
+      var dist1 = -Z_START;
+      var dir2 = dir1.clone();
+      var dist2 = DIST_THROUGH + 45;
+
+      var mesh = makeParticleMesh(ALPHA_COLOR, 1.4);
+      mesh.scale.setScalar(1.3);
+      scene.add(mesh);
+
+      track.mode = 'through';
+      track.particle = {start:start, foilPoint:foilPoint, dir1:dir1, dir2:dir2, dist1:dist1, dist2:dist2, s:0, mesh:mesh};
+      track.phase = 'through';
+      track.timer = 0;
+      track.crossedFoil = false;
+      track.captionOffTimer = 0;
+      track.savedAutorotate = camState.autorotate;
+      camState.autorotate = false;
+      orbitControlsZ.forceStop();
+
+      track.camFrom.copy(camera.position);
+
+      SHARED.stats.sent++;
+      setTrackButtonsBusy('through');
+    }
+
+    function handleTrack(dt){
+      if (track.phase==='none') return;
+      var tp = track.particle;
+
+      if (track.phase==='through'){
+        tp.s += dt*TRACK_SPEED;
+        var total = tp.dist1+tp.dist2;
+        var tAll = Math.min(1, tp.s/total);
+        var posT;
+        if (tp.s<=tp.dist1){ posT = tp.start.clone().addScaledVector(tp.dir1, tp.s); }
+        else { posT = tp.foilPoint.clone().addScaledVector(tp.dir2, tp.s-tp.dist1); }
+        tp.mesh.position.copy(posT);
+
+        if (!track.crossedFoil && tp.s>=tp.dist1){
+          track.crossedFoil = true;
+          spawnPassGlow(tp.foilPoint.clone());
+          showCaption(true, "Traverse la feuille : presque tout est vide !");
+          track.captionOffTimer = 0;
+        }
+        if (track.crossedFoil && captionVisible){
+          track.captionOffTimer += dt;
+          if (track.captionOffTimer > 1.5) showCaption(false);
+        }
+
+        var throughOffset = new THREE.Vector3(15, 9, -22);
+        var desiredCamT = posT.clone().add(throughOffset);
+        camera.position.lerp(desiredCamT, Math.min(1, dt*2.0));
+        camera.lookAt(posT);
+
+        if (tAll>=1){
+          var endPosT = tp.foilPoint.clone().addScaledVector(tp.dir2, tp.dist2);
+          spawnFlash(endPosT, 'through');
+          ensureTrackScreen(tp, 0x9fc6ff);
+          flashTrackScreen();
+          counts.through++; SHARED.stats.through++; updateCounters();
+          scene.remove(tp.mesh);
+          showCaption(false);
+          track.phase = 'finishing';
+          track.timer = 0;
+          track.finFrom.copy(camera.position);
+          track.finLookFrom.copy(posT);
+        }
+        return;
+      }
+
+      if (track.phase==='approaching'){
+        tp.s += dt*TRACK_SPEED;
+        var t = Math.min(1, tp.s/tp.dist1);
+        var te = easeInOutCubic(t);
+        var pos = tp.start.clone().addScaledVector(tp.dir1, tp.s);
+        tp.mesh.position.copy(pos);
+        camera.position.lerpVectors(track.camFrom, track.camTo, te);
+        var look = track.lookFrom.clone().lerp(track.lookTo, te);
+        camera.lookAt(look);
+        if (t>=1){
+          tp.mesh.position.copy(tp.foilPoint);
+          spawnStarburst(tp.foilPoint.clone());
+          showCaption(true, "Choc avec un noyau");
+          track.phase = 'orbiting';
+          track.timer = 0;
+          track.orbitBaseTheta = Math.atan2(camera.position.x-tp.foilPoint.x, camera.position.z-tp.foilPoint.z);
+          track.orbitRadius = Math.max(46, camera.position.distanceTo(tp.foilPoint)*1.4);
+          track.orbitY = camera.position.y;
+        }
+        return;
+      }
+      if (track.phase==='orbiting'){
+        track.timer += dt;
+        var ot = Math.min(1, track.timer/ORBIT_DURATION);
+        var oe = easeInOutCubic(ot);
+        var ang = track.orbitBaseTheta + ORBIT_ANGLE*oe;
+        var r = track.orbitRadius;
+        camera.position.x = tp.foilPoint.x + r*Math.sin(ang);
+        camera.position.z = tp.foilPoint.z + r*Math.cos(ang);
+        camera.position.y = track.orbitY + Math.sin(ot*Math.PI)*4;
+        camera.lookAt(tp.foilPoint);
+        if (track.timer >= CAPTION_HOLD+CAPTION_FADE && captionVisible){ showCaption(false); }
+        if (ot>=1){
+          showCaption(false);
+          track.phase = 'chasing';
+          track.timer = 0;
+          tp.s = 0;
+          ensureTrackScreen(tp, 0x8fc0ff);
+        }
+        return;
+      }
+      if (track.phase==='chasing'){
+        tp.s += dt*TRACK_SPEED*0.8;
+        var t2 = Math.min(1, tp.s/tp.dist2);
+        var pos2 = tp.foilPoint.clone().addScaledVector(tp.dir2, Math.min(tp.s, tp.dist2));
+        tp.mesh.position.copy(pos2);
+        var camOffset = new THREE.Vector3(28,16,28);
+        var desiredCam = pos2.clone().add(camOffset);
+        camera.position.lerp(desiredCam, Math.min(1, dt*2.2));
+        camera.lookAt(pos2);
+        if (t2>=1){
+          var endPos = tp.foilPoint.clone().addScaledVector(tp.dir2, tp.dist2);
+          spawnFlash(endPos, 'back');
+          flashTrackScreen();
+          counts.back++; SHARED.stats.back++; updateCounters();
+          scene.remove(tp.mesh);
+          track.phase = 'finishing';
+          track.timer = 0;
+          track.finFrom.copy(camera.position);
+          track.finLookFrom.copy(pos2);
+        }
+        return;
+      }
+      if (track.phase==='finishing'){
+        track.timer += dt;
+        var ft = Math.min(1, track.timer/1.3);
+        var fe = easeInOutCubic(ft);
+        var defaultPos = new THREE.Vector3(
+          camState.radius*Math.sin(camState.phi)*Math.sin(camState.theta),
+          camState.radius*Math.cos(camState.phi),
+          camState.radius*Math.sin(camState.phi)*Math.cos(camState.theta)
+        );
+        camera.position.lerpVectors(track.finFrom, defaultPos, fe);
+        var lookNow = track.finLookFrom.clone().lerp(new THREE.Vector3(0,0,0), fe);
+        camera.lookAt(lookNow);
+        if (ft>=1){
+          track.phase = 'none';
+          camState.autorotate = track.savedAutorotate;
+          updateCamera();
+          resetTrackButtons();
+        }
+      }
+    }
+
+    var clockT = 0;
+
+    return {
+      animateStep: function(dt){
+        try{
+          if (!paused){
+            clockT += dt;
+            for (var n=0;n<nucMeshes.length;n++){
+              nucMeshes[n].material.emissiveIntensity = 0.8 + Math.sin(clockT*1.7+n*0.5)*0.3;
+            }
+            handleTrack(dt);
+            updateStarburst(dt);
+            updatePassGlows(dt);
+            updateTrackScreen(dt);
+            var runNormal = (track.phase!=='orbiting');
+            var trackingActive = (track.phase!=='none');
+            if (runNormal){
+              if (camState.autorotate && !orbitControlsZ.isDragging() && track.phase==='none'){ camState.theta += dt*0.09; updateCamera(); }
+              for (var i=0;i<particles.length;i++){
+                var p=particles[i];
+                if (p.inactive){
+                  if (SHARED.gunEnabled){ particles[i] = newParticle(Math.random()*40); }
+                  continue;
+                }
+                p.s += (SHARED.gunEnabled || p.s >= 0) ? dt*110*speedFactor : 0;
+                if (p.s<0){ p.mesh.visible=false; continue; }
+                p.mesh.visible=true;
+                p.mesh.material.color.setHex(trackingActive ? 0x11141c : ALPHA_COLOR);
+                if (p.mesh.children[0]) p.mesh.children[0].material.opacity = trackingActive ? 0.04 : 0.5;
+                var pos;
+                if (p.s<=p.dist1){ pos=p.start.clone().addScaledVector(p.dir1,p.s); }
+                else if (p.s<=p.dist1+p.dist2){
+                  if (!p.flashed && p.type!=='through'){ if (!trackingActive) spawnFlash(p.flashPos,p.type); p.flashed=true; }
+                  pos=p.foilPoint.clone().addScaledVector(p.dir2,p.s-p.dist1);
+                } else {
+                  counts[p.type]++; SHARED.stats[p.type]++; updateCounters();
+                  scene.remove(p.mesh);
+                  if (SHARED.gunEnabled){ particles[i]=newParticle(Math.random()*60); }
+                  else { particles[i] = {inactive:true}; }
+                  continue;
+                }
+                p.mesh.position.copy(pos);
+              }
+            }
+            for (var j=flashPool.length-1;j>=0;j--){
+              var f=flashPool[j]; f.life+=dt; var k=f.life/f.maxLife;
+              if (k>=1){ scene.remove(f.mesh); flashPool.splice(j,1); continue; }
+              f.mesh.scale.setScalar(1+k*4);
+              f.mesh.material.opacity=0.9*(1-k);
+            }
+          }
+        } catch(err){
+          if (window.console) console.error('ruth zoom track error', err);
+          track.phase='none'; camState.autorotate=true;
+          resetTrackButtons();
+        }
+        renderer.render(scene,camera);
+      },
+      resize: function(){
+        var w = getWidth();
+        camera.aspect = w/height; camera.updateProjectionMatrix();
+        renderer.setSize(w,height);
+      },
+      setSpeed: function(v){ speedFactor=v; },
+      setPaused: function(v){ paused=v; },
+      bindCounters: function(a,b,c){ cntThroughZ=a; cntSideZ=b; cntBackZ=c; },
+      startTracking: startTracking,
+      startTrackingThrough: startTrackingThrough,
+      isTracking: function(){ return track.phase!=='none'; }
+    };
+  }
+
+  /* ================= STATS CHART (tab 3) ================= */
+
+  function createStatsChart(canvas){
+    var ctx = canvas.getContext('2d');
+    var displayed = {sent:0, through:0, side:0, back:0};
+    var categories = [
+      {key:'sent', label:'Envoyées', color:'#b39ddb'},
+      {key:'side', label:'Déviées', color:'#f0997b'},
+      {key:'through', label:'Traversées', color:'#9fc6ff'},
+      {key:'back', label:'Rétrodiffusées', color:'#e24b4a'}
+    ];
+
+    function resize(){
+      var w = canvas.parentElement.clientWidth;
+      var h = 320;
+      var dpr = Math.min(window.devicePixelRatio||1, 2);
+      canvas.width = Math.max(1, Math.round(w*dpr));
+      canvas.height = Math.max(1, Math.round(h*dpr));
+      canvas.style.height = h+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    resize();
+
+    function draw(dt){
+      var w = canvas.clientWidth, h = 320;
+      if (!w) return;
+      ctx.clearRect(0,0,w,h);
+      var maxVal = Math.max(1, SHARED.stats.sent, SHARED.stats.through, SHARED.stats.side, SHARED.stats.back);
+      var lerpAmt = Math.min(1, (dt||0.05)*4);
+      categories.forEach(function(c){
+        var target = SHARED.stats[c.key];
+        displayed[c.key] += (target - displayed[c.key])*lerpAmt;
+        if (Math.abs(target-displayed[c.key])<0.4) displayed[c.key]=target;
+      });
+
+      var padLeft=10, padBottom=48, padTop=30, padRight=10;
+      var chartW = w-padLeft-padRight;
+      var chartH = h-padTop-padBottom;
+      var n = categories.length;
+      var gap = chartW*0.09/n;
+      var barW = (chartW - gap*(n+1))/n;
+
+      ctx.strokeStyle='rgba(255,255,255,0.16)';
+      ctx.lineWidth=1;
+      ctx.beginPath();
+      ctx.moveTo(padLeft, padTop+chartH+0.5);
+      ctx.lineTo(padLeft+chartW, padTop+chartH+0.5);
+      ctx.stroke();
+
+      categories.forEach(function(c,i){
+        var val = displayed[c.key];
+        var hFrac = val/maxVal;
+        var barH = Math.max(val>0.4?4:0, hFrac*chartH);
+        var x = padLeft+gap+(barW+gap)*i;
+        var y = padTop+chartH-barH;
+
+        var grad = ctx.createLinearGradient(0,y,0,y+barH);
+        grad.addColorStop(0, c.color);
+        grad.addColorStop(1, shadeColor(c.color,-30));
+        ctx.save();
+        ctx.shadowColor = c.color; ctx.shadowBlur=16;
+        ctx.fillStyle = grad;
+        roundRectTop(ctx, x, y, barW, barH, 8);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle='#e7ebf0';
+        ctx.font='700 13px sans-serif';
+        ctx.textAlign='center';
+        var labelY = (y-10<padTop+12) ? padTop+12 : y-10;
+        ctx.fillText(Math.round(val), x+barW/2, labelY);
+
+        ctx.fillStyle='#9aa5b1';
+        ctx.font='11px sans-serif';
+        wrapText(ctx, c.label, x+barW/2, padTop+chartH+18, barW+gap*1.6, 12, 2);
+      });
+    }
+
+    return {draw:draw, resize:resize};
+  }
+
+  /* ================= CHIEN (bouton surprise) ================= */
+
+  function createDogAnimator(canvasEl, getWidth){
+    var ctx = canvasEl.getContext('2d');
+    var height = 460;
+    var FUR = '#c98a4b', FUR_DARK = '#8a5a2b', NOSE = '#3a2313';
+
+    function resize(){
+      var w = getWidth();
+      var dpr = Math.min(window.devicePixelRatio||1, 2);
+      canvasEl.width = Math.max(1, Math.round(w*dpr));
+      canvasEl.height = Math.max(1, Math.round(height*dpr));
+      canvasEl.style.width = '100%';
+      canvasEl.style.height = height+'px';
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+
+    function lerp(a,b,t){ return a+(b-a)*t; }
+
+    function drawShadow(x, groundY, scale){
+      ctx.save();
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(x, groundY+6, 22*scale, 6*scale, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawDogRunning(x, y, mirror, gait){
+      var dir = mirror ? -1 : 1;
+      var bob = Math.abs(Math.sin(gait*14))*3;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(dir, 1);
+      var bodyY = -14 - bob;
+
+      var tailWag = Math.sin(gait*10)*10;
+      ctx.strokeStyle = FUR_DARK; ctx.lineWidth = 4; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-20, bodyY+4);
+      ctx.quadraticCurveTo(-30, bodyY-6+tailWag*0.3, -34+tailWag*0.4, bodyY-14+tailWag);
+      ctx.stroke();
+
+      var legSwing1 = Math.sin(gait*14)*12;
+      var legSwing2 = Math.sin(gait*14+Math.PI)*12;
+      ctx.strokeStyle = FUR_DARK; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(14, bodyY+8); ctx.lineTo(14+legSwing1*0.5, bodyY+24); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-12, bodyY+8); ctx.lineTo(-12+legSwing2*0.5, bodyY+24); ctx.stroke();
+
+      ctx.fillStyle = FUR;
+      ctx.beginPath();
+      ctx.ellipse(0, bodyY, 24, 13, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      var headX = 26, headY = bodyY-10;
+      var earFlap = Math.sin(gait*14)*4;
+      ctx.fillStyle = FUR_DARK;
+      ctx.beginPath();
+      ctx.ellipse(headX-2, headY-6+earFlap*0.2, 5, 9, -0.3, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.fillStyle = FUR;
+      ctx.beginPath(); ctx.ellipse(headX, headY, 11, 10, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(headX+10, headY+3, 6, 5, 0, 0, Math.PI*2); ctx.fill();
+
+      ctx.fillStyle = NOSE;
+      ctx.beginPath(); ctx.arc(headX+15, headY+3, 1.8, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(headX+5, headY-2, 1.6, 0, Math.PI*2); ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawDogStanding(x, y, mirror, squeeze, armWrap){
+      var dir = mirror ? -1 : 1;
+      var s = squeeze;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(dir, 1);
+
+      ctx.strokeStyle = FUR_DARK; ctx.lineWidth = 5; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-6,-4); ctx.lineTo(-6,10); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(6,-4); ctx.lineTo(6,10); ctx.stroke();
+
+      ctx.strokeStyle = FUR_DARK; ctx.lineWidth = 4; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(-10,-14*s); ctx.quadraticCurveTo(-22,-18*s,-17,-32*s); ctx.stroke();
+
+      ctx.fillStyle = FUR;
+      ctx.beginPath();
+      ctx.ellipse(0, -24*s, 13*s, 20*s, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      var headY = -52*s;
+      ctx.fillStyle = FUR_DARK;
+      ctx.beginPath(); ctx.ellipse(-4, headY-6, 5, 9, -0.3, 0, Math.PI*2); ctx.fill();
+
+      ctx.fillStyle = FUR;
+      ctx.beginPath(); ctx.ellipse(2, headY, 11, 10, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(9, headY+4, 6, 5, 0, 0, Math.PI*2); ctx.fill();
+
+      ctx.fillStyle = NOSE;
+      ctx.beginPath(); ctx.arc(14, headY+4, 1.8, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(6, headY-2, 1.6, 0, Math.PI*2); ctx.fill();
+
+      ctx.strokeStyle = FUR; ctx.lineWidth = 7; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(9, -32*s);
+      ctx.quadraticCurveTo(24, -36*s, 20+14*armWrap, -14*s);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function drawExplosion(x, y, t){
+      ctx.save();
+      var puffCount = 7;
+      for (var i=0;i<puffCount;i++){
+        var ang = (i/puffCount)*Math.PI*2;
+        var dist = t*38;
+        var px = x + Math.cos(ang)*dist;
+        var py = y + Math.sin(ang)*dist*0.6;
+        ctx.globalAlpha = Math.max(0, 0.8*(1-t));
+        ctx.fillStyle = '#e7ebf0';
+        ctx.beginPath();
+        ctx.arc(px, py, 6+t*8, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      ctx.font = (26+t*30)+'px Arial';
+      ctx.textAlign = 'center';
+      ctx.globalAlpha = Math.max(0, 1-t*1.1);
+      ctx.fillText('💥', x, y+8);
+      ctx.restore();
+    }
+
+    function drawHeart(x, y, ageFrac){
+      var alpha;
+      if (ageFrac<0.2) alpha = ageFrac/0.2;
+      else if (ageFrac>0.7) alpha = 1-(ageFrac-0.7)/0.3;
+      else alpha = 1;
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+      ctx.font = '22px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('💗', x, y);
+      ctx.restore();
+    }
+
+    var VARIANT_PHASES = [
+      ['enter','pause','explode','clear'],
+      ['enter','hug','hold','release','exit']
+    ];
+    var VARIANT_DURATIONS = [
+      {enter:1.3, pause:0.5, explode:0.7, clear:0.3},
+      {enter:1.3, hug:0.6, hold:2.6, release:0.6, exit:0.9}
+    ];
+
+    var dog = {active:false, variant:-1, phase:'', t:0, gait:0, hearts:[], heartTimer:0};
+
+    function trigger(){
+      if (dog.active) return false;
+      dog.active = true;
+      dog.variant = (dog.variant+1) % 2;
+      dog.phase = VARIANT_PHASES[dog.variant][0];
+      dog.t = 0; dog.gait = 0; dog.hearts = []; dog.heartTimer = 0;
+      canvasEl.style.display = 'block';
+      resize();
+      return true;
+    }
+
+    function update(dt){
+      if (!dog.active) return;
+      dog.gait += dt;
+      dog.t += dt;
+      var order = VARIANT_PHASES[dog.variant];
+      var durations = VARIANT_DURATIONS[dog.variant];
+      var dur = durations[dog.phase];
+      if (dog.t >= dur){
+        dog.t = 0;
+        var idx = order.indexOf(dog.phase)+1;
+        if (idx >= order.length){
+          dog.active = false;
+          canvasEl.style.display = 'none';
+          return;
+        }
+        dog.phase = order[idx];
+      }
+      if (dog.variant===1 && dog.phase==='hold'){
+        dog.heartTimer += dt;
+        if (dog.heartTimer > 0.45){
+          dog.heartTimer = 0;
+          dog.hearts.push({dx:(Math.random()-0.5)*50, age:0, life:1.3});
+        }
+      }
+      for (var i=dog.hearts.length-1;i>=0;i--){
+        dog.hearts[i].age += dt;
+        if (dog.hearts[i].age > dog.hearts[i].life) dog.hearts.splice(i,1);
+      }
+    }
+
+    function render(){
+      if (!dog.active) return;
+      var w = getWidth();
+      ctx.clearRect(0,0,w,height);
+      var centerX = w/2, groundY = height-70;
+      var durations = VARIANT_DURATIONS[dog.variant];
+      var t = Math.min(1, dog.t/durations[dog.phase]);
+
+      if (dog.variant===0){
+        if (dog.phase==='enter'){
+          var x = lerp(-40, centerX, easeInOutCubic(t));
+          drawShadow(x, groundY, 1);
+          drawDogRunning(x, groundY, false, dog.gait);
+        } else if (dog.phase==='pause'){
+          drawShadow(centerX, groundY, 1);
+          drawDogRunning(centerX, groundY, false, dog.gait*0.15);
+        } else if (dog.phase==='explode'){
+          drawExplosion(centerX, groundY-16, t);
+        }
+      } else {
+        if (dog.phase==='enter'){
+          var et = easeInOutCubic(t);
+          var ax = lerp(-40, centerX-16, et);
+          var bx = lerp(w+40, centerX+16, et);
+          drawShadow(ax, groundY, 1); drawShadow(bx, groundY, 1);
+          drawDogRunning(ax, groundY, false, dog.gait);
+          drawDogRunning(bx, groundY, true, dog.gait);
+        } else if (dog.phase==='hug'){
+          drawShadow(centerX-16, groundY, 1); drawShadow(centerX+16, groundY, 1);
+          drawDogStanding(centerX-16, groundY, false, 1, t);
+          drawDogStanding(centerX+16, groundY, true, 1, t);
+        } else if (dog.phase==='hold'){
+          var squeeze = 1+0.05*Math.sin(dog.t*6);
+          drawShadow(centerX-16, groundY, 1); drawShadow(centerX+16, groundY, 1);
+          drawDogStanding(centerX-16, groundY, false, squeeze, 1);
+          drawDogStanding(centerX+16, groundY, true, squeeze, 1);
+          for (var i=0;i<dog.hearts.length;i++){
+            var h = dog.hearts[i];
+            var af = h.age/h.life;
+            drawHeart(centerX+h.dx, groundY-70-af*22, af);
+          }
+        } else if (dog.phase==='release'){
+          var ax2 = lerp(centerX-16, centerX-30, t);
+          var bx2 = lerp(centerX+16, centerX+30, t);
+          var wrap = lerp(1, 0.3, t);
+          drawShadow(ax2, groundY, 1); drawShadow(bx2, groundY, 1);
+          drawDogStanding(ax2, groundY, false, 1, wrap);
+          drawDogStanding(bx2, groundY, true, 1, wrap);
+        } else if (dog.phase==='exit'){
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, 1-t);
+          var ax3 = centerX-30-t*24;
+          var bx3 = centerX+30+t*24;
+          drawDogStanding(ax3, groundY, false, 1, 0.2);
+          drawDogStanding(bx3, groundY, true, 1, 0.2);
+          ctx.restore();
+        }
+      }
+    }
+
+    return {trigger:trigger, update:update, render:render, resize:resize, isActive:function(){ return dog.active; }};
+  }
+
+  /* ================= WIRING ================= */
+
+  var outerWrap = document.getElementById('ruthOuter');
+  function getWidth(){ return outerWrap.clientWidth; }
+
+  var canvasOverview = document.getElementById('ruthCanvas');
+  var canvasZoom = document.getElementById('ruthCanvasZoom');
+  var statsCanvas = document.getElementById('statsCanvas');
+
+  var trackBtn = document.getElementById('trackBtn');
+  var throughBtn = document.getElementById('throughBtn');
+  var captionEl = document.getElementById('trackCaption');
+
+  var tagEls = {
+    gun: document.getElementById('tagGun'),
+    foil: document.getElementById('tagFoil'),
+    screen: document.getElementById('tagScreen')
+  };
+
+  var overview = createOverviewScene(canvasOverview, getWidth, {tagEls:tagEls});
+  var zoom = createZoomScene(canvasZoom, getWidth, {trackBtn:trackBtn, throughBtn:throughBtn, captionEl:captionEl});
+  var statsChart = createStatsChart(statsCanvas);
+  var dogAnimator = createDogAnimator(document.getElementById('dogCanvas'), getWidth);
+
+  overview.bindCounters(document.getElementById('cntThrough'), document.getElementById('cntSide'), document.getElementById('cntBack'));
+  zoom.bindCounters(document.getElementById('cntThroughZ'), document.getElementById('cntSideZ'), document.getElementById('cntBackZ'));
+
+  document.getElementById('ruthSpeed').addEventListener('input', function(e){ overview.setSpeed(parseFloat(e.target.value)); });
+  var pausedOverview = false;
+  document.getElementById('ruthPause').addEventListener('click', function(e){
+    pausedOverview = !pausedOverview;
+    overview.setPaused(pausedOverview);
+    e.target.textContent = pausedOverview ? 'Lecture' : 'Pause';
+  });
+
+  document.getElementById('ruthSpeedZ').addEventListener('input', function(e){ zoom.setSpeed(parseFloat(e.target.value)); });
+  var pausedZoom = false;
+  document.getElementById('ruthPauseZ').addEventListener('click', function(e){
+    pausedZoom = !pausedZoom;
+    zoom.setPaused(pausedZoom);
+    e.target.textContent = pausedZoom ? 'Lecture' : 'Pause';
+  });
+
+  var gunBtn = document.getElementById('gunToggle');
+  function syncGunBtn(){
+    gunBtn.classList.toggle('on', SHARED.gunEnabled);
+    gunBtn.classList.toggle('off-state', !SHARED.gunEnabled);
+    gunBtn.textContent = SHARED.gunEnabled ? 'Éteindre le canon' : 'Allumer le canon';
+    if (trackBtn) trackBtn.disabled = !SHARED.gunEnabled || zoom.isTracking();
+    if (throughBtn) throughBtn.disabled = !SHARED.gunEnabled || zoom.isTracking();
+  }
+  gunBtn.addEventListener('click', function(){
+    SHARED.gunEnabled = !SHARED.gunEnabled;
+    syncGunBtn();
+  });
+  syncGunBtn();
+
+  var tagBtn = document.getElementById('tagToggle');
+  var tagsOn = false;
+  tagBtn.addEventListener('click', function(){
+    tagsOn = !tagsOn;
+    tagBtn.classList.toggle('on', tagsOn);
+    overview.setTagsOn(tagsOn);
+  });
+
+  var persistBtn = document.getElementById('persistToggle');
+  var persistOnFlag = false;
+  persistBtn.addEventListener('click', function(){
+    persistOnFlag = !persistOnFlag;
+    persistBtn.classList.toggle('on', persistOnFlag);
+    overview.setPersistOn(persistOnFlag);
+  });
+
+  trackBtn.addEventListener('click', function(){
+    zoom.startTracking();
+    syncGunBtn();
+  });
+  throughBtn.addEventListener('click', function(){
+    zoom.startTrackingThrough();
+    syncGunBtn();
+  });
+
+  document.getElementById('statsReset').addEventListener('click', function(){
+    SHARED.stats.sent = 0;
+    SHARED.stats.through = 0;
+    SHARED.stats.side = 0;
+    SHARED.stats.back = 0;
+  });
+
+  var dogBtn = document.getElementById('dogBtn');
+  dogBtn.addEventListener('click', function(){
+    if (dogAnimator.isActive()) return;
+    dogAnimator.trigger();
+  });
+
+  var statSentEl = document.getElementById('statSent');
+  var statSideEl = document.getElementById('statSide');
+  var statThroughEl = document.getElementById('statThrough');
+  var statBackEl = document.getElementById('statBack');
+  function updateStatsLegend(){
+    if (statSentEl) statSentEl.textContent = SHARED.stats.sent;
+    if (statSideEl) statSideEl.textContent = SHARED.stats.side;
+    if (statThroughEl) statThroughEl.textContent = SHARED.stats.through;
+    if (statBackEl) statBackEl.textContent = SHARED.stats.back;
+  }
+
+  var currentTab = 'overview';
+  var panelOverview = document.getElementById('panelOverview');
+  var panelZoom = document.getElementById('panelZoom');
+  var panelStats = document.getElementById('panelStats');
+  var panelConclusion = document.getElementById('panelConclusion');
+  var tabBtns = document.querySelectorAll('.ruth-tab-btn');
+  for (var t=0; t<tabBtns.length; t++){
+    tabBtns[t].addEventListener('click', function(){
+      var target = this.getAttribute('data-tab');
+      if (target === currentTab) return;
+      currentTab = target;
+      for (var b=0;b<tabBtns.length;b++){
+        var isActive = tabBtns[b]===this;
+        tabBtns[b].classList.toggle('active', isActive);
+        tabBtns[b].setAttribute('aria-pressed', isActive ? 'true':'false');
+      }
+      panelOverview.style.display = target==='overview' ? 'block':'none';
+      panelZoom.style.display = target==='zoom' ? 'block':'none';
+      panelStats.style.display = target==='stats' ? 'block':'none';
+      panelConclusion.style.display = target==='conclusion' ? 'block':'none';
+      overview.resize(); zoom.resize(); statsChart.resize();
+    });
+  }
+
+  var clock = new THREE.Clock();
+  function loop(){
+    requestAnimationFrame(loop);
+    var dt = Math.min(clock.getDelta(), 0.05);
+    if (dogAnimator.isActive()){
+      dogAnimator.update(dt);
+      dogAnimator.render();
+      if (currentTab === 'overview') overview.animateStep(0);
+      return;
+    }
+    if (currentTab === 'overview') overview.animateStep(dt);
+    else if (currentTab === 'zoom') zoom.animateStep(dt);
+    else if (currentTab === 'stats') { statsChart.draw(dt); updateStatsLegend(); }
+  }
+  loop();
+
+  window.addEventListener('resize', function(){ overview.resize(); zoom.resize(); statsChart.resize(); dogAnimator.resize(); });
+})();
+</script>
+
+</div>
+</body>
+</html>

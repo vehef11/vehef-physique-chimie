@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Composition de l'air et des atmosphères planétaires - Animation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="back-link" href="../seconde/">&larr; Retour aux animations de Seconde</a>
+
+<h1 id="title">La composition de l'air (Terre)</h1>
+<p class="subtitle" id="subtitle"></p>
+
+<div id="tabs">
+  <button class="tabBtn active" id="tab_final">Questions à faire</button>
+  <button class="tabBtn" id="tab_earth">Terre</button>
+  <button class="tabBtn" id="tab_mars">Mars</button>
+  <button class="tabBtn" id="tab_vie">Vie</button>
+  <button class="tabBtn" id="tab_mystery">Mystère</button>
+  <button class="tabBtn" id="tab_rappels">Rappels calculs</button>
+  <button class="tabBtn" id="tab_quiz">Quizz</button>
+</div>
+
+<div class="mystery-banner" id="mysteryBanner">
+  💨 <b>16 %</b> de O₂ dans l'air est le minimum pour que l'être humain puisse respirer.
+</div>
+
+<div id="quizFlashZone"></div>
+<div id="container">
+  <canvas id="canvas"></canvas>
+  <div id="rappelsContent">
+    <p class="rappels-intro">Pour connaître la part d'un gaz dans un mélange, on compte ses molécules parmi toutes celles présentes :</p>
+    <div class="formula-row">
+      <div class="formula-box formula-color-1">
+        <span class="fx-letter">P<sub>i</sub></span>
+        <span class="fx-eq">=</span>
+        <span class="fraction">
+          <span class="num">N<sub>i</sub></span>
+          <span class="den">N<sub>totale</sub></span>
+        </span>
+      </div>
+      <div class="note-bubble">On gardera l'expression sous forme de fraction simplifiée.</div>
+    </div>
+    <div class="formula-row">
+      <div class="formula-box formula-color-2">
+        <span class="fx-letter">P<sub>i</sub>(%)</span>
+        <span class="fx-eq">=</span>
+        <span class="fraction">
+          <span class="num">N<sub>i</sub></span>
+          <span class="den">N<sub>totale</sub></span>
+        </span>
+        <span class="fx-eq">&times; 100</span>
+      </div>
+      <div class="note-bubble">Fais le calcul et arrondis le résultat à 1 chiffre après la virgule.</div>
+    </div>
+    <div class="legend-block">
+      <p><span class="legend-symbol">P</span> = proportion</p>
+      <p><span class="legend-symbol">P<sub>i</sub></span> = proportion de la molécule i</p>
+      <p><span class="legend-symbol">N<sub>i</sub></span> = nombre de molécules i</p>
+      <p><span class="legend-symbol">N<sub>totale</sub></span> = nombre total de molécules</p>
+    </div>
+  </div>
+  <div id="quizContent">
+    <div class="quiz-columns" id="quizColumns"></div>
+    <div class="quiz-bank" id="quizBank"></div>
+    <div style="display:flex; gap:12px;">
+      <button id="quizCheckBtn">Vérifier ma réponse</button>
+      <button id="quizResetBtn" class="modeBtn">🔀 Mélanger à nouveau</button>
+    </div>
+  </div>
+  <div id="finalContent">
+    <div class="final-dog-track" id="finalDogTrack">
+      <span class="final-dog-run" id="finalDogRun">🐕</span>
+      <span class="final-dog-glare" id="finalDogGlare">🐶<span class="glare-mark">💢</span></span>
+    </div>
+    <div class="questions-list">
+      <div class="question-tag question-color-1"><span class="q-num">1</span><span>Donner les compositions en % des atmosphères de la Terre et de Mars.</span></div>
+      <div class="question-tag question-color-2"><span class="q-num">2</span><span>L'atmosphère mystère est-elle viable pour l'être humain ? Justifie par des calculs.</span></div>
+      <div class="question-tag question-color-3"><span class="q-num">3</span><span>Explique où tu as pu voir un corps pur dans cette animation.</span></div>
+    </div>
+    <p class="questions-info">ℹ️ La partie Quizz n'est pas évaluée.</p>
+  </div>
+</div>
+
+<div id="legend"></div>
+
+<div id="bottomZone">
+<div class="sliderRow" id="tempRow">
+  <label for="speedRange">Température :</label>
+  <input type="range" id="speedRange" min="0.2" max="3" step="0.1" value="1">
+  <span id="tempLabel">20 °C</span>
+</div>
+
+<div class="sliderRow" id="moleculeRow">
+  <label for="moleculeRange">Nb de molécules :</label>
+  <input type="range" id="moleculeRange" min="100" max="250" step="5" value="150">
+  <span id="moleculeLabel">150</span>
+</div>
+
+<div class="sliderRow" id="pressureRow">
+  <label for="pressureRange">Pression :</label>
+  <input type="range" id="pressureRange" min="0" max="100" step="1" value="0">
+  <span id="pressureLabel">Normale (0)</span>
+</div>
+
+<div class="sliderRow" id="vieRatRow" style="display:none;">
+  <label for="vieKillRange">Tuer le rat :</label>
+  <input type="range" id="vieKillRange" min="0" max="100" step="1" value="0">
+  <span id="vieO2Label">100% O₂</span>
+</div>
+
+<div id="buttonRow">
+  <button id="toggleBtn">Pause</button>
+  <button id="resetBtn">Réinitialiser</button>
+  <button class="modeBtn" id="btnDetail">Modèle détaillé</button>
+</div>
+</div>
+
+<div id="counter"></div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

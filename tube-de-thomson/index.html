@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Le tube de Thomson — 1897</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --noyer: #150f0b;
+    --noyer-2: #1d140d;
+    --laiton: #a9793b;
+    --laiton-clair: #e7c486;
+    --laiton-sombre: #6b4c26;
+    --verre: #b9cbc8;
+    --vert: #4bff3a;
+    --decharge: #9b8cff;
+    --charge-pos: #ff5a4d;
+    --charge-neg: #4da6ff;
+    --parchemin: #ede3d0;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    background: radial-gradient(ellipse at 50% 40%, #241a10 0%, var(--noyer) 65%, #0b0705 100%);
+    font-family:'IBM Plex Sans', sans-serif;
+    color: var(--parchemin);
+  }
+  #scene-root{ position:fixed; inset:0; }
+  #scene-root canvas{ display:block; touch-action:none; cursor:grab; }
+  #scene-root canvas:active{ cursor:grabbing; }
+
+  .overlay{
+    position:fixed; inset:0; pointer-events:none;
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding: clamp(12px, 2.5vw, 28px);
+  }
+
+  .placard{
+    pointer-events:auto;
+    align-self:flex-start;
+    background: linear-gradient(180deg, rgba(29,20,13,.78), rgba(21,15,11,.72));
+    border:1px solid rgba(231,196,134,.25);
+    border-radius:8px;
+    padding: 10px 18px 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
+    max-width: min(78vw, 460px);
+  }
+  .placard .back-link{
+    display:inline-block; margin:0 0 7px;
+    font-family:'IBM Plex Mono', monospace; font-size:.62rem; letter-spacing:.08em;
+    text-transform:uppercase; color: rgba(237,227,208,.6); text-decoration:none;
+  }
+  .placard .back-link:hover{ color: var(--laiton-clair); }
+  .placard h1{
+    margin:0; font-family:'Playfair Display', serif; font-style:italic; font-weight:700;
+    font-size: clamp(1.05rem, 2.6vw, 1.6rem); letter-spacing:.02em; color: var(--laiton-clair);
+    text-shadow: 0 1px 0 rgba(0,0,0,.5);
+  }
+  .placard h1 .flag{
+    display:inline-block; font-style:normal;
+    font-size:.62em; margin-left:.4em; vertical-align:.1em;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,.5));
+  }
+  .placard .sub{
+    margin:3px 0 0; font-family:'IBM Plex Mono', monospace; font-size: clamp(.62rem, 1.4vw, .74rem);
+    letter-spacing:.06em; color: rgba(237,227,208,.65); text-transform:uppercase;
+  }
+
+  .legend{
+    pointer-events:none;
+    position:fixed; top: clamp(12px,2.5vw,28px); right: clamp(12px,2.5vw,28px);
+    background: rgba(21,15,11,.6);
+    border:1px solid rgba(231,196,134,.18);
+    border-radius:8px;
+    padding: 8px 12px;
+    font-family:'IBM Plex Mono', monospace; font-size:.66rem; letter-spacing:.02em;
+    display:flex; flex-direction:column; gap:5px;
+    backdrop-filter: blur(2px);
+    opacity:0; transform: translateY(-6px);
+    transition: opacity .25s ease, transform .25s ease;
+    z-index:5;
+  }
+  .legend.visible{ opacity:1; transform: translateY(0); }
+
+  .tube-tag{
+    pointer-events:none;
+    position:fixed; left:0; top:0;
+    transform: translate(-50%, -50%);
+    display:flex; align-items:center; gap:7px;
+    background: rgba(21,15,11,.85);
+    border:1px solid rgba(231,196,134,.28);
+    border-radius:7px;
+    padding: 6px 12px 6px 9px;
+    font-family:'IBM Plex Mono', monospace; font-size:.66rem; letter-spacing:.02em;
+    color: rgba(237,227,208,.92);
+    white-space:nowrap;
+    opacity:0;
+    transition: opacity .2s ease;
+    box-shadow: 0 6px 16px rgba(0,0,0,.4);
+    z-index:5;
+  }
+  .tube-tag.visible{ opacity:1; }
+
+  #tagLines{
+    position:fixed; inset:0;
+    pointer-events:none;
+    z-index:4;
+  }
+  .tag-line{ stroke-width:1.3; opacity:0; transition:opacity .2s ease; }
+  .tag-line.visible{ opacity:.65; }
+  #lineCathode{ stroke: var(--decharge); }
+  #lineAnode{ stroke:#cfd3d6; }
+  #linePlates{ stroke:#cfd3d6; }
+  #lineScreen{ stroke:#2fd94b; }
+  .legend-item{ display:flex; align-items:center; gap:7px; color: rgba(237,227,208,.85); white-space:nowrap; }
+  .dot{ width:8px; height:8px; border-radius:50%; flex:none; box-shadow:0 0 5px currentColor; }
+  .dot-cathode{ background:var(--decharge); color:var(--decharge); }
+  .dot-anode{ background:#cfd3d6; color:#cfd3d6; }
+  .dot-plates{ background:#cfd3d6; color:#cfd3d6; }
+  .dot-beam{ background:var(--vert); color:var(--vert); }
+  .dot-screen{ background:#2fd94b; color:#2fd94b; }
+
+  #camReset{
+    pointer-events:auto;
+    position:fixed; top: clamp(12px,2.5vw,28px); right: clamp(12px,2.5vw,28px);
+    margin-top: 150px;
+    width:34px; height:34px; border-radius:50%;
+    background: rgba(21,15,11,.6); border:1px solid rgba(231,196,134,.3);
+    color: var(--laiton-clair); font-size:1.1rem; cursor:pointer; display:none;
+    align-items:center; justify-content:center; line-height:1;
+  }
+  #camReset:hover{ background: rgba(169,121,59,.35); }
+
+  .hint{
+    position:fixed; left:50%; top: 14px; transform:translateX(-50%);
+    font-family:'IBM Plex Mono', monospace; font-size:.66rem; letter-spacing:.04em;
+    color: rgba(237,227,208,.55); pointer-events:none;
+    transition: opacity .8s ease; text-align:center;
+  }
+
+  .control-plaque{
+    pointer-events:auto;
+    align-self:center;
+    width:min(920px, 96vw);
+    background: linear-gradient(180deg, #3a2a16 0%, #241a0e 100%);
+    border:1px solid rgba(0,0,0,.4);
+    border-radius:10px;
+    padding: 14px 18px 16px;
+    box-shadow: 0 -2px 0 rgba(255,255,255,.06) inset, 0 12px 30px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.08) inset;
+    position:relative;
+  }
+  .control-plaque::before, .control-plaque::after{
+    content:""; position:absolute; top:8px; width:6px; height:6px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, #f2d9a8, #6b4c26 70%);
+    box-shadow: inset 0 0 2px rgba(0,0,0,.6);
+  }
+  .control-plaque::before{ left:10px; }
+  .control-plaque::after{ right:10px; }
+
+  .caption{
+    margin: 0 0 12px; font-size: clamp(.72rem, 1.6vw, .86rem); line-height:1.45;
+    color: rgba(237,227,208,.9); text-align:center; min-height: 2.6em;
+    font-family:'IBM Plex Sans', sans-serif;
+  }
+
+  .buttons-row{ display:flex; flex-wrap:wrap; gap:9px; justify-content:center; }
+
+  .switch{
+    font-family:'IBM Plex Mono', monospace; font-size:.72rem; letter-spacing:.02em;
+    color: var(--laiton-clair);
+    background: linear-gradient(180deg, #241a10, #171009);
+    border: 1px solid rgba(231,196,134,.35);
+    border-radius:6px;
+    padding: 9px 13px;
+    min-height:40px;
+    cursor:pointer;
+    transition: box-shadow .25s ease, border-color .25s ease, transform .08s ease, color .25s ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 2px 4px rgba(0,0,0,.4);
+    white-space:nowrap;
+    touch-action:manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .switch:hover:not(:disabled){ border-color: rgba(231,196,134,.7); }
+  .switch:active:not(:disabled){ transform: translateY(1px); }
+  .switch.on{
+    color:#eafff0;
+    border-color: var(--vert);
+    box-shadow: inset 0 0 10px rgba(75,255,58,.35), 0 0 10px rgba(75,255,58,.25);
+  }
+  .switch:disabled{
+    opacity:.35; cursor:not-allowed;
+  }
+
+  /* ---------------------------------------------------------------------
+     CONCLUSION — panneau modal néon
+  --------------------------------------------------------------------- */
+  .conclusion-overlay{
+    position:fixed; inset:0; z-index:60;
+    display:flex; align-items:center; justify-content:center;
+    padding: clamp(16px, 5vw, 40px);
+    background: rgba(6,4,2,.8);
+    backdrop-filter: blur(4px);
+    opacity:0; pointer-events:none;
+    transition: opacity .35s ease;
+  }
+  .conclusion-overlay.visible{ opacity:1; pointer-events:auto; }
+  .conclusion-card{
+    position:relative;
+    width:min(600px, 100%);
+    background: linear-gradient(180deg, rgba(36,26,16,.94), rgba(17,12,8,.96));
+    border:1px solid rgba(75,255,58,.4);
+    border-radius:12px;
+    padding: clamp(22px,4vw,34px) clamp(20px,4vw,36px) clamp(20px,4vw,28px);
+    box-shadow: 0 0 2px rgba(75,255,58,.6), 0 0 28px rgba(75,255,58,.18), 0 22px 60px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
+    transform: scale(.94) translateY(10px);
+    transition: transform .35s ease;
+    max-height: 88vh; overflow:auto;
+  }
+  .conclusion-overlay.visible .conclusion-card{ transform: scale(1) translateY(0); }
+  .conclusion-title{
+    margin:0 0 4px;
+    font-family:'IBM Plex Mono', monospace; font-size:.66rem; letter-spacing:.14em; text-transform:uppercase;
+    color: var(--vert);
+    text-align:center;
+    text-shadow: 0 0 6px rgba(75,255,58,.7), 0 0 18px rgba(75,255,58,.4);
+  }
+  .conclusion-heading{
+    margin:6px 0 16px;
+    font-family:'Playfair Display', serif; font-style:italic; font-weight:700;
+    font-size: clamp(1.25rem, 3.2vw, 1.7rem);
+    color:#f2fff4;
+    text-align:center;
+    text-shadow: 0 0 10px rgba(75,255,58,.5), 0 0 26px rgba(75,255,58,.22), 0 1px 0 rgba(0,0,0,.5);
+    letter-spacing:.01em;
+  }
+  .conclusion-text{
+    margin:0; font-size: clamp(.82rem, 1.9vw, .98rem); line-height:1.7;
+    color: rgba(237,227,208,.92); text-align:center;
+  }
+  .conclusion-text strong{ color: var(--laiton-clair); font-weight:600; }
+  .conclusion-close{
+    position:absolute; top:12px; right:12px;
+    width:32px; height:32px; border-radius:50%;
+    background: rgba(21,15,11,.7); border:1px solid rgba(231,196,134,.3);
+    color: var(--laiton-clair); font-size:1.05rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; line-height:1;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  }
+  .conclusion-close:hover{ background: rgba(169,121,59,.35); }
+
+  /* ---------------------------------------------------------------------
+     SIÈSTE — écran qui s'assombrit, lune, Zzz, puis screamer
+  --------------------------------------------------------------------- */
+  .sieste-overlay{
+    position:fixed; inset:0; z-index:55;
+    background:#000; opacity:0;
+    pointer-events:none;
+    transition: opacity 1.5s ease;
+  }
+  .sieste-overlay.active{ opacity:.72; }
+
+  .sieste-moon{
+    position:fixed; left:50%; top:-18vh;
+    transform: translateX(-50%);
+    width: clamp(60px, 9vw, 104px); height: clamp(60px, 9vw, 104px);
+    border-radius:50%;
+    background: radial-gradient(circle at 34% 30%, #fffaea 0%, #f2e6b8 45%, #d8c584 78%, #b9a866 100%);
+    box-shadow: 0 0 34px rgba(242,230,184,.55), 0 0 80px rgba(242,230,184,.22), inset -16px -12px 0 rgba(0,0,0,.14);
+    opacity:0;
+    transition: top 1.8s cubic-bezier(.22,.61,.36,1), opacity .6s ease;
+    z-index:56; pointer-events:none;
+  }
+  .sieste-moon.active{ top:9%; opacity:1; }
+  .sieste-moon.hide{ top:-18vh; opacity:0; transition: top .6s ease-in, opacity .5s ease; }
+
+  .sieste-zs{
+    position:fixed; left:50%; top:26%;
+    width:140px; height:140px; margin-left:-70px;
+    z-index:56; pointer-events:none;
+    opacity:0; transition:opacity .4s ease;
+    font-family:'Playfair Display', serif; font-style:italic; font-weight:700;
+    font-size:1.6rem;
+    color: rgba(237,227,208,.92);
+  }
+  .sieste-zs.active{ opacity:1; }
+  .sieste-zs span{
+    position:absolute; bottom:0; opacity:0;
+    text-shadow: 0 0 10px rgba(237,227,208,.5);
+    animation: zzz-rise 2.3s ease-in-out infinite;
+  }
+  @keyframes zzz-rise{
+    0%{ opacity:0; transform: translate(0,0) scale(.7); }
+    12%{ opacity:.95; }
+    75%{ opacity:.2; }
+    100%{ opacity:0; transform: translate(10px,-92px) scale(1.3); }
+  }
+
+  .screamer-overlay{
+    position:fixed; inset:0; z-index:75;
+    display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(circle, #f4f0e8 0%, #d8d0c0 100%);
+    opacity:0; pointer-events:none;
+  }
+  .screamer-overlay.flash{ opacity:1; }
+  .screamer-ghost{
+    font-size: min(58vh, 58vw);
+    line-height:1;
+    transform: scale(.85);
+  }
+  .screamer-overlay.flash .screamer-ghost{ transform: scale(1.05); }
+
+  @media (max-width: 640px){
+    .legend{ top:90px; left:12px; right:auto; bottom:auto; max-width: calc(100vw - 24px); font-size:.62rem; }
+    .placard{ max-width: 62vw; padding: 8px 12px 10px; }
+    .control-plaque{ padding: 10px 12px 12px; }
+    .buttons-row{ gap:5px; }
+    .switch{ font-size:.58rem; padding:6px 8px; min-height:29px; letter-spacing:.01em; }
+    #camReset{ margin-top: 0; top: auto; bottom: 190px; }
+    .conclusion-card{ padding: 20px 18px 18px; }
+    .hint{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div id="scene-root"></div>
+
+  <div class="overlay">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <header class="placard">
+        <a class="back-link" href="../premiere/">&larr; Retour aux animations de Première</a>
+        <h1>Le tube de Thomson <span class="flag" title="Royaume-Uni" aria-label="Royaume-Uni">🇬🇧</span></h1>
+        <p class="sub">1897 — la découverte de l'électron</p>
+      </header>
+    </div>
+
+    <div class="control-plaque">
+      <p class="caption" id="caption">Dispositif éteint. Aucun faisceau ne circule dans le tube.</p>
+      <div class="buttons-row">
+        <button id="btnPower" class="switch">⏻ Allumer le dispositif</button>
+        <button id="btnMode" class="switch">◐ Afficher en particules</button>
+        <button id="btnPlates" class="switch">▭ Placer les plaques</button>
+        <button id="btnVoltage" class="switch" disabled>⚡ Appliquer la tension</button>
+        <button id="btnInvert" class="switch" disabled>⇄ Inverser la polarité</button>
+        <button id="btnLegend" class="switch">▤ Afficher la légende</button>
+        <button id="btnConclusion" class="switch">❖ Conclusion</button>
+        <button id="btnSieste" class="switch">💤 Sièste</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="dot dot-beam"></span>Faisceau d'électrons</div>
+  </div>
+
+  <svg id="tagLines">
+    <line id="lineCathode" class="tag-line"></line>
+    <line id="lineAnode" class="tag-line"></line>
+    <line id="linePlates" class="tag-line"></line>
+    <line id="lineScreen" class="tag-line"></line>
+  </svg>
+  <div class="tube-tag" id="tagCathode"><span class="dot dot-cathode"></span>Cathode (libère les électrons)</div>
+  <div class="tube-tag" id="tagAnode"><span class="dot dot-anode"></span>Anode (accélère le faisceau)</div>
+  <div class="tube-tag" id="tagPlates"><span class="dot dot-plates"></span>Plaques de déviation</div>
+  <div class="tube-tag" id="tagScreen"><span class="dot dot-screen"></span>Écran fluorescent</div>
+
+  <div class="sieste-overlay" id="siesteOverlay"></div>
+  <div class="sieste-moon" id="siesteMoon"></div>
+  <div class="sieste-zs" id="siesteZs">
+    <span style="left:-14px; animation-delay:0s;">Z</span>
+    <span style="left:10px; animation-delay:.6s; font-size:.75em;">z</span>
+    <span style="left:30px; animation-delay:1.2s; font-size:.6em;">z</span>
+  </div>
+  <div class="screamer-overlay" id="screamerOverlay"><div class="screamer-ghost">👻</div></div>
+
+  <button id="camReset" title="Réinitialiser la vue">⟲</button>
+  <div class="hint" id="hint">glisser pour tourner · pincer ou molette pour zoomer</div>
+
+  <div class="conclusion-overlay" id="conclusionOverlay">
+    <div class="conclusion-card">
+      <button class="conclusion-close" id="btnCloseConclusion" aria-label="Fermer la conclusion">✕</button>
+      <p class="conclusion-title">Conclusion de l'expérience</p>
+      <h2 class="conclusion-heading">Une particule à l'intérieur de l'atome</h2>
+      <p class="conclusion-text">
+        Le faisceau se courbe sous l'effet du champ électrique : c'est donc un flux de particules chargées <strong>négativement</strong>, arrachées aux atomes de la cathode. Quelle que soit la cathode utilisée, ces particules sont toujours identiques et environ <strong>2000 fois plus légères</strong> que l'atome d'hydrogène — le plus léger des atomes connus.
+        <br><br>
+        Avant cette expérience, on pensait l'atome indivisible : une sphère pleine, neutre et sans structure interne. Thomson montre qu'il contient en réalité un constituant plus petit et chargé que lui : il vient de découvrir la première particule subatomique, <strong>l'électron</strong>.
+      </p>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------------------
+     CONSTANTES GÉOMÉTRIQUES
+  --------------------------------------------------------------------- */
+  const TUBE_X0       = -5.5, TUBE_X1 = 5.5;
+  const CATHODE_X     = -5.2;
+  const ANODE_X       = -3.6;
+  const SCREEN_X      = 5.35;
+  const BEAM_X_START  = -5.15;
+  const BEAM_X_END    = 5.3;
+  const PLATE_X0      = -1.3, PLATE_X1 = 1.3;
+  const PLATE_Y       = 0.85;
+  const MAX_DEFL      = 0.30;
+
+  // Le vrai tube de Thomson n'était pas un simple cylindre : un bulbe côté
+  // cathode, resserré au niveau de l'anode, puis un second bulbe côté écran.
+  // Profil simplifié (position sur l'axe -> rayon du verre) utilisé à la
+  // fois pour la géométrie du tube et pour caler les cerclages / bouchons.
+  const TUBE_PROFILE = [
+    [TUBE_X0,  1.55],
+    [-4.9,     1.75],
+    [-4.2,     1.7 ],
+    [ANODE_X,  1.45],
+    [-2.4,     1.45],
+    [0,        1.45],
+    [2.0,      1.55],
+    [3.4,      1.75],
+    [4.6,      1.9 ],
+    [TUBE_X1,  1.9 ]
+  ];
+  function tubeRadiusAt(x){
+    for(let i=0;i<TUBE_PROFILE.length-1;i++){
+      const [x0,r0] = TUBE_PROFILE[i], [x1,r1] = TUBE_PROFILE[i+1];
+      if(x>=x0 && x<=x1){
+        const t = (x-x0)/(x1-x0);
+        return r0 + (r1-r0)*t;
+      }
+    }
+    return TUBE_PROFILE[TUBE_PROFILE.length-1][1];
+  }
+  const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------------------------------------------------------------
+     ÉTAT DE L'INTERFACE
+  --------------------------------------------------------------------- */
+  const state = {
+    powerOn: false,
+    beamMode: 'line',       // 'line' | 'particles'
+    platesVisible: false,
+    voltageOn: false,
+    polarity: 1             // +1 : plaque du haut positive ; -1 : plaque du bas positive
+  };
+
+  // Grandeurs animées (tween manuel, indépendant du framerate)
+  const anim = {
+    progress: 0, progressTarget: 0,       // 0..1 : portion du tube parcourue par le faisceau
+    defl: 0, deflTarget: 0,                // déviation verticale courante en unités monde
+    plateGlow: 0, plateGlowTarget: 0,      // 0..1 : intensité visuelle des plaques/charges
+    spark: 0, sparkTarget: 0                // 0..1 : intensité de la décharge (ionisation) à la cathode
+  };
+
+  /* ---------------------------------------------------------------------
+     SCÈNE THREE.JS
+  --------------------------------------------------------------------- */
+  const root = document.getElementById('scene-root');
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x150f0b, 0.028);
+
+  const camera = new THREE.PerspectiveCamera(42, window.innerWidth/window.innerHeight, 0.1, 200);
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  root.appendChild(renderer.domElement);
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    applyFraming();
+  });
+
+  // Lumières
+  scene.add(new THREE.AmbientLight(0x5b4a33, 0.65));
+  const keyLight = new THREE.DirectionalLight(0xfff2df, 0.85);
+  keyLight.position.set(6, 8, 6);
+  scene.add(keyLight);
+  const rimLight = new THREE.DirectionalLight(0x6f9aa8, 0.35);
+  rimLight.position.set(-6, -3, -5);
+  scene.add(rimLight);
+
+  const screenGlowLight = new THREE.PointLight(0x4bff3a, 0, 6, 2);
+  scene.add(screenGlowLight);
+
+  /* ---------------------------------------------------------------------
+     CAMÉRA ORBITALE MAISON
+  --------------------------------------------------------------------- */
+  const camTarget = new THREE.Vector3(0,0,0);
+  const camDefault = { radius: 12.5, theta: 0.55, phi: 1.18 };
+  const cam = { radius: camDefault.radius, theta: camDefault.theta, phi: camDefault.phi };
+  let resettingCam = false;
+  let autoRotate = !reducedMotion;
+  let idleTime = 0;
+
+  function updateCameraPosition(){
+    camera.position.x = camTarget.x + cam.radius * Math.sin(cam.phi) * Math.sin(cam.theta);
+    camera.position.y = camTarget.y + cam.radius * Math.cos(cam.phi);
+    camera.position.z = camTarget.z + cam.radius * Math.sin(cam.phi) * Math.cos(cam.theta);
+    camera.lookAt(camTarget);
+  }
+
+  /* Cadrage adaptatif : sur un écran étroit le champ horizontal se resserre et
+     les extrémités du tube sortent de l'image. On élargit le champ, on recule la
+     caméra juste assez pour que tout le tube tienne quel que soit l'angle, et on
+     remonte l'ensemble pour qu'il ne passe pas sous le bandeau de commandes. */
+  const TUBE_FIT    = (TUBE_X1 - TUBE_X0) / 2 + 0.5;   // demi-longueur + marge
+  const BASE_RADIUS = camDefault.radius;
+  let framingRadius = camDefault.radius;
+
+  function applyFraming(){
+    const aspect = window.innerWidth / window.innerHeight;
+    camera.fov  = aspect < 1.1 ? Math.min(70, 42 / Math.max(aspect, 0.5)) : 42;
+    camTarget.y = aspect < 1.1 ? -1.5 : -0.6;
+
+    const tanH = Math.tan(camera.fov * Math.PI / 360) * aspect;
+    const fitted = Math.max(BASE_RADIUS, Math.min(22, TUBE_FIT / tanH));
+
+    // Ne pas écraser le zoom si l'utilisateur l'a réglé lui-même
+    const untouched = Math.abs(cam.radius - framingRadius) < 0.01;
+    framingRadius = fitted;
+    camDefault.radius = fitted;          // le bouton « recadrer » revient ici
+    if(untouched) cam.radius = fitted;
+
+    camera.updateProjectionMatrix();
+    updateCameraPosition();
+  }
+  applyFraming();
+
+  const dom = renderer.domElement;
+  let dragging = false, lastX = 0, lastY = 0;
+  const hintEl = document.getElementById('hint');
+  let hintHidden = false;
+  function hideHint(){ if(!hintHidden){ hintHidden = true; hintEl.style.opacity = '0'; } }
+
+  /* Pointeurs actifs : un doigt (ou souris) fait pivoter la vue, deux doigts
+     zooment par pincement. Pointer Events unifie souris/tactile/stylet. */
+  const activePointers = new Map();
+  let pinchStartDist = 0, pinchStartRadius = cam.radius;
+  function pointerDist(a, b){ return Math.hypot(a.x - b.x, a.y - b.y); }
+  function firstTwoPointers(){
+    const vals = [];
+    activePointers.forEach((v) => { if(vals.length < 2) vals.push(v); });
+    return vals;
+  }
+
+  dom.addEventListener('pointerdown', (e) => {
+    try{ dom.setPointerCapture(e.pointerId); }catch(err){}
+    activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    autoRotate = false; idleTime = 0; hideHint();
+    if(activePointers.size === 1){
+      dragging = true; lastX = e.clientX; lastY = e.clientY;
+    } else if(activePointers.size === 2){
+      dragging = false;
+      const pts = firstTwoPointers();
+      pinchStartDist = Math.max(1, pointerDist(pts[0], pts[1]));
+      pinchStartRadius = cam.radius;
+    }
+  });
+  dom.addEventListener('pointermove', (e) => {
+    if(!activePointers.has(e.pointerId)) return;
+    activePointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if(activePointers.size >= 2){
+      const pts = firstTwoPointers();
+      const d = pointerDist(pts[0], pts[1]);
+      const scale = d / pinchStartDist;
+      cam.radius = Math.max(6, Math.min(22, pinchStartRadius / scale));
+      return;
+    }
+    if(!dragging) return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    cam.theta -= dx * 0.006;
+    cam.phi   -= dy * 0.006;
+    cam.phi = Math.max(0.35, Math.min(Math.PI - 0.35, cam.phi));
+  });
+  function endPointer(e){
+    if(!activePointers.has(e.pointerId)) return;
+    activePointers.delete(e.pointerId);
+    if(activePointers.size === 1){
+      const remaining = firstTwoPointers()[0];
+      lastX = remaining.x; lastY = remaining.y;
+      dragging = true;
+    } else if(activePointers.size === 0){
+      dragging = false;
+    }
+  }
+  window.addEventListener('pointerup', endPointer);
+  window.addEventListener('pointercancel', endPointer);
+  dom.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    cam.radius *= (1 + e.deltaY * 0.001);
+    cam.radius = Math.max(6, Math.min(22, cam.radius));
+    hideHint();
+  }, { passive:false });
+
+  const camResetBtn = document.getElementById('camReset');
+  camResetBtn.addEventListener('click', () => { resettingCam = true; });
+
+  /* ---------------------------------------------------------------------
+     MATÉRIAUX RÉUTILISABLES
+  --------------------------------------------------------------------- */
+  const glassMat = new THREE.MeshPhongMaterial({
+    color: 0xb9cbc8, transparent:true, opacity:0.16, shininess:90,
+    specular:0xffffff, side: THREE.DoubleSide, depthWrite:false
+  });
+  const metalMat = new THREE.MeshStandardMaterial({ color:0xcfd3d6, metalness:0.85, roughness:0.35 });
+  const brassMat = new THREE.MeshStandardMaterial({ color:0xb08a4e, metalness:0.7, roughness:0.4 });
+
+  /* ---------------------------------------------------------------------
+     ENVELOPPE DE VERRE
+  --------------------------------------------------------------------- */
+  const tubeGroup = new THREE.Group();
+  scene.add(tubeGroup);
+
+  const lathePts = TUBE_PROFILE.map(([x,r]) => new THREE.Vector2(r, x));
+  const latheGeo = new THREE.LatheGeometry(lathePts, 48);
+  const latheMesh = new THREE.Mesh(latheGeo, glassMat);
+  latheMesh.rotation.z = -Math.PI/2;
+  tubeGroup.add(latheMesh);
+
+  function makeCap(x){
+    const capGeo = new THREE.CircleGeometry(tubeRadiusAt(x), 48);
+    const cap = new THREE.Mesh(capGeo, glassMat);
+    cap.rotation.y = Math.PI/2;
+    cap.position.x = x;
+    return cap;
+  }
+  tubeGroup.add(makeCap(TUBE_X0));
+  tubeGroup.add(makeCap(TUBE_X1));
+
+  // fine ligne de renfort (cerclages) pour lire la rondeur du verre
+  for(const gx of [TUBE_X0+0.4, TUBE_X1-0.4]){
+    const ringGeo = new THREE.TorusGeometry(tubeRadiusAt(gx), 0.012, 8, 48);
+    const ring = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({color:0xdfeae8, transparent:true, opacity:0.18}));
+    ring.rotation.y = Math.PI/2;
+    ring.position.x = gx;
+    tubeGroup.add(ring);
+  }
+
+  /* ---------------------------------------------------------------------
+     CATHODE
+  --------------------------------------------------------------------- */
+  const cathodeMat = new THREE.MeshStandardMaterial({
+    color:0x2a2320, metalness:0.4, roughness:0.6, emissive:0x000000, emissiveIntensity:0
+  });
+  const cathodeGeo = new THREE.CircleGeometry(1.0, 32);
+  const cathodeMesh = new THREE.Mesh(cathodeGeo, cathodeMat);
+  cathodeMesh.rotation.y = Math.PI/2;
+  cathodeMesh.position.x = CATHODE_X;
+  scene.add(cathodeMesh);
+  const cathodeLight = new THREE.PointLight(0x9b8cff, 0, 4, 2);
+  cathodeLight.position.set(CATHODE_X+0.2, 0, 0);
+  scene.add(cathodeLight);
+
+  /* ---------------------------------------------------------------------
+     ANODE — dans le vrai tube, ce n'est pas un simple anneau plat : c'est un
+     petit tube métallique percé d'une ouverture étroite qui collimate le
+     faisceau en un pinceau fin avant qu'il n'atteigne les plaques.
+  --------------------------------------------------------------------- */
+  const ANODE_APERTURE = 0.14;
+  const anodeGroup = new THREE.Group();
+  anodeGroup.position.x = ANODE_X;
+  scene.add(anodeGroup);
+
+  const anodeGeo = new THREE.RingGeometry(ANODE_APERTURE, 1.2, 40, 1);
+  const anodeMesh = new THREE.Mesh(anodeGeo, metalMat);
+  anodeMesh.rotation.y = Math.PI/2;
+  anodeGroup.add(anodeMesh);
+
+  // Collerette qui prolonge l'ouverture en un petit tube (le "collimateur")
+  const anodeCollarGeo = new THREE.CylinderGeometry(ANODE_APERTURE, ANODE_APERTURE, 0.55, 28, 1, true);
+  const anodeCollar = new THREE.Mesh(anodeCollarGeo, metalMat);
+  anodeCollar.rotation.z = Math.PI/2;
+  anodeGroup.add(anodeCollar);
+
+  const anodeGlowGeo = new THREE.RingGeometry(ANODE_APERTURE+0.01, ANODE_APERTURE+0.16, 32, 1);
+  const anodeGlowMat = new THREE.MeshBasicMaterial({ color:0xbfe8ff, transparent:true, opacity:0, blending:THREE.AdditiveBlending, side:THREE.DoubleSide, depthWrite:false });
+  const anodeGlow = new THREE.Mesh(anodeGlowGeo, anodeGlowMat);
+  anodeGlow.rotation.y = Math.PI/2;
+  anodeGroup.add(anodeGlow);
+
+  /* ---------------------------------------------------------------------
+     ÉCRAN FLUORESCENT + POINT D'IMPACT
+  --------------------------------------------------------------------- */
+  const screenGeo = new THREE.CircleGeometry(1.4, 48);
+  const screenMat = new THREE.MeshStandardMaterial({ color:0x1c2a1e, roughness:0.7, metalness:0.05, side:THREE.DoubleSide });
+  const screenMesh = new THREE.Mesh(screenGeo, screenMat);
+  screenMesh.rotation.y = Math.PI/2;
+  screenMesh.position.x = SCREEN_X;
+  scene.add(screenMesh);
+
+  // Échelle graduée collée sur l'écran : c'est avec ce type de repère que
+  // Thomson lisait la déviation du faisceau. Ici purement indicative,
+  // sans lecture chiffrée — le propos reste qualitatif.
+  function makeScaleTexture(){
+    const size = 512;
+    const cnv = document.createElement('canvas'); cnv.width = size; cnv.height = size;
+    const ctx = cnv.getContext('2d');
+    ctx.strokeStyle = 'rgba(237,227,208,0.4)';
+    ctx.lineWidth = 1;
+    const step = size/12;
+    for(let i=1;i<12;i++){
+      ctx.beginPath(); ctx.moveTo(i*step,0); ctx.lineTo(i*step,size); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,i*step); ctx.lineTo(size,i*step); ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(237,227,208,0.7)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(size/2,0); ctx.lineTo(size/2,size); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,size/2); ctx.lineTo(size,size/2); ctx.stroke();
+    return new THREE.CanvasTexture(cnv);
+  }
+  const scaleMat = new THREE.MeshBasicMaterial({
+    map: makeScaleTexture(), transparent:true, opacity:0.55, side:THREE.DoubleSide, depthWrite:false
+  });
+  const scaleMesh = new THREE.Mesh(new THREE.CircleGeometry(1.32, 48), scaleMat);
+  scaleMesh.rotation.y = Math.PI/2;
+  scaleMesh.position.x = SCREEN_X - 0.025;
+  scene.add(scaleMesh);
+
+  function makeGlowTexture(colorHex){
+    const size = 128;
+    const cnv = document.createElement('canvas'); cnv.width = size; cnv.height = size;
+    const ctx = cnv.getContext('2d');
+    const grad = ctx.createRadialGradient(size/2,size/2,0, size/2,size/2,size/2);
+    grad.addColorStop(0, colorHex + 'ff');
+    grad.addColorStop(0.35, colorHex + 'aa');
+    grad.addColorStop(1, colorHex + '00');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,size,size);
+    return new THREE.CanvasTexture(cnv);
+  }
+  const glowTex = makeGlowTexture('#4bff3a');
+  const impactSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTex, transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false
+  }));
+  impactSprite.scale.set(1.1,1.1,1);
+  impactSprite.position.set(SCREEN_X-0.02, 0, 0);
+  scene.add(impactSprite);
+
+  /* ---------------------------------------------------------------------
+     PLAQUES DE DÉVIATION
+  --------------------------------------------------------------------- */
+  const platesGroup = new THREE.Group();
+  platesGroup.visible = false;
+  scene.add(platesGroup);
+
+  const plateGeo = new THREE.BoxGeometry(PLATE_X1-PLATE_X0, 0.1, 2.0);
+  const topPlateMat = new THREE.MeshStandardMaterial({ color:0xd7dadc, metalness:0.85, roughness:0.3, emissive:0x000000 });
+  const botPlateMat = new THREE.MeshStandardMaterial({ color:0xd7dadc, metalness:0.85, roughness:0.3, emissive:0x000000 });
+  const topPlate = new THREE.Mesh(plateGeo, topPlateMat);
+  topPlate.position.set(0, PLATE_Y, 0);
+  const botPlate = new THREE.Mesh(plateGeo, botPlateMat);
+  botPlate.position.set(0, -PLATE_Y, 0);
+  platesGroup.add(topPlate, botPlate);
+
+  function makeLabelSprite(){
+    const size = 128;
+    const cnv = document.createElement('canvas'); cnv.width = size; cnv.height = size;
+    const tex = new THREE.CanvasTexture(cnv);
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthTest:false });
+    const spr = new THREE.Sprite(mat);
+    spr.scale.set(0.42,0.42,1);
+    spr._canvas = cnv; spr._ctx = cnv.getContext('2d'); spr._tex = tex;
+    return spr;
+  }
+  function setLabel(sprite, text, colorHex){
+    const ctx = sprite._ctx, size = sprite._canvas.width;
+    ctx.clearRect(0,0,size,size);
+    ctx.beginPath(); ctx.arc(size/2,size/2,size*0.42,0,Math.PI*2);
+    ctx.fillStyle = 'rgba(10,8,6,0.6)'; ctx.fill();
+    ctx.lineWidth = 5; ctx.strokeStyle = colorHex; ctx.stroke();
+    ctx.fillStyle = colorHex;
+    ctx.font = 'bold 76px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, size/2, size/2 + 6);
+    sprite._tex.needsUpdate = true;
+  }
+  const topLabel = makeLabelSprite();
+  const botLabel = makeLabelSprite();
+  topLabel.position.set(0, PLATE_Y+0.32, 0);
+  botLabel.position.set(0, -PLATE_Y-0.32, 0);
+  platesGroup.add(topLabel, botLabel);
+
+  function refreshPlateLabels(){
+    if(state.polarity === 1){
+      setLabel(topLabel, '+', '#ff5a4d');
+      setLabel(botLabel, '\u2212', '#4da6ff');
+    } else {
+      setLabel(topLabel, '\u2212', '#4da6ff');
+      setLabel(botLabel, '+', '#ff5a4d');
+    }
+  }
+  refreshPlateLabels();
+
+  /* ---------------------------------------------------------------------
+     FAISCEAU — COURBE DE DÉVIATION
+  --------------------------------------------------------------------- */
+  function beamY(x, deflAmt){
+    if(x <= PLATE_X0) return 0;
+    if(x >= PLATE_X1){
+      const slope = (2*deflAmt) / (PLATE_X1 - PLATE_X0);
+      return deflAmt + slope * (x - PLATE_X1);
+    }
+    const t = (x - PLATE_X0) / (PLATE_X1 - PLATE_X0);
+    return deflAmt * t * t;
+  }
+
+  /* ---- Mode "ligne" : deux tubes concentriques (noyau + halo) ---- */
+  const beamLineGroup = new THREE.Group();
+  scene.add(beamLineGroup);
+  const beamCoreMat = new THREE.MeshBasicMaterial({ color:0x9dffb0, transparent:true, opacity:0.95, blending:THREE.AdditiveBlending, depthWrite:false });
+  const beamHaloMat = new THREE.MeshBasicMaterial({ color:0x4bff3a, transparent:true, opacity:0.32, blending:THREE.AdditiveBlending, depthWrite:false });
+  let beamCoreMesh = null, beamHaloMesh = null;
+
+  function rebuildBeamLine(currentX, deflAmt){
+    const nPoints = Math.max(8, Math.floor(50 * Math.max(0.02, (currentX-BEAM_X_START)/(BEAM_X_END-BEAM_X_START))));
+    const pts = [];
+    for(let i=0;i<nPoints;i++){
+      const x = THREE.MathUtils.lerp(BEAM_X_START, currentX, i/(nPoints-1));
+      pts.push(new THREE.Vector3(x, beamY(x, deflAmt), 0));
+    }
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const coreGeo = new THREE.TubeGeometry(curve, Math.max(16, nPoints), 0.045, 8, false);
+    const haloGeo = new THREE.TubeGeometry(curve, Math.max(16, nPoints), 0.16, 8, false);
+    if(beamCoreMesh){ beamCoreMesh.geometry.dispose(); beamCoreMesh.geometry = coreGeo; }
+    else { beamCoreMesh = new THREE.Mesh(coreGeo, beamCoreMat); beamLineGroup.add(beamCoreMesh); }
+    if(beamHaloMesh){ beamHaloMesh.geometry.dispose(); beamHaloMesh.geometry = haloGeo; }
+    else { beamHaloMesh = new THREE.Mesh(haloGeo, beamHaloMat); beamLineGroup.add(beamHaloMesh); }
+  }
+
+  /* ---- Mode "particules" : sphères instanciées, sans traînée ---- */
+  const N_PARTICLES = 42;
+  const particlePhases = new Float32Array(N_PARTICLES);
+  for(let i=0;i<N_PARTICLES;i++){
+    particlePhases[i] = i/N_PARTICLES + (Math.random()-0.5)*(1/N_PARTICLES)*0.6;
+  }
+  const sphereGeo = new THREE.SphereGeometry(1, 10, 8);
+  const particleCoreMat = new THREE.MeshBasicMaterial({ color:0xbaffc4, transparent:true, opacity:0.95, blending:THREE.AdditiveBlending, depthWrite:false });
+  const particleHaloMat = new THREE.MeshBasicMaterial({ color:0x4bff3a, transparent:true, opacity:0.4, blending:THREE.AdditiveBlending, depthWrite:false });
+  const particlesCore = new THREE.InstancedMesh(sphereGeo, particleCoreMat, N_PARTICLES);
+  const particlesHalo = new THREE.InstancedMesh(sphereGeo, particleHaloMat, N_PARTICLES);
+  scene.add(particlesCore, particlesHalo);
+  const dummy = new THREE.Object3D();
+  const PARTICLE_LOOP_S = 0.9;
+
+  function updateParticles(dt, progress, deflAmt){
+    for(let i=0;i<N_PARTICLES;i++){
+      particlePhases[i] = (particlePhases[i] + dt/PARTICLE_LOOP_S) % 1;
+      const t = particlePhases[i];
+      const visible = t <= progress;
+      const x = THREE.MathUtils.lerp(BEAM_X_START, BEAM_X_END, t);
+      const y = beamY(x, deflAmt);
+      dummy.position.set(x, y, 0);
+      dummy.scale.setScalar(visible ? 0.075 : 0.0001);
+      dummy.updateMatrix();
+      particlesCore.setMatrixAt(i, dummy.matrix);
+      dummy.scale.setScalar(visible ? 0.16 : 0.0001);
+      dummy.updateMatrix();
+      particlesHalo.setMatrixAt(i, dummy.matrix);
+    }
+    particlesCore.instanceMatrix.needsUpdate = true;
+    particlesHalo.instanceMatrix.needsUpdate = true;
+  }
+
+  /* ---------------------------------------------------------------------
+     TEXTE DYNAMIQUE
+  --------------------------------------------------------------------- */
+  const captionEl = document.getElementById('caption');
+  function updateCaption(){
+    let txt;
+    if(!state.powerOn){
+      txt = "Dispositif éteint. Aucun faisceau ne circule dans le tube.";
+    } else if(!state.platesVisible){
+      txt = "Sous très haute tension, le gaz résiduel s'ionise et arrache des électrons à la cathode : un faisceau rectiligne, rendu visible en vert fluorescent, traverse le tube jusqu'à l'écran.";
+    } else if(!state.voltageOn){
+      txt = "Les plaques de déviation sont en place, mais aucune tension n'est appliquée : le faisceau reste parfaitement rectiligne.";
+    } else {
+      txt = "Flux vert = particules arrachées aux atomes de la cathode.";
+    }
+    captionEl.textContent = txt;
+  }
+  updateCaption();
+
+  /* ---------------------------------------------------------------------
+     BOUTONS
+  --------------------------------------------------------------------- */
+  const btnPower   = document.getElementById('btnPower');
+  const btnMode    = document.getElementById('btnMode');
+  const btnPlates  = document.getElementById('btnPlates');
+  const btnVoltage = document.getElementById('btnVoltage');
+  const btnInvert  = document.getElementById('btnInvert');
+  const btnLegend  = document.getElementById('btnLegend');
+  const btnConclusion = document.getElementById('btnConclusion');
+  const legendEl = document.querySelector('.legend');
+  const conclusionOverlay = document.getElementById('conclusionOverlay');
+  const btnCloseConclusion = document.getElementById('btnCloseConclusion');
+
+  /* Étiquettes flottantes pointant vers les objets du tube, reliées par un
+     trait plutôt que par une pointe de bulle (qui ne suivait pas toujours
+     l'objet une fois l'étiquette recalée pour rester dans l'écran). */
+  const tubeTags = {
+    cathode: document.getElementById('tagCathode'),
+    anode:   document.getElementById('tagAnode'),
+    plates:  document.getElementById('tagPlates'),
+    screen:  document.getElementById('tagScreen')
+  };
+  const tubeTagLines = {
+    cathode: document.getElementById('lineCathode'),
+    anode:   document.getElementById('lineAnode'),
+    plates:  document.getElementById('linePlates'),
+    screen:  document.getElementById('lineScreen')
+  };
+  const tagAnchors = {
+    cathode: new THREE.Vector3(CATHODE_X, tubeRadiusAt(CATHODE_X) + 0.3, 0),
+    anode:   new THREE.Vector3(ANODE_X, tubeRadiusAt(ANODE_X) + 0.3, 0),
+    plates:  new THREE.Vector3(0, PLATE_Y + 0.55, 0),
+    screen:  new THREE.Vector3(SCREEN_X, tubeRadiusAt(SCREEN_X) + 0.3, 0)
+  };
+  function hideTag(el, lineEl){
+    el.classList.remove('visible');
+    lineEl.classList.remove('visible');
+  }
+  function updateTagPos(el, lineEl, worldPos){
+    const v = worldPos.clone().project(camera);
+    const rect = dom.getBoundingClientRect();
+    const w = rect.width, h = rect.height;
+    const x = (v.x*0.5+0.5)*w;
+    const y = (-v.y*0.5+0.5)*h;
+    const inFront = v.z < 1 && x>4 && x<w-4 && y>4 && y<h-4;
+    if(!inFront){ hideTag(el, lineEl); return; }
+    const elW = el.offsetWidth || 150, elH = el.offsetHeight || 26;
+    // La boîte reste posée un peu au-dessus du point réel, recalée pour
+    // tenir dans l'écran — mais le trait, lui, vise toujours ce point exact.
+    const xC = Math.max(elW/2+6, Math.min(w-elW/2-6, x));
+    const yC = Math.max(elH/2+6, Math.min(h-elH/2-6, y-38));
+    el.style.left = xC+'px'; el.style.top = yC+'px';
+    el.classList.add('visible');
+
+    const halfW = elW/2, halfH = elH/2;
+    const lx = Math.max(xC-halfW, Math.min(xC+halfW, x));
+    const ly = Math.max(yC-halfH, Math.min(yC+halfH, y));
+    lineEl.setAttribute('x1', lx); lineEl.setAttribute('y1', ly);
+    lineEl.setAttribute('x2', x);  lineEl.setAttribute('y2', y);
+    lineEl.classList.add('visible');
+  }
+  function updateTubeTags(){
+    if(!legendVisible){
+      hideTag(tubeTags.cathode, tubeTagLines.cathode);
+      hideTag(tubeTags.anode, tubeTagLines.anode);
+      hideTag(tubeTags.plates, tubeTagLines.plates);
+      hideTag(tubeTags.screen, tubeTagLines.screen);
+      return;
+    }
+    updateTagPos(tubeTags.cathode, tubeTagLines.cathode, tagAnchors.cathode);
+    updateTagPos(tubeTags.anode, tubeTagLines.anode, tagAnchors.anode);
+    updateTagPos(tubeTags.screen, tubeTagLines.screen, tagAnchors.screen);
+    if(state.platesVisible){ updateTagPos(tubeTags.plates, tubeTagLines.plates, tagAnchors.plates); }
+    else { hideTag(tubeTags.plates, tubeTagLines.plates); }
+  }
+
+  let legendVisible = false;
+  let conclusionVisible = false;
+
+  function refreshButtons(){
+    btnPower.textContent   = state.powerOn ? "⏻ Éteindre" : "⏻ Allumer";
+    btnPower.classList.toggle('on', state.powerOn);
+
+    btnMode.textContent    = state.beamMode === 'line' ? "◐ Particules" : "◉ Rayon";
+    btnMode.classList.toggle('on', state.beamMode === 'particles');
+
+    btnPlates.textContent  = state.platesVisible ? "▭ Retirer plaques" : "▭ Placer plaques";
+    btnPlates.classList.toggle('on', state.platesVisible);
+
+    btnVoltage.disabled = !state.platesVisible;
+    btnVoltage.textContent = state.voltageOn ? "⚡ Couper la tension" : "⚡ Appliquer la tension";
+    btnVoltage.classList.toggle('on', state.voltageOn);
+
+    btnInvert.disabled = !state.platesVisible;
+
+    btnLegend.textContent = legendVisible ? "▤ Masquer la légende" : "▤ Afficher la légende";
+    btnLegend.classList.toggle('on', legendVisible);
+
+    btnConclusion.classList.toggle('on', conclusionVisible);
+  }
+  refreshButtons();
+
+  btnPower.addEventListener('click', () => {
+    state.powerOn = !state.powerOn;
+    anim.progressTarget = state.powerOn ? 1 : 0;
+    anim.sparkTarget = state.powerOn ? 1 : 0;
+    refreshButtons(); updateCaption();
+  });
+
+  btnMode.addEventListener('click', () => {
+    state.beamMode = state.beamMode === 'line' ? 'particles' : 'line';
+    refreshButtons(); updateCaption();
+  });
+
+  btnPlates.addEventListener('click', () => {
+    state.platesVisible = !state.platesVisible;
+    platesGroup.visible = state.platesVisible;
+    if(!state.platesVisible){
+      state.voltageOn = false;
+      anim.deflTarget = 0;
+      anim.plateGlowTarget = 0;
+    }
+    refreshButtons(); updateCaption();
+  });
+
+  btnVoltage.addEventListener('click', () => {
+    if(!state.platesVisible) return;
+    state.voltageOn = !state.voltageOn;
+    anim.deflTarget = state.voltageOn ? state.polarity * MAX_DEFL : 0;
+    anim.plateGlowTarget = state.voltageOn ? 1 : 0;
+    refreshButtons(); updateCaption();
+  });
+
+  btnInvert.addEventListener('click', () => {
+    if(!state.platesVisible) return;
+    state.polarity *= -1;
+    refreshPlateLabels();
+    if(state.voltageOn){ anim.deflTarget = state.polarity * MAX_DEFL; }
+    updateCaption();
+  });
+
+  function setLegendVisible(v){
+    legendVisible = v;
+    legendEl.classList.toggle('visible', v);
+    refreshButtons();
+  }
+  btnLegend.addEventListener('click', () => setLegendVisible(!legendVisible));
+
+  function setConclusionVisible(v){
+    conclusionVisible = v;
+    conclusionOverlay.classList.toggle('visible', v);
+    refreshButtons();
+  }
+  btnConclusion.addEventListener('click', () => setConclusionVisible(!conclusionVisible));
+  btnCloseConclusion.addEventListener('click', () => setConclusionVisible(false));
+  conclusionOverlay.addEventListener('click', (e) => {
+    if(e.target === conclusionOverlay) setConclusionVisible(false);
+  });
+  window.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && conclusionVisible) setConclusionVisible(false);
+  });
+
+  /* ---------------------------------------------------------------------
+     SIÈSTE — petite pause animée qui se termine par un screamer
+  --------------------------------------------------------------------- */
+  const btnSieste = document.getElementById('btnSieste');
+  const siesteOverlay = document.getElementById('siesteOverlay');
+  const siesteMoon = document.getElementById('siesteMoon');
+  const siesteZs = document.getElementById('siesteZs');
+  const screamerOverlay = document.getElementById('screamerOverlay');
+  let siestePlaying = false;
+
+  function playSieste(){
+    if(siestePlaying) return;
+    siestePlaying = true;
+    btnSieste.disabled = true;
+    btnSieste.classList.add('on');
+
+    siesteMoon.classList.remove('hide');
+    siesteOverlay.classList.add('active');
+    siesteZs.classList.add('active');
+    requestAnimationFrame(() => siesteMoon.classList.add('active'));
+
+    setTimeout(() => {
+      // Screamer : très bref, sans transition, pour l'effet de surprise
+      screamerOverlay.classList.add('flash');
+      setTimeout(() => {
+        screamerOverlay.classList.remove('flash');
+        siesteMoon.classList.remove('active');
+        siesteMoon.classList.add('hide');
+        siesteZs.classList.remove('active');
+        siesteOverlay.classList.remove('active');
+        setTimeout(() => {
+          siesteMoon.classList.remove('hide');
+          btnSieste.disabled = false;
+          btnSieste.classList.remove('on');
+          siestePlaying = false;
+        }, 700);
+      }, 180);
+    }, 3600);
+  }
+  btnSieste.addEventListener('click', playSieste);
+
+  /* ---------------------------------------------------------------------
+     BOUCLE D'ANIMATION
+  --------------------------------------------------------------------- */
+  const growDur = reducedMotion ? 0.25 : 1.3;
+  const shrinkDur = reducedMotion ? 0.2 : 0.5;
+  let lastT = performance.now();
+
+  function tick(now){
+    const dt = Math.min(0.05, (now - lastT)/1000);
+    lastT = now;
+
+    // Progression du faisceau (croissance / extinction)
+    if(anim.progress < anim.progressTarget){
+      anim.progress = Math.min(anim.progressTarget, anim.progress + dt/growDur);
+    } else if(anim.progress > anim.progressTarget){
+      anim.progress = Math.max(anim.progressTarget, anim.progress - dt/shrinkDur);
+    }
+
+    // Déviation (lissage exponentiel)
+    anim.defl += (anim.deflTarget - anim.defl) * (1 - Math.exp(-dt*4));
+    anim.plateGlow += (anim.plateGlowTarget - anim.plateGlow) * (1 - Math.exp(-dt*4));
+    anim.spark += (anim.sparkTarget - anim.spark) * (1 - Math.exp(-dt*3));
+
+    // Cathode : pas de filament chauffé — sous très haute tension, le gaz
+    // résiduel s'ionise et les ions viennent arracher des électrons à la
+    // cathode. On rend ça par une décharge froide, légèrement instable,
+    // plutôt que par un métal qui rougit.
+    const sparkFlicker = 0.82 + 0.10*Math.sin(now*0.021) + 0.09*Math.sin(now*0.083+2.1) + 0.07*(Math.random()-0.5);
+    cathodeMat.emissive.setHex(0x9b8cff);
+    cathodeMat.emissiveIntensity = anim.spark * 1.05 * sparkFlicker;
+    cathodeLight.intensity = anim.spark * 1.3 * sparkFlicker;
+
+    // Anode : léger halo lorsque le dispositif fonctionne
+    anodeGlowMat.opacity = anim.progress * 0.35;
+
+    // Plaques : glow de charge
+    const posColor = 0xff5a4d, negColor = 0x4da6ff;
+    topPlateMat.emissive.setHex(state.polarity === 1 ? posColor : negColor);
+    botPlateMat.emissive.setHex(state.polarity === 1 ? negColor : posColor);
+    topPlateMat.emissiveIntensity = anim.plateGlow * 0.55;
+    botPlateMat.emissiveIntensity = anim.plateGlow * 0.55;
+
+    // Faisceau
+    const showBeam = anim.progress > 0.015;
+    beamLineGroup.visible = showBeam && state.beamMode === 'line';
+    particlesCore.visible = showBeam && state.beamMode === 'particles';
+    particlesHalo.visible = showBeam && state.beamMode === 'particles';
+
+    if(showBeam && state.beamMode === 'line'){
+      const currentX = THREE.MathUtils.lerp(BEAM_X_START, BEAM_X_END, anim.progress);
+      rebuildBeamLine(currentX, anim.defl);
+    }
+    if(state.beamMode === 'particles'){
+      updateParticles(dt, anim.progress, anim.defl);
+    }
+
+    // Impact sur l'écran
+    const hitStrength = THREE.MathUtils.smoothstep(anim.progress, 0.92, 1.0);
+    impactSprite.material.opacity = hitStrength * 0.9;
+    impactSprite.position.y = beamY(BEAM_X_END, anim.defl);
+    screenGlowLight.intensity = hitStrength * 1.6;
+    screenGlowLight.position.set(SCREEN_X-0.3, impactSprite.position.y, 0);
+
+    // Caméra
+    if(resettingCam){
+      cam.radius += (camDefault.radius - cam.radius) * 0.08;
+      cam.theta  += (camDefault.theta  - cam.theta)  * 0.08;
+      cam.phi    += (camDefault.phi    - cam.phi)    * 0.08;
+      if(Math.abs(cam.radius-camDefault.radius)<0.02 && Math.abs(cam.theta-camDefault.theta)<0.01 && Math.abs(cam.phi-camDefault.phi)<0.01){
+        resettingCam = false;
+      }
+    } else if(autoRotate && !dragging){
+      idleTime += dt;
+      if(idleTime > 1.2){ cam.theta += dt * 0.045; }
+    }
+    updateCameraPosition();
+    updateTubeTags();
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // masque le bouton de réinitialisation caméra tant qu'on n'a pas interagi une fois avec la vue
+  let camBtnRevealed = false;
+  function revealCamBtn(){
+    if(!camBtnRevealed){ camBtnRevealed = true; camResetBtn.style.display = 'flex'; }
+  }
+  dom.addEventListener('pointerdown', revealCamBtn);
+  dom.addEventListener('wheel', revealCamBtn);
+
+})();
+</script>
+</body>
+</html>
