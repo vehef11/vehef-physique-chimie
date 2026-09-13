@@ -1,0 +1,2623 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Déterminer la masse volumique de l'air</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --bg:#E8E3D6; --panel:#F7F4EA; --panel2:#FBF9F2; --ink:#2B2820; --ink-soft:#6b6656;
+  --line:#cec5ab; --grid: rgba(43,40,32,.055);
+  --sage:#5C7A5E; --sage-dark:#3f5a41; --brick:#A0503F; --brick-dark:#7c3c2f;
+  --font-display: "Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --font-body: -apple-system,"Segoe UI",system-ui,sans-serif;
+  --font-mono: "SFMono-Regular",Consolas,"Liberation Mono","Courier New",monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background-color:var(--bg);
+  background-image:
+    repeating-linear-gradient(var(--grid) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 28px);
+  color:var(--ink); font-family:var(--font-body); min-height:100vh; padding:14px 10px 50px;
+}
+.app{max-width:640px;margin:0 auto;}
+.cover{max-width:460px; margin:0 auto; text-align:center; padding:6px 6px 4px;}
+.cover .eyebrow{font-family:var(--font-mono); letter-spacing:.14em; text-transform:uppercase; font-size:.66rem; color:var(--ink-soft);}
+.cover h1{font-family:var(--font-display); font-weight:600; font-size:clamp(.68rem,3.9vw,1.05rem); white-space:nowrap; margin:.2em 0 .1em; line-height:1.15;}
+.cover .sub{font-size:.8rem; color:var(--ink-soft); margin-bottom:8px;}
+
+.tabs{
+  display:flex; flex-wrap:nowrap; justify-content:stretch;
+  gap:2px; padding:0; margin:6px auto 0; width:100%; max-width:460px;
+}
+.tabs button{
+  flex:1 1 0; min-width:0; font-family:var(--font-mono); font-size:.6rem; font-weight:700;
+  border:1px solid var(--line); border-bottom:none; background:var(--panel2); color:var(--ink-soft);
+  padding:8px 2px 7px; border-radius:8px 8px 0 0; cursor:pointer;
+  transform:translateY(4px); transition:transform .2s, background .2s, color .2s;
+  white-space:normal; line-height:1.15; text-align:center; overflow-wrap:break-word;
+}
+.tabs button.active{background:var(--panel); color:var(--ink); transform:translateY(0); box-shadow:0 -2px 0 inset var(--sage);}
+
+main{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 12px 18px;}
+.tab{display:none; animation:fadeIn .35s ease;}
+.tab.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+h2{font-family:var(--font-display); font-size:1.08rem; margin:0 0 4px;}
+.hint{font-size:.82rem; color:var(--ink-soft); margin:0 0 10px; line-height:1.4;}
+
+.note-bubble{
+  background:#fff6d8; border:1px solid #e0c34a; border-radius:10px; padding:10px 14px;
+  font-size:.82rem; line-height:1.4; color:#6b5a10; max-width:480px; margin:10px auto 0;
+}
+.note-bubble-neon{
+  font-size:1.05rem; font-weight:700; max-width:520px;
+  text-shadow:0 0 3px rgba(224,195,74,.6), 0 0 7px rgba(224,195,74,.35);
+}
+.note-bubble-oneline{
+  white-space:nowrap; overflow-x:hidden; max-width:100%;
+  font-size:clamp(.5rem, 3.1vw, .85rem);
+}
+
+.prop-experiments{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-top:14px; margin-bottom:8px; }
+.prop-exp{ background:var(--panel2); border:1px solid var(--line); border-radius:14px; padding:14px 18px; flex:1 1 220px; max-width:280px; text-align:center; }
+.prop-exp-title{ font-size:1rem; margin-bottom:6px; color:var(--ink-soft); }
+.prop-exp-title b{ color:var(--ink); }
+.prop-balloon-stage{ position:relative; height:175px; }
+.prop-balloon{
+  position:absolute; left:50%; bottom:12px; width:56px; z-index:2;
+  transform:translate(-50%, -90px) scale(0.5); opacity:0;
+}
+.prop-balloon svg{ display:block; width:100%; height:auto; filter:drop-shadow(0 3px 4px rgba(0,0,0,.2)); }
+.prop-balloon .balloon-full{ display:none; }
+.prop-balloon.inflated .balloon-flat{ display:none; }
+.prop-balloon.inflated .balloon-full{ display:block; }
+.prop-scale-display{
+  position:absolute; left:50%; top:0; transform:translateX(-50%);
+  background:#1b1b1b; color:#7CFC9A; font-family:var(--font-mono); font-weight:700; font-size:.85rem;
+  padding:4px 12px; border-radius:6px; min-width:78px; text-align:center; z-index:3;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.5);
+}
+.prop-liter-badge{
+  position:absolute; left:82%; top:85px; transform:translate(-50%,-50%);
+  background:var(--sage); color:#fff; font-weight:800; font-size:.7rem;
+  padding:3px 9px; border-radius:999px; opacity:0; transition:opacity .4s ease; z-index:3; white-space:nowrap;
+}
+.prop-scale-base{
+  position:absolute; left:50%; bottom:0; transform:translateX(-50%); z-index:0;
+  width:120px; height:16px; border-radius:7px;
+  background:linear-gradient(#eceef0,#c9ccd1); box-shadow:0 2px 5px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.7);
+}
+.prop-scale-base::after{
+  content:''; position:absolute; left:50%; top:100%; transform:translateX(-50%);
+  width:70px; height:5px; background:rgba(0,0,0,.12); border-radius:0 0 5px 5px;
+}
+.prop-readout{ font-family:var(--font-mono); font-size:.86rem; margin-top:8px; color:var(--ink-soft); line-height:1.6; min-height:1.5em; }
+.prop-readout b{ color:var(--ink); }
+
+.prop-slider-block{ width:100%; margin:16px auto 4px; box-sizing:border-box; }
+.prop-slider-block .val-slider{ width:100%; }
+.prop-mix-readout{ text-align:center; font-family:var(--font-mono); font-size:.9rem; margin-top:10px; line-height:1.6; }
+
+.stage3d{
+  position:relative; width:100%; max-width:460px; aspect-ratio:4/3; margin:0 auto 10px;
+  background:#EDE8DC; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+}
+.stage3d canvas{width:100%; height:100%; display:block; cursor:grab; touch-action:none;}
+.orbit-hint{
+  position:absolute; left:8px; bottom:8px; font-size:.6rem; font-family:var(--font-mono);
+  color:var(--ink-soft); background:rgba(255,255,255,.65); padding:3px 7px; border-radius:6px; pointer-events:none;
+}
+.bottle-label-overlay{ position:absolute; inset:0; z-index:5; pointer-events:none; }
+.bottle-label-overlay button{
+  position:absolute; transform:translate(-50%,-100%); pointer-events:auto;
+  font-family:var(--font-mono); font-weight:800; font-size:.76rem; color:#fff;
+  background:var(--sage-dark); border:2px solid #fff; border-radius:999px; padding:6px 12px;
+  cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.35); white-space:nowrap;
+}
+.bottle-label-overlay button:hover{ background:var(--sage); }
+.bottle-label-overlay button::after{
+  content:''; position:absolute; left:50%; top:100%; transform:translateX(-50%);
+  border:6px solid transparent; border-top-color:var(--sage-dark);
+}
+
+.readout{
+  font-family:var(--font-mono); font-size:.76rem; background:var(--panel2); border:1px dashed var(--line);
+  border-radius:8px; padding:7px 9px; margin-bottom:10px; min-height:1.3em; color:var(--ink-soft);
+  display:none;
+}
+.readout.show{ display:block; }
+.readout b{color:var(--ink); font-weight:700;}
+
+.action-row{display:flex; flex-direction:column; align-items:center; gap:7px;}
+.main-action{
+  width:100%; max-width:420px; font-family:var(--font-body); font-size:.9rem; font-weight:700;
+  padding:13px 14px; min-height:46px; border-radius:12px; border:1.5px solid var(--sage-dark);
+  background:var(--sage); color:#fdfbf4; cursor:pointer; transition:transform .12s, opacity .2s, background .2s;
+}
+.main-action:active{transform:scale(.97);}
+.main-action:disabled{opacity:.45; cursor:not-allowed; background:var(--panel2); color:var(--ink-soft); border-color:var(--line);}
+.main-action.warn{background:var(--brick); border-color:var(--brick-dark);}
+.aux-row{display:flex; gap:8px; justify-content:center; flex-wrap:wrap;}
+.icon-btn{
+  font-family:var(--font-body); font-size:.72rem; font-weight:600; padding:7px 12px; border-radius:20px;
+  border:1px solid var(--line); background:var(--panel2); color:var(--ink-soft); cursor:pointer;
+}
+.icon-btn.warn{border-color:var(--brick); color:var(--brick-dark); display:none;}
+
+.puzzle-grid{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:6px; max-width:520px;}
+.puzzle-grid .puzzle-btn{flex:1 1 150px; max-width:230px; display:inline-flex; align-items:center; justify-content:center; gap:6px;}
+.puzzle-grid .puzzle-btn:disabled{opacity:.4; cursor:not-allowed;}
+.puzzle-num{
+  display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;
+  width:18px; height:18px; border-radius:50%; background:var(--sage-dark); color:#fff;
+  font-family:var(--font-mono); font-size:.65rem; font-weight:800;
+}
+
+.explosion-flash{
+  position:absolute; inset:0; z-index:7; pointer-events:none; opacity:0;
+  background:radial-gradient(circle, rgba(255,214,140,.95), rgba(255,90,40,.65) 42%, rgba(0,0,0,0) 72%);
+}
+.explosion-flash.flash{ animation: explodeFlash .5s ease-out; }
+@keyframes explodeFlash{ 0%{opacity:1;} 100%{opacity:0;} }
+
+.scene-dim{ position:absolute; inset:0; background:#000; opacity:0; transition:opacity .6s ease; pointer-events:none; z-index:5; }
+.scene-dim.show{ opacity:.62; }
+.scene-intro-msg{
+  position:absolute; left:9%; right:9%; top:50%; transform:translateY(-50%);
+  font-family:var(--font-body); font-weight:800; font-size:1rem; line-height:1.4; text-align:center;
+  color:#fff; z-index:6; opacity:0; transition:opacity .6s ease; pointer-events:none;
+}
+.scene-intro-msg.show{ opacity:1; }
+
+.scene-msg-box{
+  position:absolute; left:7%; right:7%; top:50%; transform:translateY(-50%);
+  z-index:8; opacity:0; pointer-events:none; transition:opacity .4s ease;
+}
+.scene-msg-box.show{ opacity:1; pointer-events:auto; }
+.scene-msg-box .msg-text{
+  position:relative; font-family:var(--font-body); font-weight:800; font-size:.92rem; line-height:1.4;
+  text-align:center; color:#fff; background:rgba(20,20,16,.72); border:1px solid rgba(255,255,255,.25);
+  border-radius:12px; padding:16px 30px;
+}
+.scene-msg-box .msg-close{
+  position:absolute; top:-9px; right:-9px; width:24px; height:24px; border-radius:50%;
+  background:#c73a24; color:#fff; border:2px solid #fff; font-family:var(--font-body); font-weight:800;
+  font-size:.78rem; line-height:20px; text-align:center; cursor:pointer; pointer-events:auto;
+}
+
+.scene-banner{
+  position:absolute; left:6%; right:6%; top:50%; transform:translateY(-50%) scale(.92);
+  font-family:var(--font-body); font-weight:800; font-size:.86rem; line-height:1.4; text-align:center;
+  color:#fff; background:rgba(110,22,10,.85); border:1px solid rgba(255,255,255,.25);
+  border-radius:12px; padding:13px 14px; z-index:6; opacity:0; pointer-events:none;
+  transition:opacity .35s ease, transform .35s ease;
+}
+.scene-banner.show{ opacity:1; transform:translateY(-50%) scale(1); }
+.scene-banner b{ display:block; font-size:1.15em; margin-bottom:3px; }
+
+.scene-neon-msg{
+  position:absolute; left:8%; right:8%; top:50%; transform:translateY(-50%);
+  font-family:var(--font-body); font-weight:800; font-size:1.15rem; line-height:1.3; text-align:center;
+  color:#dff6ff; z-index:6; opacity:0; pointer-events:none;
+  transition:opacity .4s ease;
+  text-shadow: 0 0 4px rgba(110,210,255,.9), 0 0 9px rgba(70,180,255,.55);
+}
+.scene-neon-msg.show{ opacity:1; }
+
+.nap-moon{
+  position:absolute; left:14px; top:-60px; font-size:2.1rem; z-index:6; pointer-events:none;
+  transition:top 1.3s ease;
+  filter:drop-shadow(0 0 6px rgba(255,255,200,.65));
+}
+.nap-moon.show{ top:10px; }
+.nap-zzz{
+  position:absolute; font-family:var(--font-body); font-weight:800; color:#eaf0ff; z-index:6; pointer-events:none;
+  opacity:0; transition:opacity .4s ease, transform 1.6s ease;
+  text-shadow:0 0 5px rgba(200,220,255,.6);
+}
+
+.formula-modal{
+  position:fixed; inset:0; background:rgba(20,18,12,.55); z-index:50;
+  display:none; align-items:center; justify-content:center; padding:24px;
+}
+.formula-modal.show{ display:flex; }
+.formula-modal-card{ width:100%; max-width:360px; cursor:pointer; filter:drop-shadow(0 8px 20px rgba(0,0,0,.35)); }
+.formula-modal-card svg{ width:100%; height:auto; display:block; }
+
+.notebook{
+  background:repeating-linear-gradient(var(--panel2) 0 31px, var(--line) 31px 32px);
+  border:1px solid var(--line); border-left:3px solid var(--brick); border-radius:6px; padding:10px 14px; margin-bottom:14px;
+}
+.notebook-line{display:flex; justify-content:space-between; gap:10px; font-size:.85rem; line-height:32px;}
+.notebook-line .lab{color:var(--ink-soft);}
+.notebook-line .val{font-family:var(--font-mono); font-weight:700;}
+.val-input{
+  font-family:var(--font-mono); font-weight:700; font-size:.85rem; width:120px; text-align:right;
+  border:none; border-bottom:1px dashed var(--ink-soft); background:transparent; color:var(--ink); padding:2px 2px;
+}
+.val-input:focus{outline:none; border-bottom:1.5px solid var(--sage-dark);}
+.formula{font-family:var(--font-mono); text-align:center; font-size:1rem; background:var(--panel2); border:1px solid var(--line); border-radius:8px; padding:10px; margin:12px 0;}
+textarea{width:100%; min-height:90px; font-family:var(--font-body); font-size:.85rem; padding:10px; border-radius:8px; border:1px solid var(--line); background:repeating-linear-gradient(var(--panel2) 0 26px, var(--line) 26px 27px); resize:vertical;}
+.result-badge{display:inline-block; margin-top:8px; padding:6px 12px; border-radius:20px; font-family:var(--font-mono); font-weight:700; font-size:.9rem; background:var(--sage); color:#fff; opacity:0; transform:scale(.9); transition:opacity .4s, transform .4s;}
+.result-badge.show{opacity:1; transform:scale(1);}
+.result-badge.warn{background:var(--brick);}
+
+.ghost-stage{ background:radial-gradient(circle at 30% 25%, #333c30, #14170f) !important; }
+.ghost-dim{ position:absolute; inset:0; background:#000; opacity:0; transition:opacity .6s ease; pointer-events:none; z-index:2; }
+.ghost-dim.on{ opacity:.72; }
+.ghost-figure{ position:absolute; top:50%; left:-110px; width:90px; height:100px; transform:translateY(-50%); z-index:3; display:none; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)); }
+.screamer-overlay{ position:fixed; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:9999; opacity:0; pointer-events:none; transition:opacity .05s; }
+.screamer-overlay.show{ opacity:1; }
+.screamer-overlay svg{ width:62vmin; height:auto; max-width:520px; }
+
+.color-row{display:flex; gap:10px; justify-content:center; margin-top:6px; flex-wrap:wrap;}
+.swatch{width:36px; height:36px; border-radius:50%; border:2px solid var(--line); cursor:pointer; box-shadow:inset 0 0 0 2px rgba(255,255,255,.55), 0 1px 3px rgba(0,0,0,.25); padding:0;}
+.swatch:active{transform:scale(.92);}
+.swatch.picked{outline:3px solid var(--ink); outline-offset:2px;}
+
+#ghostStage5{ aspect-ratio:unset; height:132px; max-width:460px; }
+.tab5-lines{
+  position:absolute; inset:6px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; z-index:4; pointer-events:none;
+}
+.tab5-lines div{
+  font-family:var(--font-body); font-weight:700; font-size:.76rem; line-height:1.25;
+  color:#eaf6fb; background:rgba(8,12,8,.62); border-radius:8px; padding:4px 9px;
+  text-align:center; opacity:0; transform:translateY(-3px);
+  transition:opacity .6s ease, transform .6s ease;
+}
+.tab5-lines.show div{ opacity:1; transform:translateY(0); }
+.tab5-lines.show div:nth-child(2){ transition-delay:.15s; }
+.tab5-lines.show div:nth-child(3){ transition-delay:.3s; }
+
+.final-result-row{ display:flex; align-items:center; justify-content:center; gap:8px; margin:6px 0; }
+.final-result-input{
+  font-family:var(--font-mono); font-size:1rem; padding:7px 10px; border:2px solid var(--line);
+  border-radius:8px; width:90px; text-align:center; background:var(--panel2); color:var(--ink);
+}
+.final-result-unit{ font-family:var(--font-mono); font-weight:700; color:var(--ink-soft); }
+
+.final-flash-overlay{
+  position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; opacity:0; pointer-events:none; transition:opacity .15s ease;
+}
+.final-flash-overlay.show{ opacity:1; }
+.final-flash-overlay.tier-excellent{ background:#1f7a3d; }
+.final-flash-overlay.tier-good{ background:#3fae5c; }
+.final-flash-overlay.tier-bad{ background:#c23b2b; }
+.final-flash-emoji{ font-size:5rem; filter:drop-shadow(0 4px 8px rgba(0,0,0,.3)); }
+.final-flash-text{ font-family:var(--font-display); font-weight:800; font-size:1.9rem; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.35); }
+
+.notebook-line.slider-line{ display:block; padding:5px 0; line-height:normal; }
+.notebook-line.slider-line .lab{ display:block; height:31px; line-height:31px; }
+.slider-wrap{ display:flex; align-items:center; gap:10px; height:31px; }
+.val-slider{
+  flex:1; -webkit-appearance:none; appearance:none; height:6px; border-radius:4px;
+  background:var(--line); outline:none; margin:0;
+}
+.val-slider::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:20px; height:20px; border-radius:50%;
+  background:var(--sage); border:2px solid var(--sage-dark); cursor:pointer;
+}
+.val-slider::-moz-range-thumb{
+  width:20px; height:20px; border-radius:50%; background:var(--sage); border:2px solid var(--sage-dark);
+  cursor:pointer; border-width:2px;
+}
+.slider-val{ font-family:var(--font-mono); font-weight:700; font-size:.82rem; min-width:58px; text-align:right; flex:0 0 auto;}
+
+.scientist-face{
+  position:absolute; top:6px; left:6px; width:64px; height:auto; z-index:6; display:none;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.4));
+}
+
+footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="cover">
+    <h1>Déterminer la masse volumique de l'air</h1>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="1" onclick="showTab(1)">Intro</button>
+    <button class="tab-btn" data-tab="2" onclick="showTab(2)">Gonfler et peser</button>
+    <button class="tab-btn" data-tab="3" onclick="showTab(3)">Extraire</button>
+    <button class="tab-btn" data-tab="4" onclick="showTab(4)">Peser</button>
+    <button class="tab-btn" data-tab="5" onclick="showTab(5)">Le cahier</button>
+    <button class="tab-btn" data-tab="6" onclick="showTab(6)">Proportions</button>
+  </div>
+
+  <main>
+    <!-- TAB 1 -->
+    <section id="tab-1" class="tab active">
+      <h2>Principe de la technique de déplacement d'eau</h2>
+      <div class="stage3d" id="stage3d-1">
+        <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div>
+        <div class="explosion-flash" id="explosionFlash1"></div>
+        <div class="scene-dim" id="sceneDim1"></div>
+        <div class="scene-msg-box" id="sceneIntroMsg1">
+          <div class="msg-text">commence par choisir les actions à faire dans l'ordre</div>
+          <div class="msg-close" id="sceneIntroClose1">✕</div>
+        </div>
+        <div class="scene-dim" id="overflowDim1"></div>
+        <div class="scene-neon-msg" id="overflowMsg1">t'as mis trop de liquide &gt;.&lt;</div>
+        <div class="bottle-label-overlay" id="bottleRow1" style="display:none;">
+          <button data-vol="3.3">3,3 L</button>
+          <button data-vol="2.8">2,8 L</button>
+          <button data-vol="4.1">4,1 L</button>
+        </div>
+      </div>
+      <div class="readout" id="readout1">Étape 1 : choisis une bouteille.</div>
+      <div class="action-row">
+        <div class="puzzle-grid" id="puzzleGrid1">
+          <button class="icon-btn puzzle-btn" id="tuyauBtn1" disabled><span class="puzzle-num">7</span>🧪 Placer le tuyau</button>
+          <button class="icon-btn puzzle-btn" id="soufflerBtn1" disabled><span class="puzzle-num">8</span>👄 Souffler dans le tuyau</button>
+          <button class="icon-btn puzzle-btn" id="fillAlcoolBtn1" disabled><span class="puzzle-num">?</span>🧴 Remplir la bouteille (alcool ménager)</button>
+          <button class="icon-btn puzzle-btn" id="chooseBottleBtn1"><span class="puzzle-num">1</span>🧺 Choisir une bouteille</button>
+          <button class="icon-btn puzzle-btn" id="deboucherBtn1" disabled><span class="puzzle-num">?</span>🧴 Déboucher la bouteille</button>
+          <button class="icon-btn puzzle-btn" id="retournerBtn1" disabled><span class="puzzle-num">4</span>🔄 Retourner la bouteille</button>
+          <button class="icon-btn puzzle-btn" id="fillEauBtn1" disabled><span class="puzzle-num">?</span>🚰 Remplir la bouteille (eau)</button>
+          <button class="icon-btn puzzle-btn" id="plongerBtn1" disabled><span class="puzzle-num">5</span>⬇️ Plonger l'ouverture sous l'eau</button>
+          <button class="icon-btn puzzle-btn" id="boucherBtn1" disabled><span class="puzzle-num">?</span>🧴 Boucher la bouteille</button>
+        </div>
+        <div class="aux-row">
+          <button class="icon-btn" id="colorantBtn1">🎨 Ajouter un colorant</button>
+          <button class="icon-btn" id="resetBtn1">↺ Recommencer</button>
+          <button class="icon-btn warn" id="retryBtn1">💥 Réessayer</button>
+        </div>
+        <div class="color-row" id="colorRow1" style="display:none;">
+          <button class="swatch" data-color="#2f6fd6" style="background:#2f6fd6" title="Bleu" aria-label="Bleu"></button>
+          <button class="swatch" data-color="#d63b3b" style="background:#d63b3b" title="Rouge" aria-label="Rouge"></button>
+          <button class="swatch" data-color="#2fa84f" style="background:#2fa84f" title="Vert" aria-label="Vert"></button>
+          <button class="swatch" data-color="#8a3fd6" style="background:#8a3fd6" title="Violet" aria-label="Violet"></button>
+          <button class="swatch" data-color="#e08a1e" style="background:#e08a1e" title="Orange" aria-label="Orange"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2 -->
+    <section id="tab-2" class="tab">
+      <h2>Masse d'un ballon à peu près gonflé</h2>
+      <div class="stage3d" id="stage3d-2"><div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div><div class="scene-banner" id="burstMsg2"></div></div>
+      <div class="readout" id="readout2">Étape 1 : gonfle le ballon.</div>
+      <div class="action-row">
+        <button class="main-action" id="actionBtn2">🎈 Gonfler le ballon</button>
+        <button class="main-action" id="turnOnBtn2">🔌 Allumer la balance</button>
+        <button class="main-action" id="weighBtn2" disabled>⚖️ Peser le ballon</button>
+        <div class="aux-row"><button class="icon-btn" id="resetBtn2">↺ Recommencer</button></div>
+      </div>
+    </section>
+
+    <!-- TAB 3 -->
+    <section id="tab-3" class="tab">
+      <h2>Vide le ballon</h2>
+      <div class="stage3d" id="stage3d-3">
+        <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div>
+        <div class="explosion-flash" id="explosionFlash3"></div>
+        <div class="scene-msg-box" id="camNagBox3">
+          <div class="msg-text">pour bien voir, déplace la caméra et zoome sur l'ouverture de la bouteille</div>
+          <div class="msg-close" id="camNagClose3">✕</div>
+        </div>
+        <div class="bottle-label-overlay" id="bottleRow3" style="display:flex;">
+          <button data-vol="3.3">3,3 L</button>
+          <button data-vol="2.8">2,8 L</button>
+          <button data-vol="4.1">4,1 L</button>
+        </div>
+      </div>
+      <div class="readout" id="readout3">Étape 1 : choisis une bouteille.</div>
+      <div class="action-row">
+        <button class="main-action" id="showQuestionBtn3" disabled>❓ Afficher la question</button>
+        <div class="puzzle-grid" id="puzzleGrid3">
+          <button class="icon-btn puzzle-btn" id="appuyerBtn3" disabled><span class="puzzle-num">4</span>👊 Appuyer sur le ballon</button>
+          <button class="icon-btn puzzle-btn" id="remplirAlcoolBtn3" disabled><span class="puzzle-num">?</span>🧴 Remplir la bouteille (alcool ménager)</button>
+          <button class="icon-btn puzzle-btn" id="chooseBottleBtn3"><span class="puzzle-num">1</span>🧺 Choisir une bouteille</button>
+          <button class="icon-btn puzzle-btn" id="relierBtn3" disabled><span class="puzzle-num">?</span>🔗 Relier le ballon au tuyau</button>
+          <button class="icon-btn puzzle-btn" id="remplirEauBtn3" disabled><span class="puzzle-num">?</span>🚰 Remplir la bouteille (eau)</button>
+        </div>
+        <div class="aux-row">
+          <button class="icon-btn" id="colorantBtn3">🎨 Ajouter un colorant</button>
+          <button class="icon-btn warn" id="stopBtn3"><span class="puzzle-num">5</span>🔌 Déconnecter le tuyau</button>
+          <button class="icon-btn" id="resetBtn3">↺ Recommencer</button>
+          <button class="icon-btn warn" id="retryBtn3">💥 Réessayer</button>
+        </div>
+        <div class="color-row" id="colorRow3" style="display:none;">
+          <button class="swatch" data-color="#2f6fd6" style="background:#2f6fd6" title="Bleu" aria-label="Bleu"></button>
+          <button class="swatch" data-color="#d63b3b" style="background:#d63b3b" title="Rouge" aria-label="Rouge"></button>
+          <button class="swatch" data-color="#2fa84f" style="background:#2fa84f" title="Vert" aria-label="Vert"></button>
+          <button class="swatch" data-color="#8a3fd6" style="background:#8a3fd6" title="Violet" aria-label="Violet"></button>
+          <button class="swatch" data-color="#e08a1e" style="background:#e08a1e" title="Orange" aria-label="Orange"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4 -->
+    <section id="tab-4" class="tab">
+      <h2>Dernière pesée</h2>
+      <div class="stage3d" id="stage3d-4">
+        <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div>
+        <div class="scientist-face" id="scientistFace4"></div>
+        <div class="scene-dim" id="napDim4"></div>
+        <div class="nap-moon" id="napMoon4">🌙</div>
+      </div>
+      <div class="readout" id="readout4">Pose le ballon et allume la balance, dans l'ordre de ton choix.</div>
+      <div class="action-row">
+        <button class="main-action" id="poserBtn4">⚖️ Poser le ballon</button>
+        <button class="main-action" id="allumerBtn4">🔌 Allumer la balance</button>
+        <button class="main-action" id="siesteBtn4">😴 Faire une sieste</button>
+        <div class="aux-row">
+          <button class="icon-btn" id="resetBtn4">↺ Recommencer</button>
+          <button class="icon-btn" id="surpriseBtn4" style="display:none;">🎉 Surprise</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5 -->
+    <section id="tab-5" class="tab">
+      <h2>Exploitation de l'animation</h2>
+      <div class="stage3d ghost-stage" id="ghostStage5">
+        <div class="ghost-dim" id="ghostDim5"></div>
+        <div class="ghost-figure" id="ghostFigure5"></div>
+        <div class="tab5-lines" id="tab5Lines">
+          <div>5. note tes 3 valeurs</div>
+          <div>6. calcule la masse volumique de l'air</div>
+        </div>
+      </div>
+      <div class="notebook">
+        <div class="notebook-line slider-line">
+          <span class="lab">Masse du ballon gonflé (g)</span>
+          <div class="slider-wrap">
+            <input class="val-slider" type="range" min="420" max="510" step="0.1" value="420" id="in-m1">
+            <span class="slider-val" id="in-m1-val">0 g</span>
+          </div>
+        </div>
+        <div class="notebook-line slider-line">
+          <span class="lab">Volume d'air retiré (L)</span>
+          <div class="slider-wrap">
+            <input class="val-slider" type="range" min="0" max="5" step="0.05" value="0" id="in-v">
+            <span class="slider-val" id="in-v-val">0,00 L</span>
+          </div>
+        </div>
+        <div class="notebook-line slider-line">
+          <span class="lab">Masse du ballon dégonflé (g)</span>
+          <div class="slider-wrap">
+            <input class="val-slider" type="range" min="420" max="510" step="0.1" value="420" id="in-m2">
+            <span class="slider-val" id="in-m2-val">0 g</span>
+          </div>
+        </div>
+      </div>
+      <div class="aux-row">
+        <button class="icon-btn" id="forgotFormulaBtn5">🤔 J'ai oublié la formule</button>
+        <button class="icon-btn" id="surpriseBtn5">👻 Surprise</button>
+        <button class="icon-btn" onclick="t5_calc()">🧮 Calculer avec mes valeurs</button>
+      </div>
+      <div id="t5-badge" class="result-badge"></div>
+      <div class="action-row"><button class="icon-btn" id="finalResultBtn5">📝 Note ton résultat final ici et je te dis si c'est correct</button></div>
+      <div class="final-result-row" id="finalResultRow5" style="display:none;">
+        <input type="text" inputmode="decimal" id="finalResultInput5" class="final-result-input" placeholder="1,2">
+        <span class="final-result-unit">g/L</span>
+        <button class="icon-btn" id="finalResultCheckBtn5">Valider</button>
+      </div>
+    </section>
+
+    <!-- TAB 6 -->
+    <section id="tab-6" class="tab">
+      <div class="prop-experiments">
+        <div class="prop-exp">
+          <div class="prop-exp-title">Dioxygène <b>O₂</b></div>
+          <div class="prop-balloon-stage">
+            <div class="prop-scale-display" id="propScaleO2">— g</div>
+            <div class="prop-liter-badge" id="propBadgeO2">+1 L de O₂</div>
+            <div class="prop-balloon" id="propBalloonO2">
+              <svg class="balloon-flat" viewBox="0 0 64 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="26" rx="26" ry="10" fill="#e0575a"/><path d="M10 26 Q32 16 54 26" stroke="rgba(0,0,0,.15)" stroke-width="1.5" fill="none"/><path d="M14 30 Q32 22 50 30" stroke="rgba(0,0,0,.12)" stroke-width="1.5" fill="none"/><path d="M32 36 L27 40 L37 40 Z" fill="#e0575a"/></svg>
+              <svg class="balloon-full" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="32" rx="28" ry="32" fill="#e0575a"/><ellipse cx="21" cy="18" rx="8" ry="11" fill="rgba(255,255,255,.35)"/><path d="M32 63 L27 71 L37 71 Z" fill="#e0575a"/></svg>
+            </div>
+            <div class="prop-scale-base"></div>
+          </div>
+          <div class="prop-readout" id="propReadoutO2"></div>
+        </div>
+        <div class="prop-exp">
+          <div class="prop-exp-title">Diazote <b>N₂</b></div>
+          <div class="prop-balloon-stage">
+            <div class="prop-scale-display" id="propScaleN2">— g</div>
+            <div class="prop-liter-badge" id="propBadgeN2">+1 L de N₂</div>
+            <div class="prop-balloon" id="propBalloonN2">
+              <svg class="balloon-flat" viewBox="0 0 64 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="26" rx="26" ry="10" fill="#3b82f6"/><path d="M10 26 Q32 16 54 26" stroke="rgba(0,0,0,.15)" stroke-width="1.5" fill="none"/><path d="M14 30 Q32 22 50 30" stroke="rgba(0,0,0,.12)" stroke-width="1.5" fill="none"/><path d="M32 36 L27 40 L37 40 Z" fill="#3b82f6"/></svg>
+              <svg class="balloon-full" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="32" rx="28" ry="32" fill="#3b82f6"/><ellipse cx="21" cy="18" rx="8" ry="11" fill="rgba(255,255,255,.35)"/><path d="M32 63 L27 71 L37 71 Z" fill="#3b82f6"/></svg>
+            </div>
+            <div class="prop-scale-base"></div>
+          </div>
+          <div class="prop-readout" id="propReadoutN2"></div>
+        </div>
+      </div>
+      <div class="action-row"><button class="main-action" id="propActionBtn">⚖️ Peser le ballon vide</button></div>
+
+      <div class="prop-slider-block">
+        <input class="val-slider" type="range" id="propMixSlider" min="0" max="100" step="1" value="50">
+        <div class="prop-mix-readout" id="propMixReadout">Mélange : <b>50 % O₂ / 50 % N₂</b><br>masse volumique du mélange : <b id="propMixValue">? g/L</b></div>
+      </div>
+      <div class="note-bubble note-bubble-neon note-bubble-oneline">7. Entre O₂ et N₂, qui a la plus grande masse volumique ? Justifie.</div>
+      <div class="note-bubble note-bubble-neon">8. À quelle composition de l'air (en %) correspond ta valeur de masse volumique ?</div>
+    </section>
+
+    <div class="formula-modal" id="formulaModal5">
+      <div class="formula-modal-card" id="formulaModalCard5"></div>
+    </div>
+  </main>
+</div>
+<div class="screamer-overlay" id="screamerOverlay"></div>
+
+<script>
+/* ===================== shared experiment data ===================== */
+const experiment = { massGonfle:null, volumeExtracted:0, massDegonfle:null, totalBalloonCapacity:4.5, airDensityRef:1.2 };
+const baseMassGonfle = +(452 + Math.random()*4).toFixed(1);
+const BENCH_TOP = 0.95;
+
+/* ===================== tween engine ===================== */
+const tweens = [];
+function tween(duration, onUpdate, onComplete){ tweens.push({t0:performance.now(), duration, onUpdate, onComplete}); }
+function easeInOut(p){ return p<0.5 ? 2*p*p : 1-Math.pow(-2*p+2,2)/2; }
+function updateTweens(now){
+  for(let i=tweens.length-1;i>=0;i--){
+    const tw=tweens[i];
+    const raw=Math.min(1,(now-tw.t0)/tw.duration);
+    tw.onUpdate(easeInOut(raw));
+    if(raw>=1){ if(tw.onComplete) tw.onComplete(); tweens.splice(i,1); }
+  }
+}
+
+/* ===================== per-frame updater engine (shimmer, explosion debris…) ===================== */
+// Each entry is a function(now) called once per rendered frame; returning false removes it automatically.
+const frameUpdaters = [];
+function updateFrameUpdaters(now){
+  for(let i=frameUpdaters.length-1;i>=0;i--){
+    if(frameUpdaters[i](now)===false) frameUpdaters.splice(i,1);
+  }
+}
+
+// Keeps the clickable bottle-volume labels pinned above their 3D bottles inside the stage frame,
+// re-projecting every frame so they track the bottles even while the student orbits the camera.
+function setupBottleLabelOverlay(rowEl, getCandidates, tabNumber){
+  const btns = Array.from(rowEl.querySelectorAll('button[data-vol]'));
+  frameUpdaters.push(()=>{
+    if(currentTab===tabNumber && rowEl.style.display!=='none'){
+      const list = getCandidates();
+      btns.forEach((btn,i)=>{
+        const c = list[i];
+        if(!c){ btn.style.display='none'; return; }
+        btn.style.display='';
+        const wp = new THREE.Vector3(c.bottle.group.position.x, c.bottle.group.position.y + c.bottle.H/2 + 0.14, c.bottle.group.position.z);
+        wp.project(camera);
+        btn.style.left = ((wp.x*0.5+0.5)*100).toFixed(2)+'%';
+        btn.style.top = ((1-(wp.y*0.5+0.5))*100).toFixed(2)+'%';
+      });
+    }
+    return true;
+  });
+}
+
+// A little debris burst (glass shards + droplets) used when the tab-1 apparatus is assembled in the wrong order.
+function spawnExplosionAt(scene, origin){
+  const colors = [0xEFF6EC,0xCFE9F0,0x8B9A8F,0xffffff,0xB8C9BE];
+  const bits = [];
+  for(let i=0;i<24;i++){
+    const geo = Math.random()<0.5 ? new THREE.BoxGeometry(0.045,0.045,0.045) : new THREE.SphereGeometry(0.03,6,6);
+    const mat = new THREE.MeshStandardMaterial({color:colors[i%colors.length], transparent:true, opacity:1, roughness:0.6});
+    const m = new THREE.Mesh(geo,mat); m.position.copy(origin); scene.add(m);
+    const dir = new THREE.Vector3((Math.random()-0.5)*2, Math.random()*1.6+0.4, (Math.random()-0.5)*2).normalize();
+    bits.push({ m, vel:dir.multiplyScalar(1.8+Math.random()*2.2) });
+  }
+  const t0 = performance.now();
+  frameUpdaters.push((now)=>{
+    const p = (now-t0)/1100;
+    if(p>=1){ bits.forEach(b=>scene.remove(b.m)); return false; }
+    bits.forEach(b=>{
+      b.vel.y -= 0.09;
+      b.m.position.addScaledVector(b.vel, 0.016);
+      b.m.rotation.x += 0.2; b.m.rotation.y += 0.15;
+      b.m.material.opacity = 1-p;
+    });
+    return true;
+  });
+}
+
+// A brief camera rattle to sell the impact — only meaningful while the affected tab is on screen.
+function shakeCamera(){
+  const baseTheta=controls.theta, basePhi=controls.phi, t0=performance.now(), dur=400;
+  frameUpdaters.push((now)=>{
+    const p=(now-t0)/dur;
+    if(p>=1){ controls.theta=baseTheta; controls.phi=basePhi; controls.update(); return false; }
+    const decay=1-p;
+    controls.theta = baseTheta + (Math.random()-0.5)*0.045*decay;
+    controls.phi = basePhi + (Math.random()-0.5)*0.02*decay;
+    controls.update();
+    return true;
+  });
+}
+
+// Flashes a full-stage overlay (id passed in) briefly — used alongside spawnExplosionAt.
+function flashExplosion(overlayId){
+  const el = document.getElementById(overlayId);
+  if(!el) return;
+  el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+}
+
+/* ===================== stepper (single evolving action button) ===================== */
+function makeStepper(steps, btn){
+  let idx=0;
+  function refresh(){
+    if(idx>=steps.length){ btn.textContent='✅ Étape terminée'; btn.disabled=true; return; }
+    const s=steps[idx];
+    btn.textContent = typeof s.label==='function' ? s.label() : s.label;
+  }
+  function click(){
+    if(idx>=steps.length || btn.disabled) return;
+    const s=steps[idx];
+    s.action();
+    if(!s.manualAdvance && s.done()) idx++;
+    refresh();
+  }
+  btn.onclick = click;
+  refresh();
+  return { refresh, reset(){ idx=0; btn.disabled=false; refresh(); }, forceAdvance(){ idx++; refresh(); } };
+}
+
+/* ===================== procedural textures (canvas-based, more realistic materials) ===================== */
+function makeCanvasTexture(w,h,drawFn,repeatX,repeatY){
+  const cnv=document.createElement('canvas'); cnv.width=w; cnv.height=h;
+  drawFn(cnv.getContext('2d'), w, h);
+  const tex = new THREE.CanvasTexture(cnv);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(repeatX||1, repeatY||1);
+  return tex;
+}
+function drawFloorTiles(ctx,w,h){
+  ctx.fillStyle='#3B3B3E'; ctx.fillRect(0,0,w,h);
+  const cell=w/4;
+  for(let i=0;i<4;i++) for(let j=0;j<4;j++){
+    ctx.fillStyle = (i+j)%2===0 ? '#363638' : '#434346';
+    ctx.fillRect(i*cell,j*cell,cell,cell);
+    for(let k=0;k<40;k++){
+      ctx.fillStyle='rgba(0,0,0,'+(Math.random()*0.08)+')';
+      ctx.fillRect(i*cell+Math.random()*cell, j*cell+Math.random()*cell, 6,6);
+    }
+  }
+  ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=3;
+  for(let i=0;i<=4;i++){ ctx.beginPath(); ctx.moveTo(i*cell,0); ctx.lineTo(i*cell,h); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0,i*cell); ctx.lineTo(w,i*cell); ctx.stroke(); }
+}
+function drawWoodGrain(ctx,w,h){
+  ctx.fillStyle='#C9A876'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<55;i++){
+    const y=(i/55)*h + (Math.random()-0.5)*4;
+    ctx.strokeStyle='rgba(122,86,44,'+(0.06+Math.random()*0.14)+')';
+    ctx.lineWidth=0.6+Math.random()*1.8;
+    ctx.beginPath(); ctx.moveTo(0,y);
+    for(let x=0;x<=w;x+=24){ ctx.lineTo(x, y+Math.sin(x*0.015+i)*3+Math.random()*1.5); }
+    ctx.stroke();
+  }
+  for(let k=0;k<10;k++){ ctx.fillStyle='rgba(90,60,30,0.12)'; ctx.beginPath(); ctx.ellipse(Math.random()*w,Math.random()*h,8+Math.random()*10,3+Math.random()*4,0,0,Math.PI*2); ctx.fill(); }
+}
+function drawPlaster(ctx,w,h){
+  ctx.fillStyle='#F1ECDF'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<5000;i++){ ctx.fillStyle='rgba(170,160,130,'+(Math.random()*0.06)+')'; ctx.fillRect(Math.random()*w,Math.random()*h,1.4,1.4); }
+  ctx.fillStyle='rgba(255,255,255,0.05)';
+  for(let i=0;i<400;i++){ ctx.beginPath(); ctx.arc(Math.random()*w,Math.random()*h,4+Math.random()*8,0,Math.PI*2); ctx.fill(); }
+}
+function drawPebbleLeather(ctx,w,h){
+  ctx.fillStyle='#CC5B12'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<2200;i++){
+    const x=Math.random()*w, y=Math.random()*h, r=0.7+Math.random()*1.3;
+    ctx.fillStyle='rgba(30,15,5,'+(0.10+Math.random()*0.12)+')';
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,190,140,'+(0.06+Math.random()*0.09)+')';
+    ctx.beginPath(); ctx.arc(x-0.4,y-0.4,r*0.55,0,Math.PI*2); ctx.fill();
+  }
+}
+function drawSkin(ctx,w,h){
+  ctx.fillStyle='#E7B78C'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<1800;i++){ ctx.fillStyle='rgba(160,100,60,'+(Math.random()*0.05)+')'; ctx.fillRect(Math.random()*w,Math.random()*h,1,1); }
+}
+function drawWaterRipple(ctx,w,h){
+  ctx.fillStyle='#dff1f6'; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<46;i++){
+    const y=Math.random()*h;
+    ctx.strokeStyle='rgba(255,255,255,'+(0.05+Math.random()*0.08)+')';
+    ctx.lineWidth=1+Math.random()*1.4;
+    ctx.beginPath(); ctx.moveTo(0,y);
+    for(let x=0;x<=w;x+=14){ ctx.lineTo(x, y+Math.sin(x*0.06+i)*3.2); }
+    ctx.stroke();
+  }
+  for(let i=0;i<12;i++){ ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.beginPath(); ctx.ellipse(Math.random()*w,Math.random()*h,10+Math.random()*20,3+Math.random()*5,0,0,Math.PI*2); ctx.fill(); }
+}
+const floorTex = makeCanvasTexture(512,512,drawFloorTiles,6,6);
+const woodTex = makeCanvasTexture(512,160,drawWoodGrain,3,1);
+const plasterTex = makeCanvasTexture(256,256,drawPlaster,4,2);
+const pebbleTex = makeCanvasTexture(256,256,drawPebbleLeather,3,3);
+const skinTex = makeCanvasTexture(128,128,drawSkin,1,1);
+const waterTex = makeCanvasTexture(256,256,drawWaterRipple,2,2);
+
+/* ===================== room ===================== */
+function addRoom(scene){
+  scene.background = new THREE.Color(0xEDE8DC);
+  scene.fog = new THREE.Fog(0xEDE8DC, 9, 17);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(24,24), new THREE.MeshStandardMaterial({map:floorTex, bumpMap:floorTex, bumpScale:0.012, roughness:0.92}));
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+  // background walls kept darker than the foreground props, so the scene reads with real depth
+  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(24,10), new THREE.MeshStandardMaterial({map:plasterTex, bumpMap:plasterTex, bumpScale:0.006, roughness:1, color:0x8b8570}));
+  backWall.position.set(0,5,-4.2); scene.add(backWall);
+  const sideWall = new THREE.Mesh(new THREE.PlaneGeometry(24,10), new THREE.MeshStandardMaterial({map:plasterTex, bumpMap:plasterTex, bumpScale:0.006, roughness:1, color:0x7d775f}));
+  sideWall.position.set(-6,5,0); sideWall.rotation.y=Math.PI/2; scene.add(sideWall);
+  const winFrame = new THREE.Mesh(new THREE.PlaneGeometry(2.6,2.0), new THREE.MeshStandardMaterial({color:0xffffff}));
+  winFrame.position.set(2.4,5.4,-4.19); scene.add(winFrame);
+  const win = new THREE.Mesh(new THREE.PlaneGeometry(2.3,1.7), new THREE.MeshBasicMaterial({color:0xCFE6ED}));
+  win.position.set(2.4,5.4,-4.18); scene.add(win);
+
+  const bench = new THREE.Mesh(new THREE.BoxGeometry(7.5,0.28,2.2), new THREE.MeshStandardMaterial({map:woodTex, bumpMap:woodTex, bumpScale:0.01, roughness:0.55}));
+  bench.position.set(0, BENCH_TOP-0.14, 0.2); bench.castShadow=true; bench.receiveShadow=true; scene.add(bench);
+  const legMat = new THREE.MeshStandardMaterial({map:woodTex, bumpMap:woodTex, bumpScale:0.01, roughness:0.6, color:0xB99566});
+  [[-3.4,-0.9],[3.4,-0.9],[-3.4,1.2],[3.4,1.2]].forEach(([x,z])=>{
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.18, BENCH_TOP-0.28, 0.18), legMat);
+    leg.position.set(x,(BENCH_TOP-0.28)/2,z); leg.castShadow=true; scene.add(leg);
+  });
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+  const dir = new THREE.DirectionalLight(0xfff6e6, 0.85);
+  dir.position.set(4,7,4); dir.castShadow=true;
+  dir.shadow.mapSize.set(1024,1024);
+  dir.shadow.camera.left=-6; dir.shadow.camera.right=6; dir.shadow.camera.top=6; dir.shadow.camera.bottom=-6;
+  scene.add(dir);
+  const fill = new THREE.DirectionalLight(0xE6F0FF, 0.3); fill.position.set(-4,4,-3); scene.add(fill);
+}
+
+/* ===================== object builders ===================== */
+function makeBasin(){
+  const group = new THREE.Group();
+  const Rt=0.85, Rb=0.8, H=0.55;
+  const glassMat = new THREE.MeshStandardMaterial({color:0xEAF5F6, transparent:true, opacity:0.2, roughness:0.05, metalness:0.1, side:THREE.DoubleSide, depthWrite:false});
+  const glass = new THREE.Mesh(new THREE.CylinderGeometry(Rt,Rb,H,32,1,true), glassMat);
+  glass.position.y=H/2; glass.renderOrder=1; glass.castShadow=true; group.add(glass);
+  const highlightMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.16, side:THREE.DoubleSide, depthWrite:false});
+  const highlight = new THREE.Mesh(new THREE.CylinderGeometry(Rt*1.01,Rb*1.01,H*0.9,16,1,true,0.3,0.5), highlightMat);
+  highlight.position.y=H/2; highlight.renderOrder=1.5; group.add(highlight);
+  const waterBaseColor = new THREE.Color(0xCFE9F0); // much clearer / paler water than before
+  const waterMat = new THREE.MeshStandardMaterial({color:waterBaseColor.clone(), map:waterTex, bumpMap:waterTex, bumpScale:0.01, transparent:true, opacity:0.55, roughness:0.15, depthWrite:false});
+  const water = new THREE.Mesh(new THREE.CylinderGeometry(Rb*0.95,Rb*0.95,1,32), waterMat);
+  water.renderOrder=2; group.add(water);
+  const bottom = new THREE.Mesh(new THREE.CircleGeometry(Rb,32), new THREE.MeshStandardMaterial({color:0xEAF5F6, transparent:true, opacity:0.3, depthWrite:false}));
+  bottom.rotation.x=-Math.PI/2; bottom.position.y=0.005; bottom.renderOrder=1; bottom.castShadow=true; group.add(bottom);
+  // soft fake drop-shadow disc on the bench, since the basin's transparent glass casts only a faint real shadow
+  const shadowCnv = document.createElement('canvas'); shadowCnv.width=128; shadowCnv.height=128;
+  const shadowCtx = shadowCnv.getContext('2d');
+  const grad = shadowCtx.createRadialGradient(64,64,10,64,64,64);
+  grad.addColorStop(0,'rgba(0,0,0,0.5)'); grad.addColorStop(0.7,'rgba(0,0,0,0.22)'); grad.addColorStop(1,'rgba(0,0,0,0)');
+  shadowCtx.fillStyle=grad; shadowCtx.fillRect(0,0,128,128);
+  const shadowMat = new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shadowCnv), transparent:true, depthWrite:false});
+  const shadowBlob = new THREE.Mesh(new THREE.CircleGeometry(Rb*1.7,32), shadowMat);
+  shadowBlob.rotation.x=-Math.PI/2; shadowBlob.position.y=0.001; shadowBlob.renderOrder=0.1; group.add(shadowBlob);
+  let cur=0.5;
+  function apply(frac){ const h=Math.max(0.001, frac*H*0.92); water.scale.y=h; water.position.y=h/2; }
+  apply(cur);
+  function setLevel(target){ const from=cur; tween(350, p=>{ cur=from+(target-from)*p; apply(cur); }); }
+  // as coloured water is expelled from the bottle, the basin water gradually tints toward a PALE version of that colour
+  function setColorBlend(hex, amount){
+    const paleTarget = new THREE.Color(hex).lerp(new THREE.Color(0xffffff), 0.6);
+    waterMat.color.copy(waterBaseColor.clone().lerp(paleTarget, Math.min(1,Math.max(0,amount))));
+  }
+  function resetColor(){ waterMat.color.copy(waterBaseColor); }
+  return { group, setLevel, H, R:Rb, setColorBlend, resetColor };
+}
+
+function makeBottle(volumeL){
+  const factor = Math.cbrt((volumeL||2.5)/2.5); // different bottles (2,8L / 3,3L / 4,1L) get visibly different sizes
+  const group = new THREE.Group();
+  const H=1.3*factor, bodyH=1.02*factor, neckH=0.28*factor, bodyR=0.30*factor, neckR=0.11*factor, neckRbot=0.154*factor;
+  const glassMat = new THREE.MeshStandardMaterial({color:0xEFF6EC, transparent:true, opacity:0.22, roughness:0.08, side:THREE.DoubleSide, depthWrite:false});
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.97,bodyR,bodyH,24,1,true), glassMat);
+  body.position.y = -H/2+bodyH/2; body.renderOrder=1; group.add(body);
+  const bodyBottom = new THREE.Mesh(new THREE.CircleGeometry(bodyR,24), glassMat);
+  bodyBottom.rotation.x=Math.PI/2; bodyBottom.position.y=-H/2; bodyBottom.renderOrder=1; group.add(bodyBottom);
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(neckR,neckRbot,neckH,16,1,true), glassMat);
+  neck.position.y = H/2-neckH/2; neck.renderOrder=1; group.add(neck);
+  const highlightMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.2, side:THREE.DoubleSide, depthWrite:false});
+  const highlight = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.98*1.01,bodyR*1.01,bodyH*0.85,16,1,true,0.2,0.45), highlightMat);
+  highlight.position.y = -H/2+bodyH/2; highlight.renderOrder=1.5; group.add(highlight);
+  // water is split in two parts (body + neck) so it always respects the cone-shaped neck instead of overflowing it
+  const waterBaseColor = 0xCFE9F0; // much clearer / paler water than before
+  const waterMat = new THREE.MeshStandardMaterial({color:waterBaseColor, map:waterTex, bumpMap:waterTex, bumpScale:0.008, transparent:true, opacity:0.5, depthWrite:false});
+  const bodyWater = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.92,bodyR*0.92,1,24), waterMat);
+  bodyWater.renderOrder=2; group.add(bodyWater);
+  const neckWater = new THREE.Mesh(new THREE.CylinderGeometry(neckR*0.85,neckRbot*0.85,1,16), waterMat);
+  neckWater.renderOrder=2; group.add(neckWater);
+  group.traverse(o=>{ if(o.isMesh) o.castShadow=true; });
+  const bodyBottomY=-H/2, bodyTopY=-H/2+bodyH, neckTopY=H/2;
+  function setBodyWater(from,to){ const h=Math.max(0.0001,to-from); bodyWater.scale.y=h; bodyWater.position.y=(from+to)/2; }
+  function setNeckWater(from,to){ const h=Math.max(0.0001,to-from); neckWater.scale.y=h; neckWater.position.y=(from+to)/2; }
+  let curFill=0, curAir=0;
+  function applyFilling(f){ // fills from the bottom (base) upward, respecting body then neck shape
+    const totalH = f*H;
+    const bH = Math.min(totalH, bodyH);
+    const nH = Math.max(0, totalH-bodyH);
+    setBodyWater(bodyBottomY, bodyBottomY+bH);
+    setNeckWater(bodyTopY, bodyTopY+nH);
+  }
+  function applyVenting(a){ // air pocket grows from the closed base (top once flipped), water recedes toward the neck
+    const airH = a*H;
+    const interfaceY = -H/2+airH; // top of remaining water
+    if(interfaceY <= bodyTopY){
+      setBodyWater(interfaceY, bodyTopY);
+      setNeckWater(bodyTopY, neckTopY);
+    } else {
+      setBodyWater(bodyTopY, bodyTopY);
+      setNeckWater(Math.min(interfaceY,neckTopY), neckTopY);
+    }
+  }
+  function setFilling(target){ const from=curFill; tween(350,p=>{ curFill=from+(target-from)*p; applyFilling(curFill); }); }
+  function setVenting(target){ const from=curAir; tween(350,p=>{ curAir=from+(target-from)*p; applyVenting(curAir); }); }
+  applyFilling(0); // the bottle must start empty
+  // A handful of twinkling highlights, only switched on for "alcool ménager" (rubbing alcohol) to give it a scintillating look.
+  const sparkles = [];
+  for(let i=0;i<7;i++){
+    const sp = new THREE.Mesh(new THREE.CircleGeometry(0.018,8), new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false}));
+    const ang = Math.random()*Math.PI*2, rad = bodyR*0.55*Math.random();
+    sp.position.set(Math.cos(ang)*rad, bodyBottomY + Math.random()*(bodyTopY-bodyBottomY), Math.sin(ang)*rad);
+    sp.userData.phase = Math.random()*Math.PI*2;
+    sp.visible = false;
+    group.add(sp); sparkles.push(sp);
+  }
+  let liquidType = 'eau', shimmerFn = null;
+  function setLiquidType(type){
+    liquidType = type;
+    if(type==='alcool'){
+      waterMat.color.set(0xEAF7FF); waterMat.roughness = 0.1; waterMat.metalness = 0.5;
+      sparkles.forEach(sp=>sp.visible=true);
+      if(!shimmerFn){
+        shimmerFn = (now)=>{ sparkles.forEach(sp=>{ sp.material.opacity = 0.25+0.65*Math.abs(Math.sin(now*0.0035+sp.userData.phase)); }); return true; };
+        frameUpdaters.push(shimmerFn);
+      }
+    } else {
+      waterMat.color.set(waterBaseColor); waterMat.roughness = 0.35; waterMat.metalness = 0;
+      sparkles.forEach(sp=>sp.visible=false);
+      if(shimmerFn){ const i=frameUpdaters.indexOf(shimmerFn); if(i>=0) frameUpdaters.splice(i,1); shimmerFn=null; }
+    }
+  }
+  function stopShimmer(){
+    sparkles.forEach(sp=>sp.visible=false);
+    if(shimmerFn){ const i=frameUpdaters.indexOf(shimmerFn); if(i>=0) frameUpdaters.splice(i,1); shimmerFn=null; }
+  }
+  const neckMarker = new THREE.Object3D(); neckMarker.position.set(0,H/2,0); group.add(neckMarker);
+  function getNeckWorld(target){ const t = target || new THREE.Vector3(); neckMarker.getWorldPosition(t); return t; }
+  // simple stopper (replaces the hand): a small opaque cap that seals the opening, always parented to the bottle
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(neckR*1.15,neckR*1.15,0.07,16), new THREE.MeshStandardMaterial({color:0x6B6355, roughness:0.8}));
+  cap.position.set(0,H/2+0.02,0); cap.visible=false; cap.castShadow=true; group.add(cap);
+  // optional food-colouring: tints the bottle's own water, diffusing in over a short tween
+  function setWaterColor(hex){ const from=waterMat.color.clone(), target=new THREE.Color(hex); tween(600, p=>{ waterMat.color.copy(from.clone().lerp(target,p)); }); }
+  function resetWaterColor(){ waterMat.color.set(waterBaseColor); }
+  return { group, setFilling, setVenting, getNeckWorld, cap, H, neckR, bodyR, neckH, setWaterColor, resetWaterColor, setLiquidType, stopShimmer, volumeL: volumeL||2.5 };
+}
+
+function makeMouth(){
+  const group = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({map:skinTex, color:0xC9776B, roughness:0.5});
+  const upper = new THREE.Mesh(new THREE.TorusGeometry(0.13,0.045,10,20,Math.PI), mat);
+  upper.rotation.x=Math.PI; upper.position.y=0.03; group.add(upper);
+  const lower = new THREE.Mesh(new THREE.TorusGeometry(0.13,0.05,10,20,Math.PI), mat);
+  lower.position.y=-0.03; group.add(lower);
+  group.scale.set(0.001,0.001,0.001); group.visible=false;
+  return group;
+}
+
+function makeTube(points){
+  const curve = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5);
+  const geo = new THREE.TubeGeometry(curve, 80, 0.026, 12, false);
+  const mat = new THREE.MeshStandardMaterial({color:0x8B9A8F, roughness:0.75, transparent:true, opacity:0});
+  const mesh = new THREE.Mesh(geo, mat); mesh.castShadow=true;
+  const group = new THREE.Group(); group.add(mesh);
+  const endMat = new THREE.MeshStandardMaterial({color:0x2B2820, roughness:0.4, transparent:true, opacity:0});
+  const ringGeo = new THREE.TorusGeometry(0.026,0.01,8,16);
+  const tA=curve.getTangent(0), tB=curve.getTangent(1);
+  const ringA = new THREE.Mesh(ringGeo, endMat); ringA.position.copy(points[0]); ringA.lookAt(points[0].clone().add(tA));
+  const ringB = new THREE.Mesh(ringGeo, endMat); ringB.position.copy(points[points.length-1]); ringB.lookAt(points[points.length-1].clone().add(tB));
+  group.add(ringA, ringB);
+  return group;
+}
+
+// Real déplacement-d'eau setup: the tube dives straight down along the outside of the submerged
+// bottle (never crossing the crystallisoir's glass wall, since it stays in the safe annulus between
+// the bottle and the basin), then bends into a U near the basin floor so its tip rises back up into
+// the bottle's submerged, downward-facing opening.
+function computeTubePoints(basin, bottleObj, neckWorld, outerPoint){
+  const center = basin.group.position;
+  const entryR = Math.min(basin.R*0.6, bottleObj.bodyR+0.15); // hugs the bottle, always well inside the basin's glass wall
+  let dx = outerPoint.x-center.x, dz = outerPoint.z-center.z;
+  let len = Math.sqrt(dx*dx+dz*dz); if(len<0.0001){ dx=1; dz=0; len=1; }
+  const dirX=dx/len, dirZ=dz/len;
+  const entryX = center.x+dirX*entryR, entryZ = center.z+dirZ*entryR;
+  const rimY = center.y+basin.H+0.14;            // just above the crystallisoir's rim
+  const floorY = center.y+0.02;                   // just above the crystallisoir's glass floor
+  const dipY = Math.max(floorY, neckWorld.y-0.025); // the belly of the U, right under the submerged opening
+  const arcPeakY = Math.max(outerPoint.y, rimY)+0.12;
+  const midX = (entryX+neckWorld.x)/2, midZ = (entryZ+neckWorld.z)/2;
+  const p1 = outerPoint.clone();
+  const p2 = new THREE.Vector3(outerPoint.x*0.55+entryX*0.45, arcPeakY, outerPoint.z*0.55+entryZ*0.45); // arcs up and over the rim
+  const p3 = new THREE.Vector3(entryX, rimY, entryZ);           // crosses the rim of the crystallisoir
+  const p4 = new THREE.Vector3(entryX, dipY+0.3, entryZ);       // starts the vertical run alongside the bottle
+  const p5 = new THREE.Vector3(entryX, dipY, entryZ);           // straight down to near the basin floor
+  const p6 = new THREE.Vector3(midX, dipY-0.01, midZ);          // the U-turn, underwater
+  const p7 = new THREE.Vector3(neckWorld.x, dipY+0.02, neckWorld.z); // curls back up beneath the opening
+  const p8 = neckWorld.clone();                                 // plugged into the bottle's submerged mouth
+  return [p1,p2,p3,p4,p5,p6,p7,p8];
+}
+
+function spawnBubble3D(scene, pos){
+  const geo = new THREE.SphereGeometry(0.035,8,6);
+  const mat = new THREE.MeshStandardMaterial({color:0xffffff, transparent:true, opacity:0.85});
+  const b = new THREE.Mesh(geo,mat); b.position.copy(pos); scene.add(b);
+  const startY = pos.y;
+  tween(900, p=>{ b.position.y = startY + p*0.5; mat.opacity = 0.85*(1-p); }, ()=>{ scene.remove(b); geo.dispose(); mat.dispose(); });
+}
+
+function makeDisplayTexture(text){
+  const cnv=document.createElement('canvas'); cnv.width=256; cnv.height=96;
+  const ctx=cnv.getContext('2d');
+  ctx.fillStyle='#20261f'; ctx.fillRect(0,0,256,96);
+  ctx.fillStyle= text ? '#7fe08b' : '#3c453a';
+  ctx.font='700 38px monospace'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(text || '‑ ‑ ‑ ‑', 128,50);
+  return new THREE.CanvasTexture(cnv);
+}
+
+function makeBalloon(){
+  const group = new THREE.Group();
+  const R = 0.32;
+  const mat = new THREE.MeshStandardMaterial({map:pebbleTex, bumpMap:pebbleTex, bumpScale:0.004, color:0xE07A2E, roughness:0.8, metalness:0.02});
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(R,28,20), mat); sphere.castShadow=true; group.add(sphere);
+  const seamMat = new THREE.MeshStandardMaterial({color:0x241F1A, roughness:0.6});
+  const seamR = R*1.006;
+  const equator = new THREE.Mesh(new THREE.TorusGeometry(seamR,0.012,8,32), seamMat);
+  group.add(equator);
+  const merid1 = new THREE.Mesh(new THREE.TorusGeometry(seamR,0.012,8,32), seamMat);
+  merid1.rotation.x=Math.PI/2; group.add(merid1);
+  const merid2 = new THREE.Mesh(new THREE.TorusGeometry(seamR,0.012,8,32), seamMat);
+  merid2.rotation.x=Math.PI/2; merid2.rotation.y=Math.PI/2; group.add(merid2);
+  let curXZ=0.32, curY=0.32; group.scale.set(curXZ,curY,curXZ);
+  // setScale(targetXZ, targetY) — targetY optional, defaults to a uniform scale like before (backward-compatible).
+  function setScale(targetXZ, targetY){
+    if(targetY===undefined) targetY = targetXZ;
+    const fromXZ=curXZ, fromY=curY;
+    tween(300,p=>{ curXZ=fromXZ+(targetXZ-fromXZ)*p; curY=fromY+(targetY-fromY)*p; group.scale.set(curXZ,curY,curXZ); });
+  }
+  // setPose: same idea but instant (no tween) — used to set an initial resting shape without an animated jump.
+  function setPose(targetXZ, targetY){
+    if(targetY===undefined) targetY = targetXZ;
+    curXZ=targetXZ; curY=targetY; group.scale.set(curXZ,curY,curXZ);
+  }
+  return { group, setScale, setPose };
+}
+
+function makeFlatLabel(text){
+  const cnv=document.createElement('canvas'); cnv.width=300; cnv.height=160;
+  function draw(t){
+    const ctx=cnv.getContext('2d');
+    ctx.clearRect(0,0,300,160);
+    ctx.fillStyle='#F7F4EA'; ctx.fillRect(0,0,300,160);
+    ctx.strokeStyle='#8a8265'; ctx.lineWidth=3; ctx.strokeRect(5,5,290,150);
+    ctx.fillStyle='#2B2820'; ctx.font='700 66px Georgia, serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(t, 150,84);
+  }
+  draw(text);
+  const tex = new THREE.CanvasTexture(cnv);
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.62,0.33), new THREE.MeshStandardMaterial({map:tex, roughness:0.85}));
+  mesh.rotation.x=-Math.PI/2; mesh.receiveShadow=true;
+  mesh.setText = function(t){ draw(t); tex.needsUpdate = true; };
+  return mesh;
+}
+
+// Auto-fits the box width (and shrinks the font if truly necessary) so long labels never overflow their background.
+function makeFloatingLabel(text){
+  const cnv=document.createElement('canvas');
+  const ctx=cnv.getContext('2d');
+  let fontSize=34;
+  ctx.font='700 '+fontSize+'px sans-serif';
+  let width = Math.min(680, Math.max(384, Math.ceil(ctx.measureText(text).width)+90));
+  cnv.width=width; cnv.height=120;
+  ctx.font='700 '+fontSize+'px sans-serif';
+  let tw = ctx.measureText(text).width;
+  while(tw > width-70 && fontSize>18){ fontSize-=2; ctx.font='700 '+fontSize+'px sans-serif'; tw=ctx.measureText(text).width; }
+  ctx.fillStyle='rgba(43,40,32,0.85)';
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(4,4,width-8,112,18) : ctx.rect(4,4,width-8,112); ctx.fill();
+  ctx.fillStyle='#F7F4EA'; ctx.font='700 '+fontSize+'px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(text, width/2,60);
+  const tex = new THREE.CanvasTexture(cnv);
+  const mat = new THREE.MeshBasicMaterial({map:tex, transparent:true, opacity:1, side:THREE.DoubleSide, depthWrite:false});
+  const planeWidth = 1.3*(width/384);
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(planeWidth,0.4), mat);
+  mesh.visible=false; mesh.renderOrder=5;
+  function showThenFade(delayMs){
+    mesh.visible=true; mat.opacity=1;
+    setTimeout(()=>{ tween(500, p=>{ mat.opacity=1-p; }, ()=>{ mesh.visible=false; }); }, delayMs||2000);
+  }
+  return { mesh, mat, showThenFade };
+}
+
+// A simple, legible sign board (chalkboard style) used for in-scene reflection questions —
+// plain sans-serif text, no gimmicky fonts, so it stays readable from any camera distance.
+function makeSignBoard(lines, opts){
+  opts = opts||{};
+  const w = opts.width||900, h = opts.height||340;
+  const cnv=document.createElement('canvas'); cnv.width=w; cnv.height=h;
+  const ctx=cnv.getContext('2d');
+  ctx.fillStyle = opts.bg||'#10201a'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle = opts.frame||'#8a6a3e'; ctx.lineWidth=16; ctx.strokeRect(8,8,w-16,h-16);
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  const fontSize = opts.fontSize||44;
+  const neon = opts.neon || '#5df2ff';
+  const numbered = opts.numbered!==false && lines.length>1;
+  const displayLines = numbered ? lines.map((l,i)=>(i+1)+'. '+l) : lines;
+  const header = opts.header;
+  const lineH = fontSize*1.35;
+  const totalLines = displayLines.length + (header?1:0);
+  let y0 = h/2 - (totalLines-1)*lineH/2;
+  if(header){
+    ctx.font = '700 '+Math.round(fontSize*0.68)+'px "Segoe UI", Arial, sans-serif';
+    ctx.fillStyle = '#eaf4ee';
+    ctx.fillText(header, w/2, y0);
+    y0 += lineH;
+  }
+  ctx.font = '700 '+fontSize+'px "Segoe UI", Arial, sans-serif';
+  displayLines.forEach((line,i)=>{
+    const y = y0 + i*lineH;
+    ctx.save();
+    ctx.shadowColor = neon; ctx.shadowBlur = 4; ctx.fillStyle = '#f4fffd'; ctx.fillText(line, w/2, y);
+    ctx.shadowBlur = 0; ctx.fillText(line, w/2, y);
+    ctx.restore();
+  });
+  const tex = new THREE.CanvasTexture(cnv);
+  const planeWidth = opts.planeWidth||1.8;
+  const mat = new THREE.MeshStandardMaterial({map:tex, roughness:0.92, transparent:true, emissive:new THREE.Color(neon), emissiveMap:tex, emissiveIntensity:0.12});
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(planeWidth, planeWidth*h/w), mat);
+  return mesh;
+}
+
+function makeBalance(){
+  const group = new THREE.Group();
+  const baseMat = new THREE.MeshStandardMaterial({color:0xD9D2BC, roughness:0.6});
+  const base = new THREE.Mesh(new THREE.BoxGeometry(0.9,0.12,0.7), baseMat);
+  base.position.y=0.06; base.castShadow=true; base.receiveShadow=true; group.add(base);
+  const plateMat = new THREE.MeshStandardMaterial({color:0xEDEAE0, roughness:0.4, metalness:0.3});
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.32,0.04,24), plateMat);
+  plate.position.y=0.15; plate.castShadow=true; plate.receiveShadow=true; group.add(plate);
+  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.05,12), baseMat);
+  stem.position.y=0.125; group.add(stem);
+  // screen lies flat on the table in front of the balance, so the ball on the plate can never hide it
+  const screenFrame = new THREE.Mesh(new THREE.BoxGeometry(0.56,0.02,0.28), new THREE.MeshStandardMaterial({color:0x3a362d, roughness:0.6}));
+  screenFrame.position.set(0,0.01,0.62); screenFrame.receiveShadow=true; group.add(screenFrame);
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.5,0.22), new THREE.MeshBasicMaterial({map:makeDisplayTexture(null)}));
+  screen.rotation.x=-Math.PI/2; screen.position.set(0,0.021,0.62); group.add(screen);
+  function setDisplay(text){ screen.material.map = makeDisplayTexture(text); screen.material.needsUpdate = true; }
+  return { group, plate, setDisplay };
+}
+
+// A cheerful low-poly quadruped, built from primitives, reused for the tab-4 chase animation:
+// pass 'mouse', 'cat' or 'dino' to get a different palette / size / silhouette.
+function makeCritter(kind){
+  const presets = {
+    mouse: { furColor:0x9c9690, darkColor:0x6b665f, scale:0.62, ears:'round', mane:false, teeth:false },
+    cat:   { furColor:0xE0A85C, darkColor:0x8a5a2b, scale:1.0,  ears:'point', mane:false, teeth:false },
+    dino:  { furColor:0x4f8a4f, darkColor:0x2e5a2e, scale:1.7,  ears:'none',  mane:false, teeth:true  }
+  };
+  const p = presets[kind] || presets.cat;
+  const group = new THREE.Group();
+  const fur = new THREE.MeshStandardMaterial({color:p.furColor, roughness:0.9});
+  const dark = new THREE.MeshStandardMaterial({color:p.darkColor, roughness:0.9});
+  const nose = new THREE.MeshStandardMaterial({color:0x2B2820, roughness:0.4});
+  const body = new THREE.Mesh(new THREE.SphereGeometry(0.22,16,12), fur);
+  body.scale.set(1.35,0.95,0.95); body.position.set(0,0.24,0); group.add(body);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.15,16,12), fur);
+  head.position.set(0.3,0.36,0); group.add(head);
+  const snout = new THREE.Mesh(new THREE.SphereGeometry(0.075,10,8), fur);
+  snout.scale.set(1.3,0.8,0.8); snout.position.set(0.43,0.32,0); group.add(snout);
+  const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.022,8,6), nose);
+  noseTip.position.set(0.5,0.32,0); group.add(noseTip);
+  if(p.ears==='point'){
+    const earGeo = new THREE.ConeGeometry(0.06,0.15,8);
+    const earL = new THREE.Mesh(earGeo, dark); earL.position.set(0.24,0.48,0.1); earL.rotation.set(0.3,0,-0.3); group.add(earL);
+    const earR = new THREE.Mesh(earGeo, dark); earR.position.set(0.24,0.48,-0.1); earR.rotation.set(-0.3,0,-0.3); group.add(earR);
+  } else if(p.ears==='round'){
+    const earGeo = new THREE.SphereGeometry(0.055,10,8);
+    const earL = new THREE.Mesh(earGeo, dark); earL.position.set(0.26,0.47,0.09); group.add(earL);
+    const earR = new THREE.Mesh(earGeo, dark); earR.position.set(0.26,0.47,-0.09); group.add(earR);
+  }
+  if(p.mane){
+    const maneMat = new THREE.MeshStandardMaterial({color:0x9c5f22, roughness:0.95});
+    for(let i=0;i<10;i++){
+      const tuft = new THREE.Mesh(new THREE.SphereGeometry(0.09,8,6), maneMat);
+      const ang = (i/10)*Math.PI*2;
+      tuft.position.set(0.3+Math.cos(ang)*0.14, 0.36+Math.sin(ang)*0.14, Math.sin(ang*1.7)*0.06);
+      group.add(tuft);
+    }
+  }
+  if(p.teeth){
+    const teethMat = new THREE.MeshStandardMaterial({color:0xF7F4EA, roughness:0.3});
+    const toothGeo = new THREE.ConeGeometry(0.014,0.05,6);
+    [[0.44,0.285,0.045],[0.44,0.285,-0.045],[0.47,0.283,0.02],[0.47,0.283,-0.02]].forEach(([x,y,z])=>{
+      const tooth = new THREE.Mesh(toothGeo, teethMat);
+      tooth.position.set(x,y,z); tooth.rotation.x = Math.PI;
+      group.add(tooth);
+    });
+  }
+  const legGeo = new THREE.CylinderGeometry(0.045,0.045,0.24,8);
+  [[0.14,0.1],[0.14,-0.1],[-0.16,0.1],[-0.16,-0.1]].forEach(([x,z])=>{
+    const leg=new THREE.Mesh(legGeo, fur); leg.position.set(x,0.12,z); group.add(leg);
+  });
+  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.05,0.26,8), fur);
+  tail.position.set(-0.3,0.34,0); tail.rotation.z=Math.PI/2-0.5; group.add(tail);
+  group.traverse(o=>{ if(o.isMesh){ o.castShadow=true; } });
+  const s = 1.5*p.scale; group.scale.set(s,s,s);
+  return group;
+}
+
+/* ===================== camera controls ===================== */
+function SimpleOrbit(camera, dom){
+  this.camera=camera; this.dom=dom;
+  this.target=new THREE.Vector3(0,1.2,0.3);
+  this.theta=0.5; this.phi=1.05; this.radius=5.2;
+  this.minRadius=2.6; this.maxRadius=10.5; this.minPhi=0.25; this.maxPhi=1.5;
+  this._drag=false; this._lastX=0; this._lastY=0; this._pinchDist=null;
+  dom.style.touchAction='none';
+  dom.addEventListener('pointerdown', e=>{ this._drag=true; this._lastX=e.clientX; this._lastY=e.clientY; dom.style.cursor='grabbing'; try{dom.setPointerCapture(e.pointerId);}catch(err){} });
+  dom.addEventListener('pointerup', ()=>{ this._drag=false; dom.style.cursor='grab'; });
+  dom.addEventListener('pointercancel', ()=>{ this._drag=false; dom.style.cursor='grab'; });
+  dom.addEventListener('pointermove', e=>{
+    if(!this._drag) return;
+    const dx=e.clientX-this._lastX, dy=e.clientY-this._lastY;
+    this._lastX=e.clientX; this._lastY=e.clientY;
+    this.theta -= dx*0.008;
+    this.phi = Math.min(this.maxPhi, Math.max(this.minPhi, this.phi - dy*0.008));
+    this.update();
+  });
+  dom.addEventListener('wheel', e=>{
+    e.preventDefault();
+    this.radius = Math.min(this.maxRadius, Math.max(this.minRadius, this.radius + e.deltaY*0.003));
+    this.update();
+  }, {passive:false});
+  dom.addEventListener('touchmove', e=>{
+    if(e.touches.length===2){
+      e.preventDefault();
+      const dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(this._pinchDist!=null){
+        this.radius = Math.min(this.maxRadius, Math.max(this.minRadius, this.radius + (this._pinchDist-dist)*0.01));
+        this.update();
+      }
+      this._pinchDist=dist;
+    }
+  }, {passive:false});
+  dom.addEventListener('touchend', e=>{ if(e.touches.length<2) this._pinchDist=null; });
+  this.update = function(){
+    this.camera.position.set(
+      this.target.x + this.radius*Math.sin(this.phi)*Math.sin(this.theta),
+      this.target.y + this.radius*Math.cos(this.phi),
+      this.target.z + this.radius*Math.sin(this.phi)*Math.cos(this.theta)
+    );
+    this.camera.lookAt(this.target);
+  };
+  this.update();
+}
+
+/* ===================== three.js globals ===================== */
+const canvas = document.createElement('canvas');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.shadowMap.enabled = true;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 50);
+const controls = new SimpleOrbit(camera, canvas);
+const scenes = {};
+let currentTab = 1;
+
+// Smoothly animates the orbit camera to a new framing — used for the automatic reveal shots.
+function flyTo(target, duration){
+  const from = { theta:controls.theta, phi:controls.phi, radius:controls.radius, target:controls.target.clone() };
+  tween(duration||1200, p=>{
+    controls.theta = from.theta + (target.theta-from.theta)*p;
+    controls.phi = from.phi + (target.phi-from.phi)*p;
+    controls.radius = from.radius + (target.radius-from.radius)*p;
+    controls.target.lerpVectors(from.target, target.target, p);
+    controls.update();
+  });
+}
+
+function resizeCanvas(){
+  const parent = canvas.parentElement;
+  if(!parent) return;
+  const w = parent.clientWidth, h = parent.clientHeight;
+  if(w<10||h<10) return;
+  renderer.setSize(w,h,false);
+  camera.aspect = w/h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', resizeCanvas);
+
+function switchTo3D(n){
+  if(scenes[currentTab]){
+    const s=scenes[currentTab];
+    s.camAngles.theta=controls.theta; s.camAngles.phi=controls.phi; s.camAngles.radius=controls.radius;
+    s.camAngles.target.copy(controls.target);
+  }
+  document.getElementById('stage3d-'+n).appendChild(canvas);
+  const s = ensureScene(n);
+  controls.theta=s.camAngles.theta; controls.phi=s.camAngles.phi; controls.radius=s.camAngles.radius;
+  controls.target.copy(s.camAngles.target); controls.update();
+  currentTab = n;
+  resizeCanvas();
+  setTimeout(resizeCanvas, 60);
+  if(s.onEnter) s.onEnter();
+}
+function ensureScene(n){
+  if(scenes[n]) return scenes[n];
+  const b = n===1?buildScene1() : n===2?buildScene2() : n===3?buildScene3() : buildScene4();
+  scenes[n]=b; return b;
+}
+
+let lastT = performance.now();
+function loop(now){
+  requestAnimationFrame(loop);
+  updateTweens(now);
+  updateFrameUpdaters(now);
+  const s = scenes[currentTab];
+  if(s) renderer.render(s.scene, camera);
+}
+requestAnimationFrame(loop);
+
+/* ===================== TAB 1 : découverte du déplacement d'eau ===================== */
+function buildScene1(){
+  const scene = new THREE.Scene(); addRoom(scene);
+  const basin = makeBasin(); basin.group.position.set(1.2, BENCH_TOP, 0.3); scene.add(basin.group);
+
+  // Three candidate bottles sit on the table at once; picking one fades out & removes the other two.
+  const candidateVols = [3.3, 2.8, 4.1];
+  const candidateX = [-2.05, -1.3, -0.55];
+  function createCandidates(){
+    return candidateVols.map((vol,i)=>{
+      const b = makeBottle(vol);
+      const y = BENCH_TOP + b.H/2 + 0.02;
+      b.group.position.set(candidateX[i], y, 0.3);
+      scene.add(b.group);
+      const lbl = makeFlatLabel(vol.toFixed(1).replace('.',',')+' L');
+      lbl.position.set(candidateX[i], BENCH_TOP+0.006, 0.85);
+      lbl.visible = false;
+      scene.add(lbl);
+      return { vol, bottle:b, lbl };
+    });
+  }
+  let candidates = createCandidates();
+  let bottleObj = null;
+  const holdPos = new THREE.Vector3(-1.3, BENCH_TOP+0.67, 0.3);
+
+  const label = makeFlatLabel('? L'); label.visible=false; scene.add(label);
+
+  const introBottle = makeFloatingLabel('Bouteilles');
+  introBottle.mesh.position.set(-1.3, BENCH_TOP+1.1, 0.3);
+  scene.add(introBottle.mesh);
+  const introBasin = makeFloatingLabel('Cristallisoir rempli d\'eau');
+  introBasin.mesh.position.copy(basin.group.position).add(new THREE.Vector3(0, basin.H+0.4, 0));
+  scene.add(introBasin.mesh);
+
+  const submergedPos = new THREE.Vector3(basin.group.position.x, BENCH_TOP+0.67, basin.group.position.z);
+  function tubeOuterPos(){ return new THREE.Vector3(-1.9, BENCH_TOP+0.55, 1.0); }
+
+  const mouth = makeMouth(); scene.add(mouth);
+
+  // wall-mounted sign, revealed once the whole apparatus has been assembled and blown into successfully
+  const signPos = new THREE.Vector3(0, 2.0, -4.15);
+  const sign1 = makeSignBoard(["Où va l'air que tu souffles ?","Où va l'eau de la bouteille ?"], {width:1125,height:500,fontSize:55,planeWidth:2.75, header:"note les réponses sur ton cahier :"});
+  sign1.position.copy(signPos); sign1.visible=false; scene.add(sign1);
+  // kept separate from the returned camAngles object (which the tab-switcher mutates to remember where you left the view)
+  const trueDefaultCam = { theta:0.5, phi:1.05, radius:5.6, target:new THREE.Vector3(0,1.2,0.3) };
+  const signCam = { theta:0, phi:1.4, radius:3.2, target:signPos.clone() };
+
+  // dimmed reminder message shown on top of everything each time this tab opens
+  const sceneDim1 = document.getElementById('sceneDim1');
+  const sceneIntroMsg1 = document.getElementById('sceneIntroMsg1');
+  const sceneIntroClose1 = document.getElementById('sceneIntroClose1');
+  let introMsgTimer1 = null;
+  let introCaptionsTimer1 = null;
+  function hideIntroMessage1(){
+    if(introMsgTimer1){ clearTimeout(introMsgTimer1); introMsgTimer1=null; }
+    sceneDim1.classList.remove('show'); sceneIntroMsg1.classList.remove('show');
+  }
+  function showIntroMessage1(){
+    if(introMsgTimer1) clearTimeout(introMsgTimer1);
+    sceneDim1.classList.add('show'); sceneIntroMsg1.classList.add('show');
+    introMsgTimer1 = setTimeout(hideIntroMessage1, 6000);
+  }
+  sceneIntroClose1.onclick = hideIntroMessage1;
+
+  let tubeGroup = null;
+  const state = { colorHex:null, bottleVolume:null, liquidType:null, fillPresses:0, air:0 };
+  const readout = document.getElementById('readout1');
+  const colorantBtn = document.getElementById('colorantBtn1');
+  const colorRow = document.getElementById('colorRow1');
+  colorantBtn.onclick = ()=>{ if(exploded) return; colorRow.style.display = colorRow.style.display==='none' ? 'flex' : 'none'; };
+  colorRow.querySelectorAll('.swatch').forEach(sw=>{
+    sw.onclick = ()=>{
+      if(exploded || !bottleObj) return;
+      colorRow.querySelectorAll('.swatch').forEach(s=>s.classList.remove('picked'));
+      sw.classList.add('picked');
+      state.colorHex = sw.dataset.color;
+      bottleObj.setWaterColor(state.colorHex);
+      readout.innerHTML = 'Le colorant se diffuse dans le liquide de la bouteille.';
+    };
+  });
+
+  // ---- the 9 action buttons, deliberately laid out out of order — the student has to work out the real sequence ----
+  const chooseBottleBtn = document.getElementById('chooseBottleBtn1');
+  const bottleRow = document.getElementById('bottleRow1');
+  setupBottleLabelOverlay(bottleRow, ()=>candidates, 1);
+  const fillEauBtn = document.getElementById('fillEauBtn1');
+  const fillAlcoolBtn = document.getElementById('fillAlcoolBtn1');
+  const boucherBtn = document.getElementById('boucherBtn1');
+  const retournerBtn = document.getElementById('retournerBtn1');
+  const plongerBtn = document.getElementById('plongerBtn1');
+  const deboucherBtn = document.getElementById('deboucherBtn1');
+  const tuyauBtn = document.getElementById('tuyauBtn1');
+  const soufflerBtn = document.getElementById('soufflerBtn1');
+  const retryBtn = document.getElementById('retryBtn1');
+  const puzzleActionBtns = [fillEauBtn, fillAlcoolBtn, boucherBtn, retournerBtn, plongerBtn, deboucherBtn, tuyauBtn, soufflerBtn];
+
+  // nextStep tracks the one correct action expected right now: 0=choose a bottle, 1=fill it (eau OU alcool, 9 clicks),
+  // 2=boucher, 3=retourner, 4=plonger, 5=déboucher, 6=placer le tuyau, 7=souffler (several clicks), 8=done.
+  let nextStep = 0;
+  let exploded = false;
+
+  function explodeApparatus(){
+    if(exploded) return;
+    exploded = true;
+    puzzleActionBtns.forEach(b=>b.disabled=true);
+    bottleRow.style.display='none'; colorRow.style.display='none';
+    mouth.visible=false; mouth.scale.set(0.001,0.001,0.001);
+    const origin = bottleObj ? bottleObj.getNeckWorld().add(new THREE.Vector3(0,-0.2,0)) : holdPos.clone();
+    spawnExplosionAt(scene, origin);
+    shakeCamera();
+    flashExplosion('explosionFlash1');
+    if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
+    if(tubeGroup){ scene.remove(tubeGroup); tubeGroup=null; }
+    readout.innerHTML = '💥 <b>Boom !</b> Ce n\'était pas le bon ordre : tout est cassé.';
+    retryBtn.style.display='inline-block';
+  }
+
+  const overflowDim1 = document.getElementById('overflowDim1');
+  const overflowMsg1 = document.getElementById('overflowMsg1');
+  // A brief spill of droplets over the bottle's neck before the whole thing gives way.
+  function spawnOverflow(neckPos){
+    const drops=[];
+    for(let i=0;i<9;i++){
+      const geo = new THREE.SphereGeometry(0.022+Math.random()*0.012,6,6);
+      const col = state.liquidType==='alcool' ? 0xEAF7FF : 0x3fa9e0;
+      const mat = new THREE.MeshStandardMaterial({color:col, transparent:true, opacity:0.92, roughness:0.15, metalness:0.1});
+      const m = new THREE.Mesh(geo, mat);
+      const ang = Math.random()*Math.PI*2;
+      m.position.copy(neckPos).add(new THREE.Vector3(Math.cos(ang)*0.05, 0.01, Math.sin(ang)*0.05));
+      scene.add(m);
+      drops.push({ m, startY:m.position.y, fallDist:0.5+Math.random()*0.3 });
+    }
+    tween(600, p=>{
+      drops.forEach(d=>{
+        d.m.position.y = d.startY - d.fallDist*p*p;
+        d.m.material.opacity = 0.92*(1-p);
+      });
+    }, ()=>{ drops.forEach(d=>scene.remove(d.m)); });
+  }
+  function explodeOverflow(){
+    if(exploded) return;
+    exploded = true;
+    puzzleActionBtns.forEach(b=>b.disabled=true);
+    bottleRow.style.display='none'; colorRow.style.display='none';
+    mouth.visible=false; mouth.scale.set(0.001,0.001,0.001);
+    const neckPos = bottleObj ? bottleObj.getNeckWorld() : holdPos.clone();
+    spawnOverflow(neckPos);
+    readout.innerHTML = 'L\'eau déborde de la bouteille…';
+    setTimeout(()=>{
+      const origin = bottleObj ? bottleObj.getNeckWorld().add(new THREE.Vector3(0,-0.2,0)) : holdPos.clone();
+      spawnExplosionAt(scene, origin);
+      shakeCamera();
+      flashExplosion('explosionFlash1');
+      if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
+      if(tubeGroup){ scene.remove(tubeGroup); tubeGroup=null; }
+      overflowDim1.classList.add('show');
+      overflowMsg1.classList.add('show');
+      readout.innerHTML = 'La bouteille a débordé puis explosé. Appuie sur « Réessayer ».';
+      retryBtn.style.display='inline-block';
+    }, 600);
+  }
+
+  chooseBottleBtn.onclick = ()=>{
+    if(exploded) return;
+    const opening = bottleRow.style.display==='none';
+    bottleRow.style.display = opening ? 'flex' : 'none';
+    candidates.forEach(c=>{ c.lbl.visible = opening; });
+  };
+  function applyBottleVolume(vol){
+    if(exploded) return;
+    if(nextStep!==0){ explodeApparatus(); return; }
+    state.bottleVolume = vol;
+    const chosen = candidates.find(c=>c.vol===vol);
+    if(!chosen) return;
+    bottleObj = chosen.bottle;
+    candidates.forEach(c=>{
+      if(c===chosen) return;
+      scene.remove(c.lbl);
+      const grp = c.bottle.group;
+      const mats = []; grp.traverse(o=>{ if(o.isMesh && o.material){ o.material.transparent=true; mats.push(o.material); } });
+      const startOps = mats.map(m=> m.opacity!=null ? m.opacity : 1);
+      tween(450, p=>{ mats.forEach((m,i)=>{ m.opacity = startOps[i]*(1-p); }); }, ()=>{ scene.remove(grp); });
+    });
+    scene.remove(chosen.lbl);
+    holdPos.y = BENCH_TOP + bottleObj.H/2 + 0.02;
+    submergedPos.y = BENCH_TOP + bottleObj.H/2 + 0.05;
+    const startPos = bottleObj.group.position.clone();
+    tween(600, p=>{ bottleObj.group.position.lerpVectors(startPos, holdPos, p); });
+    label.setText(vol.toFixed(1).replace('.',',')+' L');
+    label.position.set(holdPos.x, BENCH_TOP+0.006, holdPos.z+0.55);
+    label.visible = true;
+    bottleRow.style.display='none';
+    puzzleActionBtns.forEach(b=>b.disabled=false);
+    chooseBottleBtn.disabled = true;
+    nextStep = 1;
+    readout.innerHTML = 'La bouteille est choisie. À toi de deviner le bon ordre des actions suivantes !';
+  }
+  bottleRow.querySelectorAll('button[data-vol]').forEach(b=>{
+    b.onclick = ()=> applyBottleVolume(parseFloat(b.dataset.vol));
+  });
+
+  // filling now takes 9 clicks on the same button to go from empty to brimful — a 10th click overflows it
+  function doFill(type){
+    if(exploded) return;
+    if(state.fillPresses>=9){ explodeOverflow(); return; }
+    if(nextStep!==1){ explodeApparatus(); return; }
+    if(state.liquidType===null){
+      state.liquidType = type;
+      bottleObj.setLiquidType(type);
+      (type==='alcool' ? fillEauBtn : fillAlcoolBtn).disabled = true;
+    } else if(state.liquidType!==type){
+      explodeApparatus(); return;
+    }
+    state.fillPresses = Math.min(9, state.fillPresses+1);
+    bottleObj.setFilling(state.fillPresses/9);
+    if(state.fillPresses>=9){
+      readout.innerHTML = '<b>La bouteille est remplie à ras bord !</b>';
+      nextStep = 2;
+    } else {
+      readout.innerHTML = 'Continue à remplir la bouteille ('+state.fillPresses+'/9).';
+    }
+  }
+  fillEauBtn.onclick = ()=> doFill('eau');
+  fillAlcoolBtn.onclick = ()=> doFill('alcool');
+
+  boucherBtn.onclick = ()=>{
+    if(exploded) return;
+    if(nextStep!==2){ explodeApparatus(); return; }
+    bottleObj.cap.visible=true; bottleObj.cap.scale.set(0.001,0.001,0.001);
+    tween(300,p=>{ const s=0.001+p*0.999; bottleObj.cap.scale.set(s,s,s); }, ()=>{ readout.innerHTML='Le bouchon ferme l\'ouverture : aucun liquide ne peut sortir.'; });
+    nextStep = 3;
+  };
+  retournerBtn.onclick = ()=>{
+    if(exploded) return;
+    if(nextStep!==3){ explodeApparatus(); return; }
+    const r0=bottleObj.group.rotation.x; tween(800,p=>{ bottleObj.group.rotation.x=r0+(Math.PI-r0)*p; }, ()=>{ readout.innerHTML='Bouteille retournée : le bouchon maintient toujours l\'ouverture fermée.'; });
+    nextStep = 4;
+  };
+  plongerBtn.onclick = ()=>{
+    if(exploded) return;
+    if(nextStep!==4){ explodeApparatus(); return; }
+    const startPos=bottleObj.group.position.clone(); tween(900,p=>{ bottleObj.group.position.lerpVectors(startPos,submergedPos,p); }, ()=>{ readout.innerHTML='L\'ouverture est maintenant immergée dans le cristallisoir.'; });
+    nextStep = 5;
+  };
+  deboucherBtn.onclick = ()=>{
+    if(exploded) return;
+    if(nextStep!==5){ explodeApparatus(); return; }
+    tween(300,p=>{ const s=1-0.999*p; bottleObj.cap.scale.set(s,s,s); }, ()=>{ bottleObj.cap.visible=false; readout.innerHTML='Aucun liquide ne s\'échappe : la pression atmosphérique le maintient en place.'; });
+    nextStep = 6;
+  };
+  tuyauBtn.onclick = ()=>{
+    if(exploded) return;
+    if(nextStep!==6){ explodeApparatus(); return; }
+    const points = computeTubePoints(basin, bottleObj, bottleObj.getNeckWorld(), tubeOuterPos());
+    tubeGroup = makeTube(points); scene.add(tubeGroup);
+    tween(700,p=>{ tubeGroup.children.forEach(c=>{ c.material.opacity=p; }); }, ()=>{
+      readout.innerHTML='Le tuyau relie l\'ouverture immergée à l\'extérieur, sans traverser aucun verre.';
+    });
+    nextStep = 7;
+  };
+  soufflerBtn.onclick = ()=>{
+    if(exploded) return;
+    if(nextStep!==7){ explodeApparatus(); return; }
+    if(state.air===0){ mouth.visible=true; mouth.position.copy(tubeOuterPos()).add(new THREE.Vector3(0.15,0,0.05)); tween(350,p=>{ const s=0.001+p*0.999; mouth.scale.set(s,s,s); }); }
+    state.air = Math.min(100, state.air+16);
+    bottleObj.setVenting(state.air/100);
+    basin.setLevel(0.5+state.air/100*0.42);
+    if(state.colorHex) basin.setColorBlend(state.colorHex, state.air/100);
+    spawnBubble3D(scene, bottleObj.getNeckWorld().add(new THREE.Vector3(0,0.15,0)));
+    if(state.air>=100){
+      readout.innerHTML='<b>Bravo !</b> Le liquide de la bouteille a été entièrement remplacé par de l\'air.';
+      nextStep = 8;
+      setTimeout(()=>{ sign1.visible=true; flyTo(signCam, 1400); }, 1000);
+    } else readout.innerHTML = 'L\'air remplace le liquide, qui remonte dans le cristallisoir.';
+  };
+
+  function resetAll(){
+    exploded = false; nextStep = 0;
+    state.colorHex=null; state.bottleVolume=null; state.liquidType=null; state.fillPresses=0; state.air=0;
+    if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
+    candidates.forEach(c=>{ c.bottle.stopShimmer(); scene.remove(c.bottle.group); scene.remove(c.lbl); });
+    candidates = createCandidates();
+    label.visible = false;
+    basin.resetColor();
+    basin.setLevel(0.5);
+    mouth.visible=false; mouth.scale.set(0.001,0.001,0.001);
+    if(tubeGroup){ scene.remove(tubeGroup); tubeGroup=null; }
+    sign1.visible=false;
+    colorRow.style.display='none'; colorRow.querySelectorAll('.swatch').forEach(s=>s.classList.remove('picked'));
+    bottleRow.style.display='none';
+    puzzleActionBtns.forEach(b=>b.disabled=true);
+    fillEauBtn.disabled=true; fillAlcoolBtn.disabled=true;
+    chooseBottleBtn.disabled = false;
+    retryBtn.style.display='none';
+    overflowDim1.classList.remove('show'); overflowMsg1.classList.remove('show');
+    flyTo(trueDefaultCam, 700);
+    readout.innerHTML='Étape 1 : choisis une bouteille.';
+  }
+  document.getElementById('resetBtn1').onclick = resetAll;
+  retryBtn.onclick = resetAll;
+  return {
+    scene, camAngles:{ theta:0.5, phi:1.05, radius:5.6, target:new THREE.Vector3(0,1.2,0.3) },
+    onEnter(){
+      showIntroMessage1();
+      if(introCaptionsTimer1) clearTimeout(introCaptionsTimer1);
+      introCaptionsTimer1 = setTimeout(()=>{ introBottle.showThenFade(3200); introBasin.showThenFade(3200); }, 3700);
+    }
+  };
+}
+
+/* ===================== TAB 2 : peser le ballon gonflé ===================== */
+function buildScene2(){
+  const scene = new THREE.Scene(); addRoom(scene);
+  const balloon = makeBalloon();
+  const restPos = new THREE.Vector3(-1.1, BENCH_TOP+0.5, 0.3);
+  balloon.group.position.copy(restPos);
+  balloon.setPose(0.30, 0.035); // au départ : totalement dégonflé, à plat
+  scene.add(balloon.group);
+  const balance = makeBalance(); balance.group.position.set(1.0, BENCH_TOP, 0.2); scene.add(balance.group);
+  const weighPos = new THREE.Vector3(balance.group.position.x, balance.group.position.y+0.55, balance.group.position.z);
+
+  const introBalloon = makeFloatingLabel('Ballon (de basket)');
+  introBalloon.mesh.position.copy(restPos).add(new THREE.Vector3(0,0.75,0));
+  scene.add(introBalloon.mesh);
+  const introBalance = makeFloatingLabel('Balance');
+  introBalance.mesh.position.copy(balance.group.position).add(new THREE.Vector3(0,0.75,0));
+  scene.add(introBalance.mesh);
+
+  // question sign, lying flat on the table — revealed once the balloon has actually been weighed
+  const sign2 = makeSignBoard(["L'air a une masse.","3. Comment le prouver avec cette expérience ?"], {width:1125,height:425,fontSize:50,planeWidth:2.1, numbered:false, header:"note la réponse sur ton cahier :"});
+  sign2.rotation.x=-Math.PI/2; sign2.position.set(-0.16, BENCH_TOP+0.006, 1.0); sign2.visible=false; scene.add(sign2);
+  // dedicated close-up framing used to reveal the sign, and the tab's normal resting view to fly back to on reset
+  const trueDefaultCam2 = { theta:-0.4, phi:1.05, radius:5.4, target:new THREE.Vector3(0,1.1,0.35) };
+  const signCam2 = { theta:-0.05, phi:0.55, radius:3.0, target:new THREE.Vector3(sign2.position.x, sign2.position.y+0.05, sign2.position.z) };
+
+  // the balloon's mass genuinely depends on how much air it holds: a fixed rubber/cuir mass (a real basketball) plus the mass of the air pumped in
+  const rubberMass = +(450 + Math.random()*8).toFixed(1);
+  const airFullMass = +(2.4 + Math.random()*1.2).toFixed(1);
+  function currentMass(){ return rubberMass + (state.inflate/100)*airFullMass; }
+  // the balloon bursts after a random number of presses (between 3 and 10) rather than always the same count
+  function randomBurstThreshold(){ return 3 + Math.floor(Math.random()*8); }
+
+  const state = { inflate:0, onScale:false, balanceOn:false, pressCount:0, exploded:false };
+  let burstAt = randomBurstThreshold();
+  const readout = document.getElementById('readout2');
+  const inflateBtn = document.getElementById('actionBtn2');
+  const turnOnBtn = document.getElementById('turnOnBtn2');
+  const weighBtn = document.getElementById('weighBtn2');
+  const burstMsg = document.getElementById('burstMsg2');
+
+  function explodeBalloon(){
+    state.exploded = true;
+    burstMsg.innerHTML = '💥 <b>Boom !</b> Il y avait trop d\'air à l\'intérieur : le ballon a éclaté. Appuie sur « Recommencer ».';
+    burstMsg.classList.add('show');
+    const center = balloon.group.position.clone();
+    const flashMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.9});
+    const flash = new THREE.Mesh(new THREE.SphereGeometry(0.06,12,10), flashMat);
+    flash.position.copy(center); scene.add(flash);
+    tween(300, p=>{ const s=0.06+p*1.3; flash.scale.set(s,s,s); flashMat.opacity=0.9*(1-p); }, ()=>scene.remove(flash));
+    const shreds=[];
+    for(let i=0;i<12;i++){
+      const geo = new THREE.ConeGeometry(0.045,0.13,6);
+      const mat = new THREE.MeshStandardMaterial({color:0xE07A2E, roughness:0.8, transparent:true, opacity:1});
+      const m = new THREE.Mesh(geo, mat);
+      m.position.copy(center); scene.add(m);
+      const dir = new THREE.Vector3(Math.random()*2-1, Math.random()*1.3+0.2, Math.random()*2-1).normalize();
+      shreds.push({mesh:m, dir});
+    }
+    tween(750, p=>{
+      shreds.forEach(s=>{
+        s.mesh.position.copy(center).addScaledVector(s.dir, p*0.95);
+        s.mesh.position.y -= p*p*0.55;
+        s.mesh.material.opacity = 1-p;
+        s.mesh.rotation.x += 0.35; s.mesh.rotation.y += 0.22;
+      });
+    }, ()=>{ shreds.forEach(s=>scene.remove(s.mesh)); });
+    balloon.group.visible = false;
+    inflateBtn.disabled = true;
+    turnOnBtn.disabled = true;
+    weighBtn.disabled = true;
+  }
+
+  inflateBtn.onclick = function(){
+    if(state.exploded) return;
+    state.pressCount++;
+    if(state.pressCount>=burstAt){ explodeBalloon(); return; }
+    state.inflate = Math.min(100, state.inflate+11);
+    balloon.setScale(0.30+(state.inflate/100)*0.70, 0.035+(state.inflate/100)*0.965);
+    if(state.onScale){
+      experiment.massGonfle = currentMass();
+      balance.setDisplay(currentMass().toFixed(1)+' g');
+      readout.innerHTML='La masse affichée change avec la quantité d\'air : regarde l\'écran devant la balance.';
+    } else {
+      readout.innerHTML = state.inflate>=100 ? '<b>Le ballon est bien gonflé.</b> Quand tu es prêt, allume la balance puis pèse-le.' : 'Continue à gonfler le ballon.';
+    }
+  };
+  turnOnBtn.onclick = function(){
+    if(state.exploded || state.balanceOn) return;
+    state.balanceOn = true;
+    balance.setDisplay('0.0 g');
+    weighBtn.disabled = false;
+    readout.innerHTML = 'Balance allumée et tarée. Pose le ballon dessus pour le peser.';
+  };
+  weighBtn.onclick = function(){
+    if(state.exploded || !state.balanceOn) return;
+    if(!state.onScale){
+      readout.innerHTML='Pesée en cours…';
+      const start = balloon.group.position.clone();
+      tween(800, p=>{ balloon.group.position.lerpVectors(start, weighPos, p); }, ()=>{
+        state.onScale = true;
+        const mass = currentMass(); experiment.massGonfle = mass;
+        let shown=0;
+        const id=setInterval(()=>{ shown=Math.min(mass, shown+mass/12); balance.setDisplay(shown.toFixed(1)+' g'); if(shown>=mass) clearInterval(id); }, 60);
+        readout.innerHTML='Lis la masse affichée sur l\'écran, devant la balance, et note-la sur ton cahier. Tu peux encore gonfler le ballon pour voir la masse changer. Passe ensuite à l\'onglet 3.';
+        setTimeout(()=>{ sign2.visible = true; flyTo(signCam2, 1400); }, 2000);
+      });
+    } else {
+      experiment.massGonfle = currentMass();
+      balance.setDisplay(currentMass().toFixed(1)+' g');
+    }
+  };
+  document.getElementById('resetBtn2').onclick = function(){
+    state.inflate=0; state.onScale=false; state.balanceOn=false; state.pressCount=0; state.exploded=false;
+    burstAt = randomBurstThreshold();
+    balloon.group.position.copy(restPos); balloon.setPose(0.30, 0.035); balloon.group.visible=true;
+    inflateBtn.disabled=false; turnOnBtn.disabled=false; weighBtn.disabled=true;
+    balance.setDisplay(null); experiment.massGonfle=null;
+    sign2.visible=false;
+    flyTo(trueDefaultCam2, 700);
+    burstMsg.classList.remove('show');
+    readout.innerHTML='Étape 1 : gonfle le ballon.';
+  };
+  return {
+    scene, camAngles:{ theta:-0.4, phi:1.05, radius:5.4, target:new THREE.Vector3(0,1.1,0.35) },
+    onEnter(){ introBalloon.showThenFade(2000); introBalance.showThenFade(2000); }
+  };
+}
+
+/* ===================== TAB 3 : extraction de l'air ===================== */
+function buildScene3(){
+  const scene = new THREE.Scene(); addRoom(scene);
+  const basin = makeBasin(); basin.group.position.set(1.2, BENCH_TOP, 0.3); scene.add(basin.group);
+
+  // Three candidate bottles sit on the table at once; picking one fades out & removes the other two.
+  const candidateVols = [3.3, 2.8, 4.1];
+  const candidateX = [-2.05, -1.3, -0.55];
+  function createCandidates(){
+    return candidateVols.map((vol,i)=>{
+      const b = makeBottle(vol);
+      const y = BENCH_TOP + b.H/2 + 0.02;
+      b.group.position.set(candidateX[i], y, 0.3);
+      scene.add(b.group);
+      const lbl = makeFlatLabel(vol.toFixed(1).replace('.',',')+' L');
+      lbl.position.set(candidateX[i], BENCH_TOP+0.006, 0.85);
+      scene.add(lbl);
+      return { vol, bottle:b, lbl };
+    });
+  }
+  let candidates = createCandidates();
+  let bottleObj = null;
+  const restPos = new THREE.Vector3(-1.3, BENCH_TOP+0.67, 0.3);
+  const submergedPos = new THREE.Vector3(basin.group.position.x, BENCH_TOP+0.67, basin.group.position.z);
+
+  const label = makeFlatLabel('? L'); label.visible=false; scene.add(label);
+
+  const introBottle = makeFloatingLabel('Choisis une bouteille');
+  introBottle.mesh.position.set(-1.3, BENCH_TOP+1.1, 0.3);
+  scene.add(introBottle.mesh);
+  const introBasin = makeFloatingLabel('Cristallisoir rempli d\'eau');
+  introBasin.mesh.position.copy(basin.group.position).add(new THREE.Vector3(0, basin.H+0.4, 0));
+  scene.add(introBasin.mesh);
+
+  const balloon = makeBalloon();
+  const balloonRest = new THREE.Vector3(-1.9, BENCH_TOP+0.9, 1.0);
+  balloon.group.position.copy(balloonRest); balloon.setScale(1.0); scene.add(balloon.group);
+
+  const introLabel = makeFloatingLabel('Ballon que tu as gonflé');
+  introLabel.mesh.position.copy(balloonRest).add(new THREE.Vector3(0,0.75,0));
+  scene.add(introLabel.mesh);
+
+  // question sign, lying flat on the table — revealed only when the student clicks "Afficher la question"
+  const sign3 = makeSignBoard(["4. Donne une estimation du volume","d'air que tu as retiré du ballon."], {width:1125,height:375,fontSize:50,planeWidth:2.1, numbered:false});
+  sign3.rotation.x=-Math.PI/2; sign3.position.set(0, BENCH_TOP+0.006, 1.0); sign3.visible=false; scene.add(sign3);
+  // dedicated close-up framing used to reveal the sign, and the tab's normal resting view to fly back to on reset
+  const trueDefaultCam3 = { theta:0.3, phi:1.05, radius:5.7, target:new THREE.Vector3(0.1,1.1,0.4) };
+  const signCam3 = { theta:0, phi:0.55, radius:3.0, target:new THREE.Vector3(sign3.position.x, sign3.position.y+0.05, sign3.position.z) };
+
+  let tubeGroup = null;
+  const readout = document.getElementById('readout3');
+  const showQuestionBtn = document.getElementById('showQuestionBtn3');
+  showQuestionBtn.disabled = true;
+  showQuestionBtn.onclick = ()=>{ if(showQuestionBtn.disabled) return; sign3.visible = true; flyTo(signCam3, 1400); };
+  const stopBtn = document.getElementById('stopBtn3');
+  stopBtn.style.display='none';
+  const state = { localVolume:0, bottleVolume:null, colorHex:null, liquidType:null };
+
+  // ---- camera reminder: nags once if the student mashes "appuyer sur le ballon" 5 times
+  // without ever having zoomed the camera in near the bottle's submerged opening ----
+  const camNagBox3 = document.getElementById('camNagBox3');
+  const camNagClose3 = document.getElementById('camNagClose3');
+  let pressesWithoutCam = 0;
+  let camNagShown = false;
+  function cameraIsNearOpening(){
+    // "near" = zoomed in reasonably close AND looking roughly at the submerged bottle neck
+    const dist = controls.target.distanceTo(submergedPos);
+    return controls.radius <= 3.6 && dist <= 1.4;
+  }
+  function hideCamNag3(){ camNagBox3.classList.remove('show'); }
+  camNagClose3.onclick = hideCamNag3;
+
+  const chooseBottleBtn = document.getElementById('chooseBottleBtn3');
+  const bottleRow = document.getElementById('bottleRow3');
+  setupBottleLabelOverlay(bottleRow, ()=>candidates, 3);
+  const remplirEauBtn = document.getElementById('remplirEauBtn3');
+  const remplirAlcoolBtn = document.getElementById('remplirAlcoolBtn3');
+  const relierBtn = document.getElementById('relierBtn3');
+  const appuyerBtn = document.getElementById('appuyerBtn3');
+  const retryBtn = document.getElementById('retryBtn3');
+  const puzzleActionBtns3 = [remplirEauBtn, remplirAlcoolBtn, relierBtn, appuyerBtn];
+
+  // nextStep tracks the one correct action expected right now: 0=choose a bottle, 1=remplir (eau OU alcool),
+  // 2=relier le ballon au tuyau, 3=appuyer sur le ballon (repeated, extraction in progress).
+  let nextStep = 0;
+  let exploded = false;
+
+  function explodeApparatus3(){
+    if(exploded) return;
+    exploded = true;
+    puzzleActionBtns3.forEach(b=>b.disabled=true);
+    bottleRow.style.display='none'; colorRow.style.display='none';
+    stopBtn.style.display='none';
+    const origin = bottleObj ? bottleObj.getNeckWorld().add(new THREE.Vector3(0,-0.2,0)) : restPos.clone();
+    spawnExplosionAt(scene, origin);
+    shakeCamera();
+    flashExplosion('explosionFlash3');
+    if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
+    if(tubeGroup){ scene.remove(tubeGroup); tubeGroup=null; }
+    readout.innerHTML = '💥 <b>Boom !</b> Ce n\'était pas le bon ordre : tout est cassé.';
+    retryBtn.style.display='inline-block';
+  }
+
+  chooseBottleBtn.onclick = ()=>{ if(exploded) return; bottleRow.style.display = bottleRow.style.display==='none' ? 'flex' : 'none'; };
+  function applyBottleVolume(vol){
+    if(exploded) return;
+    if(nextStep!==0){ explodeApparatus3(); return; }
+    state.bottleVolume = vol;
+    const chosen = candidates.find(c=>c.vol===vol);
+    if(!chosen) return;
+    bottleObj = chosen.bottle;
+    candidates.forEach(c=>{
+      if(c===chosen) return;
+      scene.remove(c.lbl);
+      const grp = c.bottle.group;
+      const mats = []; grp.traverse(o=>{ if(o.isMesh && o.material){ o.material.transparent=true; mats.push(o.material); } });
+      const startOps = mats.map(m=> m.opacity!=null ? m.opacity : 1);
+      tween(450, p=>{ mats.forEach((m,i)=>{ m.opacity = startOps[i]*(1-p); }); }, ()=>{ scene.remove(grp); });
+    });
+    scene.remove(chosen.lbl);
+    restPos.y = BENCH_TOP + bottleObj.H/2 + 0.02;
+    submergedPos.y = BENCH_TOP + bottleObj.H/2 + 0.05;
+    const startPos = bottleObj.group.position.clone();
+    tween(600, p=>{ bottleObj.group.position.lerpVectors(startPos, restPos, p); });
+    bottleRow.style.display='none';
+    puzzleActionBtns3.forEach(b=>b.disabled=false);
+    chooseBottleBtn.disabled = true;
+    nextStep = 1;
+    readout.innerHTML = 'La bouteille est choisie. À toi de deviner le bon ordre des actions suivantes !';
+  }
+  bottleRow.querySelectorAll('button[data-vol]').forEach(b=>{
+    b.onclick = ()=> applyBottleVolume(parseFloat(b.dataset.vol));
+  });
+
+  const colorantBtn = document.getElementById('colorantBtn3');
+  const colorRow = document.getElementById('colorRow3');
+  colorantBtn.onclick = ()=>{ if(exploded) return; colorRow.style.display = colorRow.style.display==='none' ? 'flex' : 'none'; };
+  colorRow.querySelectorAll('.swatch').forEach(sw=>{
+    sw.onclick = ()=>{
+      if(exploded || !bottleObj) return;
+      colorRow.querySelectorAll('.swatch').forEach(s=>s.classList.remove('picked'));
+      sw.classList.add('picked');
+      state.colorHex = sw.dataset.color;
+      bottleObj.setWaterColor(state.colorHex);
+      readout.innerHTML = 'Le colorant se diffuse dans le liquide de la bouteille.';
+    };
+  });
+
+  // Filling with water or with rubbing alcohol ("alcool ménager", shown with a scintillating shimmer)
+  // both lead into the same rebuild-the-montage animation.
+  function doMontage(type){
+    if(exploded) return;
+    if(nextStep!==1){ explodeApparatus3(); return; }
+    state.liquidType = type;
+    bottleObj.setLiquidType(type);
+    puzzleActionBtns3.forEach(b=>b.disabled=true);
+    bottleObj.setFilling(1);
+    readout.innerHTML='Remplissage et immersion en cours…';
+    setTimeout(()=>{
+      tween(800, p=>{ bottleObj.group.rotation.x = p*Math.PI; }, ()=>{
+        const startPos = bottleObj.group.position.clone();
+        tween(900, p=>{ bottleObj.group.position.lerpVectors(startPos, submergedPos, p); }, ()=>{
+          nextStep = 2;
+          relierBtn.disabled = false; appuyerBtn.disabled = false;
+          readout.innerHTML = 'Montage prêt : bouteille pleine, '+(type==='alcool' ? 'd\'alcool ménager' : 'd\'eau')+' et immergée.';
+        });
+      });
+    }, 450);
+  }
+  remplirEauBtn.onclick = ()=> doMontage('eau');
+  remplirAlcoolBtn.onclick = ()=> doMontage('alcool');
+
+  relierBtn.onclick = ()=>{
+    if(exploded) return;
+    if(nextStep!==2){ explodeApparatus3(); return; }
+    const points = computeTubePoints(basin, bottleObj, bottleObj.getNeckWorld(), balloon.group.position.clone().add(new THREE.Vector3(0,-0.3,0)));
+    tubeGroup = makeTube(points); scene.add(tubeGroup);
+    tween(600, p=>{ tubeGroup.children.forEach(c=>c.material.opacity=p); });
+    readout.innerHTML='Le ballon est relié à la bouteille. Appuie dessus pour chasser l\'air.';
+    relierBtn.disabled = true;
+    nextStep = 3;
+  };
+  appuyerBtn.onclick = ()=>{
+    if(exploded) return;
+    if(camNagShown && camNagBox3.classList.contains('show')) return; // paused while the reminder is up
+    if(nextStep!==3){ explodeApparatus3(); return; }
+    if(state.localVolume>=experiment.totalBalloonCapacity) return;
+    if(cameraIsNearOpening()){
+      pressesWithoutCam = 0;
+    } else {
+      pressesWithoutCam++;
+      if(pressesWithoutCam>=5 && !camNagShown){
+        camNagShown = true;
+        camNagBox3.classList.add('show');
+        return; // this press is absorbed by the reminder; resume exactly here once closed
+      }
+    }
+    // more presses are needed now: each press only pushes a small amount of air through
+    state.localVolume = Math.min(experiment.totalBalloonCapacity, state.localVolume+0.12);
+    experiment.volumeExtracted = state.localVolume;
+    const bottleFrac = Math.min(state.localVolume, state.bottleVolume)/state.bottleVolume;
+    bottleObj.setVenting(bottleFrac);
+    basin.setLevel(0.5+bottleFrac*0.4);
+    if(state.colorHex) basin.setColorBlend(state.colorHex, bottleFrac);
+    const remain = Math.max(0, experiment.totalBalloonCapacity-state.localVolume)/experiment.totalBalloonCapacity;
+    balloon.setScale(0.3+remain*0.7);
+    spawnBubble3D(scene, bottleObj.getNeckWorld().add(new THREE.Vector3(0,0.15,0)));
+    stopBtn.style.display='inline-block';
+    const v = state.localVolume;
+    if(v>=experiment.totalBalloonCapacity){ readout.innerHTML='Le ballon est complètement à plat.'; appuyerBtn.disabled=true; }
+    else readout.innerHTML='Observe le niveau dans la bouteille graduée à '+state.bottleVolume.toFixed(1).replace('.',',')+' L pour savoir quand t\'arrêter.';
+  };
+  stopBtn.onclick = function(){
+    stopBtn.style.display='none'; appuyerBtn.disabled=true;
+    readout.innerHTML='Tuyau déconnecté. Lis toi-même le volume sur la graduation de la bouteille et note-le sur ton cahier. Passe ensuite à l\'onglet 4.';
+    if(tubeGroup){
+      const tg = tubeGroup; tubeGroup=null;
+      const startOps = tg.children.map(c=>c.material.opacity);
+      tween(500, p=>{ tg.children.forEach((c,i)=>{ c.material.opacity = startOps[i]*(1-p); }); }, ()=>{ scene.remove(tg); });
+    }
+    showQuestionBtn.disabled = false;
+  };
+  function resetAll3(){
+    exploded = false; nextStep = 0;
+    state.localVolume=0; experiment.volumeExtracted=0;
+    state.bottleVolume=null; state.colorHex=null; state.liquidType=null;
+    if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
+    candidates.forEach(c=>{ c.bottle.stopShimmer(); scene.remove(c.bottle.group); scene.remove(c.lbl); });
+    candidates = createCandidates();
+    label.visible = false;
+    basin.resetColor();
+    sign3.visible=false;
+    basin.setLevel(0.5);
+    balloon.group.position.copy(balloonRest); balloon.setScale(1.0);
+    if(tubeGroup){ scene.remove(tubeGroup); tubeGroup=null; }
+    stopBtn.style.display='none';
+    puzzleActionBtns3.forEach(b=>b.disabled=true);
+    chooseBottleBtn.disabled = false;
+    pressesWithoutCam = 0; camNagShown = false; hideCamNag3();
+    showQuestionBtn.disabled = true;
+    retryBtn.style.display='none';
+    bottleRow.style.display='flex'; colorRow.style.display='none';
+    colorRow.querySelectorAll('.swatch').forEach(s=>s.classList.remove('picked'));
+    flyTo(trueDefaultCam3, 700);
+    readout.innerHTML='Étape 1 : choisis une bouteille.';
+  }
+  document.getElementById('resetBtn3').onclick = resetAll3;
+  retryBtn.onclick = resetAll3;
+  return {
+    scene, camAngles:{ theta:0.3, phi:1.05, radius:5.7, target:new THREE.Vector3(0.1,1.1,0.4) },
+    onEnter(){ introBottle.showThenFade(2000); introBasin.showThenFade(2000); introLabel.showThenFade(2000); }
+  };
+}
+
+// A small scientist head, popped into the corner of the frame as a comic reaction shot.
+// mood: 'angry' (default, flushed face + converging eyebrows + forehead vein + shouting mouth) or 'happy'.
+function scientistFaceSVG(mood){
+  if(mood==='happy'){
+    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+      + '<circle cx="50" cy="56" r="33" fill="#eab98c"/>'
+      + '<path d="M18 44 Q12 12 42 14 Q34 2 58 6 Q80 4 84 28 Q94 36 82 42 Q85 16 58 14 Q38 10 32 26 Q20 22 18 44 Z" fill="#cfcfcf"/>'
+      + '<path d="M26 47 Q36 40 46 46" stroke="#5a5a5a" stroke-width="4" fill="none" stroke-linecap="round"/>'
+      + '<path d="M74 47 Q64 40 54 46" stroke="#5a5a5a" stroke-width="4" fill="none" stroke-linecap="round"/>'
+      + '<circle cx="38" cy="57" r="4.4" fill="#241f1a"/>'
+      + '<circle cx="62" cy="57" r="4.4" fill="#241f1a"/>'
+      + '<circle cx="39.6" cy="55.4" r="1.3" fill="#fff"/>'
+      + '<circle cx="63.6" cy="55.4" r="1.3" fill="#fff"/>'
+      + '<ellipse cx="28" cy="68" rx="6.5" ry="4" fill="#f0a08a" opacity="0.7"/>'
+      + '<ellipse cx="72" cy="68" rx="6.5" ry="4" fill="#f0a08a" opacity="0.7"/>'
+      + '<path d="M33 73 Q50 78 67 73 Q50 82 33 73 Z" fill="#8a8a8a"/>'
+      + '<path d="M37 78 Q50 92 63 78 Q50 86 37 78 Z" fill="#7a3325"/>'
+      + '<path d="M40 79 Q50 88 60 79" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
+      + '</svg>';
+  }
+  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
+    + '<circle cx="50" cy="56" r="33" fill="#c73a24"/>'
+    + '<path d="M18 40 Q12 10 42 12 Q34 0 58 4 Q80 2 84 26 Q94 34 82 38 Q85 14 58 12 Q38 8 32 24 Q20 20 18 40 Z" fill="#cfcfcf"/>'
+    + '<path d="M10 46 Q4 40 9 33 Q3 28 8 21" stroke="#f6f6f6" stroke-width="3.4" fill="none" stroke-linecap="round" opacity="0.85"/>'
+    + '<path d="M90 46 Q96 40 91 33 Q97 28 92 21" stroke="#f6f6f6" stroke-width="3.4" fill="none" stroke-linecap="round" opacity="0.85"/>'
+    + '<path d="M40 26 Q42 30 40 34 M50 24 L50 32 M60 26 Q58 30 60 34" stroke="#7a1f12" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
+    + '<path d="M14 36 L49 55 L42 63 L12 44 Z" fill="#160f0b"/>'
+    + '<path d="M86 36 L51 55 L58 63 L88 44 Z" fill="#160f0b"/>'
+    + '<ellipse cx="36" cy="61" rx="3.4" ry="2.4" fill="#160f0b"/>'
+    + '<ellipse cx="64" cy="61" rx="3.4" ry="2.4" fill="#160f0b"/>'
+    + '<path d="M76 28 L83 35 M83 28 L76 35" stroke="#8a1c11" stroke-width="2.4" stroke-linecap="round"/>'
+    + '<path d="M28 76 L72 76 L67 97 L33 97 Z" fill="#3a0f08"/>'
+    + '<path d="M31 78.5 L69 78.5 L66 84 L34 84 Z" fill="#fff"/>'
+    + '<path d="M35 89 L65 89 L63 93.5 L37 93.5 Z" fill="#fff"/>'
+    + '</svg>';
+}
+
+/* ===================== TAB 4 : peser le ballon dégonflé ===================== */
+function buildScene4(){
+  const scene = new THREE.Scene(); addRoom(scene);
+  const balloon = makeBalloon();
+  const restPos = new THREE.Vector3(-1.1, BENCH_TOP+0.5, 0.3);
+  balloon.group.position.copy(restPos); scene.add(balloon.group);
+  const balance = makeBalance(); balance.group.position.set(1.0, BENCH_TOP, 0.2); scene.add(balance.group);
+  const weighPos = new THREE.Vector3(balance.group.position.x, balance.group.position.y+0.55, balance.group.position.z);
+  // close-up used whenever the balance actually shows a reading, so the digital screen is clearly visible
+  const weighCam4 = { theta:-0.1, phi:0.95, radius:2.5, target:new THREE.Vector3(balance.group.position.x, BENCH_TOP+0.25, balance.group.position.z+0.35) };
+  const trueDefaultCam4 = { theta:-0.4, phi:1.05, radius:5.0, target:new THREE.Vector3(0,1.2,0.2) };
+
+  const introLabel = makeFloatingLabel('Ballon que tu as dégonflé');
+  introLabel.mesh.position.copy(restPos).add(new THREE.Vector3(0,0.75,0));
+  scene.add(introLabel.mesh);
+  const introBalance = makeFloatingLabel('Balance');
+  introBalance.mesh.position.copy(balance.group.position).add(new THREE.Vector3(0,0.75,0));
+  scene.add(introBalance.mesh);
+
+  function initialScale(){ const remain=Math.max(0.15, experiment.totalBalloonCapacity-(experiment.volumeExtracted||0))/experiment.totalBalloonCapacity; return 0.28+remain*0.55; }
+  balloon.setScale(initialScale());
+
+  const readout = document.getElementById('readout4');
+  const poserBtn = document.getElementById('poserBtn4');
+  const allumerBtn = document.getElementById('allumerBtn4');
+  const siesteBtn = document.getElementById('siesteBtn4');
+  const surpriseBtn = document.getElementById('surpriseBtn4');
+  const napDim = document.getElementById('napDim4');
+  const napMoon = document.getElementById('napMoon4');
+  const scientistFace = document.getElementById('scientistFace4');
+  let critters = [];
+  let critterTimers = [];
+  let faceTimer = null;
+  function clearCritters(){
+    critterTimers.forEach(t=>clearTimeout(t)); critterTimers=[];
+    critters.forEach(c=>scene.remove(c)); critters=[];
+  }
+  function hideScientistFace(){
+    if(faceTimer){ clearTimeout(faceTimer); faceTimer=null; }
+    scientistFace.style.display='none';
+    scientistFace.innerHTML='';
+  }
+
+  // Odd presses of the surprise button: a mouse dashes across the table just ahead of a chasing cat,
+  // which brushes past the balloon and knocks it clean off the table onto the floor — popping an
+  // angry scientist's head into the corner of the frame.
+  function runOnTable(){
+    const y = BENCH_TOP + 0.08;
+    const startX = -3.4, endX = 3.4;
+    const mouse = makeCritter('mouse'), cat = makeCritter('cat');
+    mouse.position.set(startX, y, restPos.z+0.14);
+    cat.position.set(startX, y, restPos.z-0.1);
+    let fallen = false;
+    const ballStart = balloon.group.position.clone();
+
+    scene.add(mouse); critters.push(mouse);
+    tween(1500, p=>{
+      mouse.position.x = startX + (endX-startX)*p;
+      mouse.position.y = y + Math.abs(Math.sin(p*Math.PI*8))*0.04;
+    }, ()=>{ scene.remove(mouse); critters = critters.filter(c=>c!==mouse); });
+
+    const t = setTimeout(()=>{
+      scene.add(cat); critters.push(cat);
+      tween(1500, p=>{
+        cat.position.x = startX + (endX-startX)*p;
+        cat.position.y = y + Math.abs(Math.sin(p*Math.PI*7))*0.05;
+        if(!fallen && cat.position.x > restPos.x-0.2 && cat.position.x < restPos.x+0.2){
+          fallen = true;
+          const floorY = 0.16;
+          const dropX = ballStart.x - 0.9, dropZ = ballStart.z + 1.7;
+          tween(650, q=>{
+            balloon.group.position.x = ballStart.x + (dropX-ballStart.x)*q;
+            balloon.group.position.z = ballStart.z + (dropZ-ballStart.z)*q;
+            balloon.group.position.y = ballStart.y + Math.sin(q*Math.PI)*0.25 - (ballStart.y-floorY)*q*q;
+            balloon.group.rotation.x += 0.4;
+            balloon.group.rotation.z = Math.sin(q*Math.PI*3)*0.5;
+          }, ()=>{
+            balloon.group.position.set(dropX, floorY, dropZ);
+            tween(260, r=>{ balloon.group.position.y = floorY + Math.sin(r*Math.PI)*0.05*(1-r); }, ()=>{ balloon.group.position.y = floorY; });
+            hideScientistFace();
+            scientistFace.innerHTML = scientistFaceSVG('angry');
+            scientistFace.style.display = 'block';
+            faceTimer = setTimeout(hideScientistFace, 2400);
+          });
+        }
+      }, ()=>{ scene.remove(cat); critters = critters.filter(c=>c!==cat); });
+    }, 380);
+    critterTimers.push(t);
+  }
+
+  // Surprise button: alternates between two scenes each time it's pressed.
+  // Press on odd clicks: mouse then cat run across the table, the cat brushes the balloon and knocks it onto the floor.
+  // Press on even clicks: on the floor, mouse then cat then a toothy dinosaur run past — the dinosaur (last one through)
+  // clips the fallen balloon and sends it bouncing back up onto the scale.
+  function bounceBalloonBackToScale(){
+    const start = balloon.group.position.clone();
+    tween(650, q=>{
+      balloon.group.position.x = start.x + (weighPos.x-start.x)*q;
+      balloon.group.position.z = start.z + (weighPos.z-start.z)*q;
+      balloon.group.position.y = start.y + Math.sin(q*Math.PI)*1.2 + (weighPos.y-start.y)*q*q;
+      balloon.group.rotation.x -= 0.5;
+      balloon.group.rotation.z = Math.sin(q*Math.PI*2)*0.4;
+    }, ()=>{
+      balloon.group.position.copy(weighPos);
+      balloon.group.rotation.set(0,0,0);
+      tween(260, r=>{ balloon.group.position.y = weighPos.y + Math.sin(r*Math.PI)*0.06*(1-r); }, ()=>{ balloon.group.position.y = weighPos.y; });
+    });
+    hideScientistFace();
+    scientistFace.innerHTML = scientistFaceSVG('happy');
+    scientistFace.style.display = 'block';
+    faceTimer = setTimeout(hideScientistFace, 2400);
+  }
+  function runChaseOnFloor(){
+    const z = balance.group.position.z + 1.3;
+    const startX = -3.6, endX = 3.6;
+    const order = [['mouse',0], ['cat',380], ['dino',760]];
+    let ballHit = false;
+    order.forEach(([kind,delay], idx)=>{
+      const isLast = idx===order.length-1;
+      const t = setTimeout(()=>{
+        const c = makeCritter(kind);
+        c.position.set(startX, 0, z);
+        scene.add(c); critters.push(c);
+        tween(1800, p=>{
+          c.position.x = startX + (endX-startX)*p;
+          c.position.y = Math.abs(Math.sin(p*Math.PI*7))*0.05;
+          if(isLast && !ballHit && Math.abs(c.position.x-balloon.group.position.x)<0.4 && Math.abs(c.position.z-balloon.group.position.z)<1.0){
+            ballHit = true;
+            bounceBalloonBackToScale();
+          }
+        }, ()=>{ scene.remove(c); critters = critters.filter(cc=>cc!==c); });
+      }, delay);
+      critterTimers.push(t);
+    });
+  }
+  let surpriseRunning = false;
+  let balloonOnFloor = false;
+  surpriseBtn.onclick = function(){
+    if(surpriseRunning) return;
+    surpriseRunning = true; surpriseBtn.disabled = true;
+    if(!balloonOnFloor){
+      runOnTable();
+      balloonOnFloor = true;
+      setTimeout(()=>{ surpriseRunning=false; surpriseBtn.disabled=false; }, 2000);
+    } else {
+      runChaseOnFloor();
+      balloonOnFloor = false;
+      setTimeout(()=>{ surpriseRunning=false; surpriseBtn.disabled=false; }, 2700);
+    }
+  };
+
+  // "poser le ballon" and "allumer la balance" are independent — either can be clicked first.
+  // The surprise button only unlocks if the balance was already on *when* the balloon gets placed,
+  // i.e. "allumer" really did happen before "poser".
+  let balanceOn = false;
+  let onScale = false;
+
+  function doWeighReading(){
+    flyTo(weighCam4, 900);
+    const massGonfle = experiment.massGonfle!=null ? experiment.massGonfle : baseMassGonfle;
+    const v = experiment.volumeExtracted||0;
+    const noise = (Math.random()*0.1-0.05);
+    const mass = +(massGonfle - v*experiment.airDensityRef + noise).toFixed(1);
+    experiment.massDegonfle = mass;
+    let shown=0;
+    const id=setInterval(()=>{ shown=Math.min(mass, shown+mass/12); balance.setDisplay(shown.toFixed(1)+' g'); if(shown>=mass) clearInterval(id); }, 60);
+    readout.innerHTML='Lis la masse affichée sur la balance et note-la sur ton cahier. Passe ensuite à l\'onglet 5.';
+    surpriseBtn.style.display='inline-block';
+  }
+
+  allumerBtn.onclick = function(){
+    if(balanceOn) return;
+    balanceOn = true;
+    balance.setDisplay('0.0 g');
+    if(onScale){
+      // the balloon was already on the plate before the balance was switched on: a real scale
+      // tares to zero at power-on no matter what's already sitting on it, so it reads 0 g here —
+      // it never captured the balloon's actual mass. This order also doesn't unlock the surprise.
+      flyTo(weighCam4, 900);
+      readout.innerHTML = 'Balance allumée : elle affiche 0 g, car elle s\'est tarée avec le ballon déjà posé dessus. Repose le ballon après avoir allumé la balance pour lire sa vraie masse.';
+    } else {
+      readout.innerHTML = 'Balance allumée et tarée. Pose le ballon dessus pour le peser.';
+    }
+  };
+  poserBtn.onclick = function(){
+    if(onScale){
+      if(balanceOn && experiment.massDegonfle==null) doWeighReading();
+      return;
+    }
+    readout.innerHTML = 'Le ballon est posé sur le plateau…';
+    const start = balloon.group.position.clone();
+    tween(800, p=>{ balloon.group.position.lerpVectors(start, weighPos, p); }, ()=>{
+      onScale = true;
+      if(balanceOn){
+        doWeighReading();
+      } else {
+        readout.innerHTML = 'Le ballon est posé, mais la balance est éteinte : allume-la pour lire la masse.';
+      }
+    });
+  };
+
+  // "faire une sieste" — purely cosmetic, always available: the stage dims (not to full black),
+  // a moon slides down from the top, a few Zzzz drift up and fade, then everything settles back.
+  let napTimer = null;
+  function spawnZzz(i){
+    const stage = document.getElementById('stage3d-4');
+    const z = document.createElement('div');
+    z.className='nap-zzz';
+    z.textContent = 'Zzzz';
+    z.style.left = (28+i*16)+'%';
+    z.style.bottom = '28%';
+    z.style.fontSize = (0.85+i*0.18)+'rem';
+    stage.appendChild(z);
+    requestAnimationFrame(()=>{ z.style.opacity=1; z.style.transform='translateY(-75px)'; });
+    setTimeout(()=>{ z.style.opacity=0; }, 1500);
+    setTimeout(()=>{ z.remove(); }, 2000);
+  }
+  siesteBtn.onclick = function(){
+    if(napTimer) return;
+    siesteBtn.disabled = true;
+    napDim.classList.add('show');
+    setTimeout(()=>{ napMoon.classList.add('show'); }, 200);
+    [700, 1500, 2300].forEach((t,i)=> setTimeout(()=> spawnZzz(i), t));
+    napTimer = setTimeout(()=>{
+      napDim.classList.remove('show');
+      napMoon.classList.remove('show');
+      siesteBtn.disabled = false;
+      napTimer = null;
+      const screamer = document.getElementById('screamerOverlay');
+      screamer.innerHTML = ghostSVG('scream');
+      screamer.classList.add('show');
+      setTimeout(()=>{ screamer.classList.remove('show'); screamer.innerHTML=''; }, 260);
+    }, 4200);
+  };
+
+  document.getElementById('resetBtn4').onclick = function(){
+    balloon.group.position.copy(restPos); balloon.group.rotation.set(0,0,0); balloon.setScale(initialScale());
+    balance.setDisplay(null); experiment.massDegonfle=null;
+    balanceOn = false; onScale = false;
+    clearCritters();
+    hideScientistFace();
+    surpriseRunning = false; balloonOnFloor = false; surpriseBtn.disabled = false;
+    napDim.classList.remove('show'); napMoon.classList.remove('show');
+    if(napTimer){ clearTimeout(napTimer); napTimer=null; }
+    siesteBtn.disabled = false;
+    surpriseBtn.style.display='none';
+    flyTo(trueDefaultCam4, 700);
+    readout.innerHTML='Pose le ballon et allume la balance, dans l\'ordre de ton choix.';
+  };
+  return {
+    scene, camAngles:{ theta:-0.4, phi:1.05, radius:5.0, target:new THREE.Vector3(0,1.2,0.2) },
+    onEnter(){ introLabel.showThenFade(5000); introBalance.showThenFade(2000); }
+  };
+}
+
+/* ===================== tabs & cahier ===================== */
+let tab5LinesTimer = null;
+function showTab(n){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  document.querySelector('.tab-btn[data-tab="'+n+'"]').classList.add('active');
+  if(n>=1 && n<=4) switchTo3D(n); else currentTab = 0;
+  if(n===5){
+    const lines5 = document.getElementById('tab5Lines');
+    if(lines5){
+      lines5.classList.remove('show');
+      if(tab5LinesTimer) clearTimeout(tab5LinesTimer);
+      tab5LinesTimer = setTimeout(()=>{ lines5.classList.add('show'); }, 1200);
+    }
+  }
+  if(n===6 && typeof propInitState==='function'){
+    propInitState();
+  }
+}
+// Sliders replace free-text entry: each has to actually be dragged (not just left at 0) before it counts as filled in.
+const sliderTouched = { m1:false, v:false, m2:false };
+function bindT5Slider(key, unit, decimals){
+  const el = document.getElementById('in-'+key);
+  const out = document.getElementById('in-'+key+'-val');
+  if(!el || !out) return;
+  function refresh(){ out.textContent = parseFloat(el.value).toFixed(decimals).replace('.',',')+' '+unit; }
+  el.addEventListener('input', ()=>{ sliderTouched[key]=true; refresh(); });
+  refresh();
+}
+bindT5Slider('m1','g',1);
+bindT5Slider('v','L',2);
+bindT5Slider('m2','g',1);
+
+// "J'ai oublié la formule" — shows a nicely designed image of ρ(air) = m(air) ÷ V rather than plain text.
+(function setupFormulaReminder(){
+  const btn = document.getElementById('forgotFormulaBtn5');
+  const modal = document.getElementById('formulaModal5');
+  const card = document.getElementById('formulaModalCard5');
+  if(!btn || !modal || !card) return;
+  const svg = '<svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">'
+    + '<defs><linearGradient id="formulaBg" x1="0" y1="0" x2="0" y2="1">'
+    + '<stop offset="0%" stop-color="#FBF9F2"/><stop offset="100%" stop-color="#EFEAD8"/>'
+    + '</linearGradient></defs>'
+    + '<rect x="6" y="6" width="388" height="248" rx="22" fill="url(#formulaBg)" stroke="#5C7A5E" stroke-width="2.5"/>'
+    + '<rect x="16" y="16" width="368" height="228" rx="16" fill="none" stroke="#cec5ab" stroke-width="1" stroke-dasharray="3 5"/>'
+    + '<text x="200" y="52" text-anchor="middle" font-family="Georgia, \'Iowan Old Style\', serif" font-size="21" font-weight="700" fill="#2B2820">Masse volumique de l\'air</text>'
+    + '<line x1="60" y1="68" x2="340" y2="68" stroke="#5C7A5E" stroke-width="1.5" opacity="0.5"/>'
+    + '<ellipse cx="52" cy="152" rx="22" ry="27" fill="#A0503F" opacity="0.85"/>'
+    + '<path d="M52 179 L52 190" stroke="#7c3c2f" stroke-width="2"/>'
+    + '<path d="M47 126 Q52 115 57 126" stroke="#7c3c2f" stroke-width="2" fill="none"/>'
+    + '<text x="128" y="162" text-anchor="middle" font-family="Georgia, serif" font-size="34" font-style="italic" font-weight="700" fill="#3f5a41">&#961;(air)</text>'
+    + '<text x="200" y="162" text-anchor="middle" font-family="Georgia, serif" font-size="34" font-weight="700" fill="#2B2820">=</text>'
+    + '<text x="278" y="142" text-anchor="middle" font-family="Georgia, serif" font-size="26" font-weight="700" fill="#2B2820">m(air)</text>'
+    + '<line x1="235" y1="155" x2="321" y2="155" stroke="#2B2820" stroke-width="2.5"/>'
+    + '<text x="278" y="182" text-anchor="middle" font-family="Georgia, serif" font-size="26" font-weight="700" fill="#2B2820">V</text>'
+    + '<text x="200" y="222" text-anchor="middle" font-family="\'Segoe UI\', sans-serif" font-size="13" fill="#6b6656">m(air) en grammes (g) &#183; V en litres (L)</text>'
+    + '<text x="200" y="240" text-anchor="middle" font-family="\'Segoe UI\', sans-serif" font-size="12" fill="#6b6656" font-style="italic">résultat en g/L</text>'
+    + '</svg>';
+  card.innerHTML = svg;
+  btn.onclick = ()=> modal.classList.add('show');
+  function close(){ modal.classList.remove('show'); }
+  modal.addEventListener('click', (e)=>{ if(e.target===modal) close(); });
+  card.addEventListener('click', close);
+})();
+
+function t5_calc(){
+  // Uses only the values the student set on the sliders after reading the animation themselves — never the app's own data.
+  const badge = document.getElementById('t5-badge');
+  const m1 = parseFloat(document.getElementById('in-m1').value);
+  const v = parseFloat(document.getElementById('in-v').value);
+  const m2 = parseFloat(document.getElementById('in-m2').value);
+  const allTouched = sliderTouched.m1 && sliderTouched.v && sliderTouched.m2;
+  if(!allTouched || isNaN(m1) || isNaN(v) || isNaN(m2) || v<=0){
+    badge.classList.remove('show'); void badge.offsetWidth;
+    badge.classList.add('show','warn'); badge.textContent='Complète les trois curseurs ci-dessus pour calculer.';
+    return;
+  }
+  const rho = (m1-m2)/v;
+  badge.classList.remove('warn'); badge.classList.remove('show'); void badge.offsetWidth;
+  badge.classList.add('show');
+  badge.textContent = 'Fais le calcul sur ta feuille, avec tes valeurs, tu dois trouver '+rho.toFixed(1).replace('.',',')+' g/L';
+}
+
+// "Note ton résultat final" — the student types the density they calculated by hand, and gets
+// instant colourful full-screen feedback (never reveals the expected value, just a verdict).
+(function setupFinalResult(){
+  const openBtn = document.getElementById('finalResultBtn5');
+  const row = document.getElementById('finalResultRow5');
+  const input = document.getElementById('finalResultInput5');
+  const checkBtn = document.getElementById('finalResultCheckBtn5');
+  if(!openBtn || !row || !input || !checkBtn) return;
+
+  openBtn.onclick = ()=>{
+    const opening = row.style.display === 'none';
+    row.style.display = opening ? 'flex' : 'none';
+    if(opening) input.focus();
+  };
+
+  function evaluate(v){
+    if(v < 1.1 || v > 1.46) return { tier:'bad', text:'pas terrible :(', emoji:'😕' };
+    if(v <= 1.2) return { tier:'good', text:'pas mal', emoji:'🙂' };
+    if(v <= 1.35) return { tier:'excellent', text:'excellent :)', emoji:'🤩' };
+    return { tier:'good', text:'pas mal', emoji:'🙂' };
+  }
+
+  function flashResult(r){
+    const overlay = document.createElement('div');
+    overlay.className = 'final-flash-overlay tier-' + r.tier;
+    overlay.innerHTML = '<div class="final-flash-emoji">'+r.emoji+'</div><div class="final-flash-text">'+r.text+'</div>';
+    document.body.appendChild(overlay);
+    requestAnimationFrame(()=>{ requestAnimationFrame(()=> overlay.classList.add('show')); });
+    setTimeout(()=>{
+      overlay.classList.remove('show');
+      setTimeout(()=> overlay.remove(), 250);
+    }, 1000);
+  }
+
+  checkBtn.onclick = ()=>{
+    const raw = input.value.replace(',', '.').trim();
+    const v = parseFloat(raw);
+    if(isNaN(v)) return;
+    flashResult(evaluate(v));
+  };
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') checkBtn.click(); });
+})();
+
+/* ===================== TAB 5 : ghost jump-scare ===================== */
+function ghostSVG(face){
+  const strokeCol = '#7fa0ad';
+  let faceMarkup = '';
+  if(face==='side'){
+    faceMarkup = '<ellipse cx="63" cy="46" rx="6" ry="8" fill="#26262e"/>'
+      + '<path d="M58 63 q6 5 11 0" stroke="#26262e" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  } else if(face==='front'){
+    faceMarkup = '<ellipse cx="37" cy="47" rx="7" ry="9" fill="#26262e"/>'
+      + '<ellipse cx="63" cy="47" rx="7" ry="9" fill="#26262e"/>'
+      + '<circle cx="50" cy="66" r="6" fill="#26262e"/>';
+  } else {
+    faceMarkup = '<ellipse cx="34" cy="45" rx="11" ry="14" fill="#000"/>'
+      + '<ellipse cx="66" cy="45" rx="11" ry="14" fill="#000"/>'
+      + '<ellipse cx="50" cy="74" rx="15" ry="18" fill="#000"/>';
+  }
+  return '<svg viewBox="0 0 100 112" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">'
+    + '<defs><radialGradient id="ghostGrad'+face+'" cx="35%" cy="28%" r="75%">'
+    + '<stop offset="0%" stop-color="#ffffff"/><stop offset="55%" stop-color="#eaf6fb"/><stop offset="100%" stop-color="#b9d3dc"/>'
+    + '</radialGradient></defs>'
+    + '<path d="M12 62 C12 20 88 20 88 62 L88 98 Q78 84 68 98 Q58 84 48 98 Q38 84 28 98 Q18 84 12 98 Z" '
+    + 'fill="url(#ghostGrad'+face+')" stroke="'+strokeCol+'" stroke-width="2.2" opacity="0.9"/>'
+    + faceMarkup + '</svg>';
+}
+
+// Second design used from the 2nd press onward: a slightly scarier ghost — narrower, sharper eyes,
+// a sickly pale-green tint, jagged teeth on the scream frame, and a pink bow tied in her hair.
+function ghostSVG2(face){
+  const strokeCol = '#4a6b78';
+  let faceMarkup = '';
+  if(face==='side'){
+    faceMarkup = '<ellipse cx="63" cy="46" rx="6" ry="9" fill="#12121a"/>'
+      + '<path d="M56 65 q7 7 14 0" stroke="#12121a" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  } else if(face==='front'){
+    faceMarkup = '<path d="M27 39 L47 47 L27 55 Z" fill="#0b0b10"/>'
+      + '<path d="M73 39 L53 47 L73 55 Z" fill="#0b0b10"/>'
+      + '<path d="M39 68 Q50 79 61 68" stroke="#0b0b10" stroke-width="4" fill="none" stroke-linecap="round"/>';
+  } else {
+    faceMarkup = '<ellipse cx="32" cy="44" rx="13" ry="17" fill="#000"/>'
+      + '<ellipse cx="68" cy="44" rx="13" ry="17" fill="#000"/>'
+      + '<path d="M31 70 Q50 96 69 70 Q50 84 31 70 Z" fill="#000"/>'
+      + '<path d="M35 72 L39 81 L43 72 L47 81 L51 72 L55 81 L59 72 L63 81 L67 72" stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round"/>';
+  }
+  const bow = '<g transform="translate(50 16) rotate(-8)">'
+    + '<path d="M0 0 L-17 -10 L-17 10 Z" fill="#e8557a" stroke="#b8365a" stroke-width="1.5"/>'
+    + '<path d="M0 0 L17 -10 L17 10 Z" fill="#e8557a" stroke="#b8365a" stroke-width="1.5"/>'
+    + '<circle cx="0" cy="0" r="5.5" fill="#d94a72" stroke="#b8365a" stroke-width="1.5"/>'
+    + '</g>';
+  return '<svg viewBox="0 0 100 112" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">'
+    + '<defs><radialGradient id="ghostGrad2'+face+'" cx="35%" cy="28%" r="75%">'
+    + '<stop offset="0%" stop-color="#f2fff6"/><stop offset="55%" stop-color="#d8f2e0"/><stop offset="100%" stop-color="#9fc9ad"/>'
+    + '</radialGradient></defs>'
+    + '<path d="M12 62 C12 20 88 20 88 62 L88 98 Q78 84 68 98 Q58 84 48 98 Q38 84 28 98 Q18 84 12 98 Z" '
+    + 'fill="url(#ghostGrad2'+face+')" stroke="'+strokeCol+'" stroke-width="2.2" opacity="0.92"/>'
+    + faceMarkup + bow + '</svg>';
+}
+(function setupGhost(){
+  const stage = document.getElementById('ghostStage5');
+  const dim = document.getElementById('ghostDim5');
+  const figure = document.getElementById('ghostFigure5');
+  const btn = document.getElementById('surpriseBtn5');
+  const screamer = document.getElementById('screamerOverlay');
+  if(!stage || !btn) return;
+  let running = false;
+  let pressCount = 0;
+  btn.onclick = function(){
+    if(running) return;
+    running = true; btn.disabled = true;
+    pressCount++;
+    // 1st, 3rd, 5th… press: the original ghost. 2nd, 4th, 6th… press: the scarier bow-haired variant.
+    const svgFor = (pressCount % 2 === 0) ? ghostSVG2 : ghostSVG;
+    figure.innerHTML = svgFor('side');
+    figure.style.left = '-110px';
+    figure.style.display = 'block';
+    dim.classList.add('on');
+    setTimeout(()=>{
+      const w = stage.clientWidth;
+      const startLeft = -110, midLeft = w/2-45, endLeft = w+20;
+      tween(1400, p=>{ figure.style.left = (startLeft+(midLeft-startLeft)*p)+'px'; }, ()=>{
+        figure.innerHTML = svgFor('front'); // the ghost turns to look at us
+        setTimeout(()=>{
+          tween(1400, p=>{ figure.style.left = (midLeft+(endLeft-midLeft)*p)+'px'; }, ()=>{
+            figure.style.display = 'none';
+            dim.classList.remove('on');
+            screamer.innerHTML = svgFor('scream');
+            screamer.classList.add('show');
+            setTimeout(()=>{
+              screamer.classList.remove('show');
+              screamer.innerHTML = '';
+              btn.disabled = false; running = false;
+            }, 260);
+          });
+        }, 550);
+      });
+    }, 3000);
+  };
+})();
+
+/* ===================== TAB 6 : proportions O2/N2 ===================== */
+// Densités réalistes (masse molaire / 24 L·mol⁻¹, conditions ordinaires) : O2 = 32/24, N2 = 28/24.
+// Avec ces valeurs, un mélange à 20% O2 / 80% N2 redonne bien ≈ 1,20 g/L, la valeur théorique de l'air.
+const PROP_BASE_MASS = 450;   // masse fictive du ballon vide, g (n'a pas d'importance : elle s'annule dans la soustraction)
+let propDensityO2 = 1.33, propDensityN2 = 1.17;
+let propStep = 0; // 0=peser à vide, 1=mettre 1L, 2=peser gonflé, 3=calculer, 4=recommencer
+const PROP_STEP_LABELS = [
+  '⚖️ Peser le ballon vide',
+  '💨 Mettre 1 L de gaz',
+  '⚖️ Peser le ballon gonflé',
+  "🧮 Calculer la masse d'1 L de gaz"
+];
+const PROP_GAS_KEYS = ['O2', 'N2'];
+function propDensity(key){ return key === 'O2' ? propDensityO2 : propDensityN2; }
+function propGasLabel(key){ return key === 'O2' ? 'O\u2082' : 'N\u2082'; }
+
+function propResetVisuals(){
+  PROP_GAS_KEYS.forEach(key=>{
+    const balloon = document.getElementById('propBalloon'+key);
+    const badge = document.getElementById('propBadge'+key);
+    const scale = document.getElementById('propScale'+key);
+    const readout = document.getElementById('propReadout'+key);
+    balloon.style.transition = 'none';
+    balloon.style.opacity = '0';
+    balloon.style.transform = 'translate(-50%, -90px) scale(0.5)';
+    balloon.classList.remove('inflated');
+    badge.style.opacity = '0';
+    scale.textContent = '— g';
+    readout.innerHTML = '';
+  });
+}
+
+function propInitState(){
+  propDensityO2 = +(1.33 + (Math.random()*0.04 - 0.02)).toFixed(3);
+  propDensityN2 = +(1.17 + (Math.random()*0.04 - 0.02)).toFixed(3);
+  propResetVisuals();
+  propStep = 0;
+  const btn = document.getElementById('propActionBtn');
+  btn.textContent = PROP_STEP_LABELS[0];
+  btn.disabled = false;
+  updatePropMix();
+}
+
+// Un seul bouton pilote les 2 expériences (O2 et N2) en même temps, étape par étape.
+function propDoStep(){
+  const btn = document.getElementById('propActionBtn');
+  btn.disabled = true;
+
+  if(propStep === 0){
+    // peser le ballon vide : il descend se poser sur la balance, puis la balance affiche sa masse
+    PROP_GAS_KEYS.forEach(key=>{
+      const balloon = document.getElementById('propBalloon'+key);
+      balloon.style.transition = 'transform .6s ease, opacity .3s ease';
+      balloon.style.opacity = '1';
+      balloon.style.transform = 'translate(-50%, 0) scale(0.55)';
+    });
+    setTimeout(()=>{
+      PROP_GAS_KEYS.forEach(key=>{
+        const scale = document.getElementById('propScale'+key);
+        const readout = document.getElementById('propReadout'+key);
+        tween(500, p=>{ scale.textContent = (PROP_BASE_MASS*p).toFixed(1) + ' g'; }, ()=>{
+          scale.textContent = PROP_BASE_MASS.toFixed(1) + ' g';
+          readout.innerHTML = 'm(vide) = <b>' + PROP_BASE_MASS.toFixed(1) + ' g</b>';
+        });
+      });
+      propStep = 1; btn.textContent = PROP_STEP_LABELS[1]; btn.disabled = false;
+    }, 650);
+
+  } else if(propStep === 1){
+    // on retire le ballon de la balance pour le gonfler : il remonte, se gonfle (SVG plat -> SVG gonflé), et la balance revient à 0
+    PROP_GAS_KEYS.forEach(key=>{
+      const balloon = document.getElementById('propBalloon'+key);
+      balloon.classList.add('inflated');
+      balloon.style.transform = 'translate(-50%, -60px) scale(1.15)';
+      document.getElementById('propBadge'+key).style.opacity = '1';
+      document.getElementById('propScale'+key).textContent = '0 g';
+    });
+    setTimeout(()=>{
+      propStep = 2; btn.textContent = PROP_STEP_LABELS[2]; btn.disabled = false;
+    }, 650);
+
+  } else if(propStep === 2){
+    // on repose le ballon gonflé sur la balance, qui affiche sa nouvelle masse
+    PROP_GAS_KEYS.forEach(key=>{
+      const density = propDensity(key);
+      const filledMass = PROP_BASE_MASS + density;
+      const balloon = document.getElementById('propBalloon'+key);
+      const scale = document.getElementById('propScale'+key);
+      const readout = document.getElementById('propReadout'+key);
+      balloon.style.transform = 'translate(-50%, 0) scale(1.15)';
+      tween(650, p=>{
+        scale.textContent = (PROP_BASE_MASS + (filledMass - PROP_BASE_MASS)*p).toFixed(2) + ' g';
+      }, ()=>{
+        scale.textContent = filledMass.toFixed(2) + ' g';
+        readout.innerHTML =
+          'm(vide) = <b>' + PROP_BASE_MASS.toFixed(1) + ' g</b><br>' +
+          'm(gonflé) = <b>' + filledMass.toFixed(2) + ' g</b>';
+      });
+    });
+    setTimeout(()=>{
+      propStep = 3; btn.textContent = PROP_STEP_LABELS[3]; btn.disabled = false;
+    }, 750);
+
+  } else if(propStep === 3){
+    // calculer la masse d'1 L de gaz
+    PROP_GAS_KEYS.forEach(key=>{
+      const density = propDensity(key);
+      const gasLabel = propGasLabel(key);
+      const filledMass = PROP_BASE_MASS + density;
+      document.getElementById('propReadout'+key).innerHTML =
+        'm(vide) = <b>' + PROP_BASE_MASS.toFixed(1) + ' g</b><br>' +
+        'm(gonflé) = <b>' + filledMass.toFixed(2) + ' g</b><br>' +
+        'm(1L de ' + gasLabel + ') = <b>' + density.toFixed(2) + ' g/L</b>';
+    });
+    propStep = 4; btn.textContent = '🔁 Recommencer'; btn.disabled = false;
+
+  } else {
+    propInitState();
+  }
+}
+
+function updatePropMix(){
+  const slider = document.getElementById('propMixSlider');
+  const sliderVal = parseFloat(slider.value); // 0 = tout à gauche (100% O2) ... 100 = tout à droite (100% N2)
+  const fracO2 = 100 - sliderVal;
+  const fracN2 = sliderVal;
+  const mix = (fracO2/100)*propDensityO2 + (fracN2/100)*propDensityN2;
+  document.getElementById('propMixReadout').innerHTML =
+    'Mélange : <b>' + fracO2 + ' % O₂ / ' + fracN2 + ' % N₂</b><br>masse volumique du mélange : <b>' + mix.toFixed(3) + ' g/L</b>';
+}
+
+document.getElementById('propMixSlider').addEventListener('input', updatePropMix);
+document.getElementById('propActionBtn').addEventListener('click', propDoStep);
+updatePropMix();
+
+showTab(1);
+</script>
+</body>
+</html>

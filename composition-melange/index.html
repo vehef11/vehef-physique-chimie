@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Composition d'un mélange — Alu &amp; pâte à modeler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0a1518;
+    --bg-1:#0d2024;
+    --panel:#0f2429cc;
+    --panel-border:#3a6b63;
+    --copper:#c9814d;
+    --copper-soft:#c9814d55;
+    --teal-glow:#6fe6c9;
+    --text-0:#eef6f4;
+    --text-1:#9db8b3;
+    --text-2:#6c8a85;
+    --danger:#e0568a;
+  }
+  :root:not([data-theme="light"]){ color-scheme: dark; }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --panel:#f4faf8dd;
+      --panel-border:#bcd8d1;
+      --text-0:#0e2224;
+      --text-1:#3c5652;
+      --text-2:#5a7672;
+    }
+  }
+  :root[data-theme="light"]{
+    --panel:#f4faf8dd;
+    --panel-border:#bcd8d1;
+    --text-0:#0e2224;
+    --text-1:#3c5652;
+    --text-2:#5a7672;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%; overflow:hidden;
+    background: radial-gradient(ellipse at 50% 20%, var(--bg-1), var(--bg-0));
+    font-family:'Inter',sans-serif;
+    color:var(--text-0);
+    -webkit-tap-highlight-color: transparent;
+  }
+  #scene-container{ position:fixed; inset:0; }
+  #scene-container canvas{ display:block; touch-action:none; }
+
+  .vignette{
+    position:fixed; inset:0; pointer-events:none;
+    background: radial-gradient(ellipse at 50% 55%, transparent 45%, rgba(0,0,0,0.35) 100%);
+    z-index:2;
+  }
+
+  .topbar{
+    position:fixed; top:0; left:0; right:0; z-index:5;
+    padding: 18px 22px 14px;
+    display:flex; flex-direction:row; align-items:center; gap:14px;
+    pointer-events:none;
+  }
+  .restart-btn{
+    pointer-events:auto;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12.5px; font-weight:600; color:var(--text-0);
+    background: var(--panel); border:1px solid var(--panel-border);
+    padding:7px 13px; border-radius:999px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    cursor:pointer; white-space:nowrap;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .restart-btn:hover{ transform: translateY(-1px); background: var(--panel-border); }
+  .restart-btn:active{ transform: translateY(0) scale(0.97); }
+  .topbar h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600; font-size:19px; letter-spacing:0.2px;
+    margin:0; color:var(--text-0);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  }
+  .topbar p{
+    margin:0; font-size:13px; color:var(--text-1); max-width:520px; line-height:1.5;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  }
+  .topbar .legend-inline{ color:var(--teal-glow); }
+
+  .notebook{
+    position:fixed; left:18px; top:74px; bottom:auto; z-index:5;
+    width: 240px;
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:3px solid var(--copper);
+    border-radius: 10px;
+    padding:14px 16px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-size:13px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  }
+  .notebook h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px; margin:0 0 10px; font-weight:600; color:var(--text-0);
+  }
+  .mat-row{ margin-bottom:10px; }
+  .mat-row:last-child{ margin-bottom:0; }
+  .mat-name{ display:flex; align-items:center; gap:6px; font-weight:600; color:var(--text-0); margin-bottom:4px; white-space:nowrap; }
+  .mat-swatch{ width:9px; height:9px; border-radius:50%; display:inline-block; flex-shrink:0; }
+  .mat-line{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; color:var(--text-1); font-size:12.5px; padding:1px 0; white-space:nowrap; }
+  .mat-line span.val{ font-family:'IBM Plex Mono',monospace; color:var(--teal-glow); }
+  .mat-line span.val.empty{ color:var(--text-2); }
+
+  .dock{
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+    z-index:6; display:flex; flex-wrap:wrap; justify-content:center;
+    gap:10px; align-items:center; width:min(94vw, 760px);
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .dock.swapping{ opacity:0; transform:translateX(-50%) translateY(8px); }
+  .btn{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:14.5px; font-weight:600; letter-spacing:0.1px;
+    color:#08201c;
+    background: linear-gradient(180deg, #86e9cc, #4fc6a8);
+    border:none; border-radius: 999px;
+    padding:13px 24px;
+    cursor:pointer;
+    box-shadow: 0 8px 22px rgba(79,198,168,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
+    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    white-space:nowrap;
+  }
+  .btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 26px rgba(79,198,168,0.45), inset 0 1px 0 rgba(255,255,255,0.5); }
+  .btn:active{ transform: translateY(0px) scale(0.98); }
+  .btn:disabled{
+    background: linear-gradient(180deg, #4c5a57, #3b4744);
+    color:#8ea19d;
+    box-shadow:none;
+    cursor:default; transform:none; filter:none; opacity:0.75;
+  }
+  .btn.secondary{
+    background: linear-gradient(180deg, #e3a06a, #c9814d);
+    box-shadow: 0 8px 22px rgba(201,129,77,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+
+  .reading{
+    position:fixed; right:18px; top:70px; bottom:auto; z-index:6;
+    width:230px;
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:3px solid var(--teal-glow);
+    border-radius:10px;
+    padding:16px 18px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    opacity:0; transform: translateY(-10px);
+    pointer-events:none;
+    transition: opacity .3s ease, transform .3s ease;
+  }
+  .reading.show{ opacity:1; transform:translateY(0); }
+  .reading h3{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px; margin:0 0 8px; font-weight:600; color:var(--text-1);
+  }
+  .reading .big{
+    font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:600;
+    color:var(--teal-glow); line-height:1.1;
+  }
+  .reading .line{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--text-1); margin-top:6px;
+  }
+  .reading .line b{ color:var(--text-0); }
+
+  .questions{
+    position:fixed; inset:0; z-index:8;
+    display:flex; align-items:center; justify-content:center; align-content:center;
+    gap:14px; padding: 24px;
+    pointer-events:none;
+    opacity:0; visibility:hidden;
+    transition: opacity .35s ease;
+    flex-wrap:wrap;
+  }
+  .questions.show{ opacity:1; visibility:visible; }
+  .qcard{
+    width:280px;
+    background: var(--panel);
+    border:1px solid var(--panel-border);
+    border-radius:14px;
+    padding:22px 22px 24px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    transform: translateY(16px) rotate(-1.2deg);
+    transition: transform .4s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .qcard:nth-child(even){ transform: translateY(16px) rotate(1deg); }
+  .questions.show .qcard{ transform: translateY(0) rotate(-1.2deg); }
+  .questions.show .qcard:nth-child(even){ transform: translateY(0) rotate(1deg); }
+  .qcard p{ margin:0; font-size:15.5px; line-height:1.5; color:var(--text-0); font-family:'Space Grotesk',sans-serif; font-weight:500;}
+
+  .hint{
+    position:fixed; top:18px; right:18px; z-index:5;
+    font-size:12px; color:var(--text-2);
+    background: var(--panel); border:1px solid var(--panel-border);
+    padding:7px 12px; border-radius:8px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+
+  @media (max-width: 720px){
+    .notebook{ width: 180px; font-size:12px; padding:10px 12px; left:10px; top:56px; bottom:auto;}
+    .reading{ width:170px; right:10px; top:56px; bottom:auto; padding:12px 14px;}
+    .reading .big{ font-size:22px; }
+    .dock{ bottom:12px; }
+    .btn{ padding:11px 16px; font-size:13px; }
+    .topbar{ padding:14px 14px 8px; gap:10px; }
+    .topbar h1{ font-size:15px; }
+    .restart-btn{ font-size:11px; padding:5px 10px; }
+    .hint{ display:none; }
+    .qcard{ width: 88vw; padding:18px; }
+    .questions{ flex-direction:column; gap:12px; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{ transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div id="scene-container"></div>
+  <div class="vignette"></div>
+
+  <div class="topbar">
+    <h1>Composition d'un mélange</h1>
+    <button class="restart-btn" id="restart-btn">↻ Recommencer</button>
+  </div>
+
+  <div class="hint">glisser pour tourner · molette pour zoomer</div>
+
+  <div class="notebook">
+    <h2>Carnet de mesures</h2>
+    <div class="mat-row">
+      <div class="mat-name"><span class="mat-swatch" style="background:#d7dbdd;"></span>Aluminium : D=1,5 cm</div>
+      <div class="mat-line"><span>m(boule) =</span><span class="val empty" id="val-alu-mass">—</span></div>
+      <div class="mat-line"><span>V(boule) =</span><span class="val empty" id="val-alu-vol">—</span></div>
+    </div>
+    <div class="mat-row">
+      <div class="mat-name"><span class="mat-swatch" style="background:#e0568a;"></span>Pâte à mod. : D=2 cm</div>
+      <div class="mat-line"><span>m(boule) =</span><span class="val empty" id="val-clay-mass">—</span></div>
+      <div class="mat-line"><span>V(boule) =</span><span class="val empty" id="val-clay-vol">—</span></div>
+    </div>
+  </div>
+
+  <div class="reading" id="reading-panel">
+    <h3 id="reading-title">Mesure</h3>
+    <div class="big" id="reading-big">0,0 g</div>
+    <div class="line" id="reading-line1"></div>
+    <div class="line" id="reading-line2"></div>
+  </div>
+
+  <div class="dock" id="dock"></div>
+
+  <div class="questions" id="questions">
+    <div class="qcard">
+      <p>1. Donner la composition massique du mélange (%).</p>
+    </div>
+    <div class="qcard">
+      <p>2. Donner la composition volumique du mélange (%).</p>
+    </div>
+    <div class="qcard">
+      <p>3. Donner la composition du mélange en nombre d'unités (%).</p>
+    </div>
+    <div class="qcard">
+      <p>4. Calcule la masse volumique de l'aluminium (en g/L).</p>
+    </div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+function showFatalError(msg){
+  let el = document.getElementById('fatal-error-box');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'fatal-error-box';
+    el.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#160404;color:#ff9b9b;font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.6;padding:26px;white-space:pre-wrap;overflow:auto;';
+    document.body.appendChild(el);
+  }
+  el.textContent = "L'animation 3D n'a pas pu se charger.\n\n" + msg;
+}
+window.addEventListener('error', function(e){
+  showFatalError((e.error && e.error.stack) ? e.error.stack : (e.message||String(e)));
+});
+if(typeof THREE === 'undefined'){
+  showFatalError("La bibliothèque three.js ne s'est pas chargée (problème réseau ou CDN bloqué).");
+  return;
+}
+
+try {
+
+/* ============================= CONFIG ============================= */
+const CFG = {
+  alu:  { count:10, r:0.5625, mass:1.2, volBefore:50.0, volAfter:51.8, color:0xd7dbdd },
+  clay: { count:5,  r:0.75,   mass:7.5, volBefore:50.0, volAfter:54.2, color:0xe0568a },
+  beaker: { height:6.2, wallR:2.35, innerR:2.0, floorY:0.12, fillTarget:3.2 },
+  box: { half:2.2, height:2.8, floorY:0.09 },
+  boxAPos: new THREE.Vector3(-5.4, 0, 3.1),
+  boxBPos: new THREE.Vector3(5.4, 0, 3.1),
+  balancePos: new THREE.Vector3(-6.4, 0, -3.4),
+  cylinderPos: new THREE.Vector3(6.4, 0, -3.4),
+};
+
+/* ============================= UTIL ============================= */
+function easeInOutCubic(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
+function fmt1(n){ return n.toFixed(1).replace('.', ','); }
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+function hash3(x,y,z){
+  const s = Math.sin(x*127.1 + y*311.7 + z*74.7)*43758.5453;
+  return s - Math.floor(s);
+}
+
+const _tweens = [];
+function tween(duration, onUpdate, onComplete, easing){
+  easing = easing || easeInOutCubic;
+  _tweens.push({ start: performance.now(), duration, onUpdate, onComplete, easing, done:false });
+}
+function updateTweens(now){
+  for(let i=_tweens.length-1;i>=0;i--){
+    const tw=_tweens[i];
+    let t=(now-tw.start)/tw.duration;
+    if(t>1)t=1;
+    tw.onUpdate(tw.easing(t), t);
+    if(t>=1 && !tw.done){
+      tw.done=true;
+      _tweens.splice(i,1);
+      if(tw.onComplete) tw.onComplete();
+    }
+  }
+}
+function wait(ms, cb){ tween(ms, ()=>{}, cb, (t)=>t); }
+
+/* ============================= PACKING ============================= */
+/* "drop simulation" packing: for each ball, sample many random (x,z) spots,
+   compute the height at which it would come to rest on the floor or on
+   already-placed neighbours at that spot, and keep the lowest resting spot.
+   This settles balls into a natural, spread-out pile instead of a tower. */
+function packBalls(ballDefs, boundaryFn, floorY){
+  const placed = [];
+  const out = [];
+  for(const bd of ballDefs){
+    let best = null;
+    const tries = 90;
+    for(let attempt=0; attempt<tries; attempt++){
+      const {x,z} = boundaryFn(bd.r);
+      let restY = floorY + bd.r;
+      for(const p of placed){
+        const dx = x-p.x, dz = z-p.z;
+        const horizDist2 = dx*dx+dz*dz;
+        const rsum = bd.r+p.r+0.05;
+        if(horizDist2 < rsum*rsum){
+          const vertOffset = Math.sqrt(Math.max(0, rsum*rsum - horizDist2));
+          const candidateY = p.y + vertOffset;
+          if(candidateY > restY) restY = candidateY;
+        }
+      }
+      if(best===null || restY < best.y) best = {x, y:restY, z};
+    }
+    placed.push({x:best.x, y:best.y, z:best.z, r:bd.r});
+    out.push(new THREE.Vector3(best.x, best.y, best.z));
+  }
+  return out;
+}
+function circleBoundary(cx, cz, R){
+  return (r)=>{
+    const ang = Math.random()*Math.PI*2;
+    const rad = Math.random()*Math.max(0.001,(R-r));
+    return { x: cx+Math.cos(ang)*rad, z: cz+Math.sin(ang)*rad };
+  };
+}
+function boxBoundary(cx, cz, halfX, halfZ){
+  return (r)=>({
+    x: cx + (Math.random()*2-1)*Math.max(0.001,(halfX-r)),
+    z: cz + (Math.random()*2-1)*Math.max(0.001,(halfZ-r))
+  });
+}
+
+/* ============================= RENDERER / SCENE ============================= */
+const container = document.getElementById('scene-container');
+const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+{
+  const c = document.createElement('canvas'); c.width=8; c.height=256;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0,0,0,256);
+  g.addColorStop(0,'#12343a');
+  g.addColorStop(0.55,'#0b2226');
+  g.addColorStop(1,'#050d0f');
+  ctx.fillStyle=g; ctx.fillRect(0,0,8,256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.encoding = THREE.sRGBEncoding;
+  scene.background = tex;
+}
+
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 200);
+
+/* ---------- lights ---------- */
+scene.add(new THREE.HemisphereLight(0x9fd6ff, 0x2a1c12, 0.55));
+const key = new THREE.DirectionalLight(0xfff2df, 1.5);
+key.position.set(6, 11, 7);
+key.castShadow = true;
+key.shadow.mapSize.set(2048,2048);
+key.shadow.camera.left=-16; key.shadow.camera.right=16;
+key.shadow.camera.top=16; key.shadow.camera.bottom=-16;
+key.shadow.camera.near=1; key.shadow.camera.far=40;
+key.shadow.bias=-0.0015;
+scene.add(key);
+const fill = new THREE.DirectionalLight(0x8fd8ff, 0.35);
+fill.position.set(-8,6,-4);
+scene.add(fill);
+const rim = new THREE.PointLight(0x6fe6c9, 0.6, 20);
+rim.position.set(0,6,-6);
+scene.add(rim);
+const balanceLight = new THREE.PointLight(0xbfe9ff, 0.7, 8);
+balanceLight.position.set(CFG.balancePos.x, 3.2, CFG.balancePos.z+0.6);
+scene.add(balanceLight);
+const cylinderLight = new THREE.PointLight(0xbfe9ff, 0.7, 8);
+cylinderLight.position.set(CFG.cylinderPos.x, 3.2, CFG.cylinderPos.z+0.6);
+scene.add(cylinderLight);
+
+/* ---------- textures (procedural) ---------- */
+function makeWoodTexture(){
+  const c=document.createElement('canvas'); c.width=512; c.height=512;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle='#3a2418'; ctx.fillRect(0,0,512,512);
+  for(let i=0;i<60;i++){
+    const y = (i/60)*512 + (Math.random()-0.5)*6;
+    ctx.strokeStyle = `rgba(${20+Math.random()*40|0},${12+Math.random()*20|0},${6+Math.random()*10|0},${0.35+Math.random()*0.25})`;
+    ctx.lineWidth = 1+Math.random()*2.5;
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    for(let x=0;x<=512;x+=32){
+      ctx.lineTo(x, y+Math.sin(x*0.02+i)*4+ (Math.random()-0.5)*3);
+    }
+    ctx.stroke();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(3,3);
+  tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+function makeCardboardTexture(base){
+  const c=document.createElement('canvas'); c.width=256; c.height=256;
+  const ctx=c.getContext('2d');
+  ctx.fillStyle=base; ctx.fillRect(0,0,256,256);
+  ctx.strokeStyle='rgba(0,0,0,0.12)'; ctx.lineWidth=1;
+  for(let y=6;y<256;y+=7){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(256,y); ctx.stroke(); }
+  for(let i=0;i<400;i++){
+    ctx.fillStyle=`rgba(${Math.random()>0.5?0:255},${Math.random()>0.5?0:255},${Math.random()>0.5?0:255},0.03)`;
+    ctx.fillRect(Math.random()*256, Math.random()*256, 2,2);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2,2);
+  tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+/* Builds a graduation texture whose canvas resolution is proportioned to the
+   real circumference/height of the cylinder it wraps — using the SAME
+   pixels-per-world-unit in both directions avoids the horizontal stretching
+   you get when a canvas of arbitrary aspect ratio is wrapped around a tube. */
+function makeGraduationTexture(radius, height, opts){
+  opts = opts || {};
+  const density = opts.density || 110;
+  const circumference = 2*Math.PI*radius;
+  const w = Math.max(64, Math.round(circumference*density));
+  const h = Math.max(64, Math.round(height*density));
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = opts.stroke || 'rgba(175,228,218,0.6)';
+  ctx.fillStyle = opts.fill || 'rgba(175,228,218,0.8)';
+  const fontPx = Math.round((opts.fontWorld||0.32)*density);
+  ctx.font = fontPx + 'px "IBM Plex Mono", monospace';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  const nTicks = opts.nTicks || 10;
+  const maxVal = opts.maxVal || 100;
+  const bottomMargin = opts.bottomMargin!=null ? opts.bottomMargin : 0.09;
+  const topMargin = opts.topMargin!=null ? opts.topMargin : 0.08;
+  const usable = 1 - bottomMargin - topMargin;
+  const xStart = density*0.45;
+  for(let i=1;i<=nTicks;i++){
+    const frac = bottomMargin + (i/nTicks)*usable;
+    const y = h - frac*h;
+    const major = (i % (opts.majorEvery||2) === 0);
+    ctx.lineWidth = major ? Math.max(2,density*0.028) : Math.max(1,density*0.014);
+    const tickLen = major ? density*0.4 : density*0.22;
+    ctx.beginPath();
+    ctx.moveTo(xStart, y);
+    ctx.lineTo(xStart+tickLen, y);
+    ctx.stroke();
+    if(major){ ctx.fillText(String(Math.round(i*maxVal/nTicks)), xStart+tickLen+density*0.12, y); }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+function makeDisplayScreen(){
+  const c=document.createElement('canvas'); c.width=256; c.height=128;
+  const ctx=c.getContext('2d');
+  const tex=new THREE.CanvasTexture(c);
+  tex.encoding = THREE.sRGBEncoding;
+  function draw(text){
+    ctx.fillStyle='#08211d'; ctx.fillRect(0,0,256,128);
+    ctx.fillStyle='#6ffbcf';
+    ctx.font='700 46px "IBM Plex Mono", monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(text, 128, 64);
+    tex.needsUpdate=true;
+  }
+  draw('0,0');
+  return { tex, draw };
+}
+
+const woodTex = makeWoodTexture();
+const cardboardTexA = makeCardboardTexture('#8a5a3a');
+const cardboardTexB = makeCardboardTexture('#7f5334');
+
+/* ---------- table ---------- */
+const table = new THREE.Mesh(
+  new THREE.CylinderGeometry(15, 15, 0.6, 64),
+  new THREE.MeshStandardMaterial({ map: woodTex, roughness:0.65, metalness:0.04 })
+);
+table.position.y = -0.3;
+table.receiveShadow = true;
+scene.add(table);
+
+/* ============================= BEAKER ============================= */
+const beakerGroup = new THREE.Group();
+scene.add(beakerGroup);
+
+const glassMat = new THREE.MeshPhysicalMaterial({
+  color:0xdff3ef, transmission:0.93, roughness:0.06, thickness:0.6,
+  ior:1.45, transparent:true, opacity:1, clearcoat:1, clearcoatRoughness:0.1,
+  side:THREE.DoubleSide, depthWrite:false
+});
+
+const beakerWall = new THREE.Mesh(
+  new THREE.CylinderGeometry(CFG.beaker.wallR, CFG.beaker.wallR*0.94, CFG.beaker.height, 56, 1, true),
+  glassMat
+);
+beakerWall.position.y = CFG.beaker.height/2;
+beakerWall.castShadow = true;
+beakerWall.receiveShadow = true;
+beakerGroup.add(beakerWall);
+
+/* cheap (non-transmissive) glass look for secondary surfaces: keeps only the
+   main beaker & cylinder walls doing the expensive transmission render pass */
+const cheapGlassMat = new THREE.MeshStandardMaterial({ color:0xdff3ef, transparent:true, opacity:0.32, roughness:0.12, metalness:0.05 });
+
+const beakerBottom = new THREE.Mesh(
+  new THREE.CircleGeometry(CFG.beaker.wallR*0.95, 56),
+  cheapGlassMat
+);
+beakerBottom.rotation.x = -Math.PI/2;
+beakerBottom.position.y = 0.06;
+beakerBottom.receiveShadow = true;
+beakerGroup.add(beakerBottom);
+
+const beakerLipMat = new THREE.MeshStandardMaterial({ color:0xeaf7f4, transparent:true, opacity:0.55, roughness:0.15, metalness:0.1 });
+const beakerLip = new THREE.Mesh(new THREE.TorusGeometry(CFG.beaker.wallR, 0.05, 12, 48), beakerLipMat);
+beakerLip.rotation.x = Math.PI/2;
+beakerLip.position.y = CFG.beaker.height;
+beakerGroup.add(beakerLip);
+
+const gradTex = makeGraduationTexture(CFG.beaker.wallR, CFG.beaker.height, { fontWorld:0.3 });
+const beakerGrad = new THREE.Mesh(
+  new THREE.CylinderGeometry(CFG.beaker.wallR+0.02, CFG.beaker.wallR*0.94+0.02, CFG.beaker.height, 56, 1, true),
+  new THREE.MeshBasicMaterial({ map:gradTex, transparent:true, side:THREE.DoubleSide, depthWrite:false })
+);
+beakerGrad.position.y = CFG.beaker.height/2;
+beakerGroup.add(beakerGrad);
+
+/* ============================= BOXES ============================= */
+function makeBox(pos, cardboardTex){
+  const g = new THREE.Group();
+  const w = CFG.box.half*2, h=CFG.box.height, d=CFG.box.half*2;
+  const mats = [];
+  for(let i=0;i<6;i++){
+    if(i===2){ mats.push(new THREE.MeshBasicMaterial({ transparent:true, opacity:0 })); }
+    else mats.push(new THREE.MeshStandardMaterial({ map:cardboardTex, roughness:0.92, metalness:0, side:THREE.DoubleSide }));
+  }
+  const box = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mats);
+  box.position.y = h/2;
+  box.castShadow = true; box.receiveShadow = true;
+  g.add(box);
+  g.position.copy(pos);
+  g.rotation.y = (pos.x<0? 0.18 : -0.18);
+  scene.add(g);
+  return g;
+}
+const boxA = makeBox(CFG.boxAPos, cardboardTexA);
+const boxB = makeBox(CFG.boxBPos, cardboardTexB);
+
+/* ============================= BALLS ============================= */
+function noiseSphere(radius, seed, amp, detail){
+  const geo = new THREE.IcosahedronGeometry(radius, detail);
+  const pos = geo.attributes.position;
+  const v = new THREE.Vector3();
+  for(let i=0;i<pos.count;i++){
+    v.fromBufferAttribute(pos, i);
+    const n = hash3(v.x*2.1+seed, v.y*2.1+seed*1.3, v.z*2.1+seed*0.7)*2-1;
+    const scale = 1 + n*amp;
+    v.multiplyScalar(scale);
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  geo.computeVertexNormals();
+  return geo;
+}
+const aluMat = new THREE.MeshStandardMaterial({ color: CFG.alu.color, metalness:1, roughness:0.38 });
+const clayMat = new THREE.MeshStandardMaterial({ color: CFG.clay.color, metalness:0, roughness:0.82 });
+
+function makeAluBall(seed){
+  const geo = noiseSphere(CFG.alu.r, seed, 0.11, 3);
+  const m = new THREE.Mesh(geo, aluMat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+function makeClayBall(seed){
+  const geo = noiseSphere(CFG.clay.r, seed, 0.035, 2);
+  const m = new THREE.Mesh(geo, clayMat);
+  m.castShadow = true; m.receiveShadow = true;
+  return m;
+}
+
+const aluBalls = [];
+const clayBalls = [];
+for(let i=0;i<CFG.alu.count;i++){
+  const b = makeAluBall(i*7.31+1.1);
+  b.userData = { type:'alu', r:CFG.alu.r };
+  aluBalls.push(b);
+  scene.add(b);
+}
+for(let i=0;i<CFG.clay.count;i++){
+  const b = makeClayBall(i*5.19+2.7);
+  b.userData = { type:'clay', r:CFG.clay.r };
+  clayBalls.push(b);
+  scene.add(b);
+}
+
+/* initial placement inside the boxes */
+const boxAPositions = packBalls(
+  aluBalls.map(()=>({r:CFG.alu.r})),
+  boxBoundary(CFG.boxAPos.x, CFG.boxAPos.z, CFG.box.half-0.15, CFG.box.half-0.15),
+  CFG.box.floorY
+);
+aluBalls.forEach((b,i)=>{ b.position.copy(boxAPositions[i]); b.rotation.set(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2); });
+
+const boxBPositions = packBalls(
+  clayBalls.map(()=>({r:CFG.clay.r})),
+  boxBoundary(CFG.boxBPos.x, CFG.boxBPos.z, CFG.box.half-0.15, CFG.box.half-0.15),
+  CFG.box.floorY
+);
+clayBalls.forEach((b,i)=>{ b.position.copy(boxBPositions[i]); b.rotation.set(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2); });
+
+/* target resting positions inside the beaker (precomputed once) */
+const allBallDefs = [
+  ...aluBalls.map(b=>({r:b.userData.r, ball:b})),
+  ...clayBalls.map(b=>({r:b.userData.r, ball:b}))
+];
+const shuffledDefs = allBallDefs.slice().sort(()=>Math.random()-0.5);
+const beakerPositions = packBalls(
+  shuffledDefs.map(d=>({r:d.r})),
+  circleBoundary(0,0, CFG.beaker.innerR),
+  CFG.beaker.floorY
+);
+shuffledDefs.forEach((d,i)=>{ d.ball.userData.homePos = beakerPositions[i].clone(); });
+
+/* ============================= BALANCE ============================= */
+const balanceGroup = new THREE.Group();
+balanceGroup.position.copy(CFG.balancePos);
+scene.add(balanceGroup);
+
+const balanceBase = new THREE.Mesh(
+  new THREE.CylinderGeometry(1.05, 1.15, 0.5, 40),
+  new THREE.MeshStandardMaterial({ color:0xe7e9ee, metalness:0.35, roughness:0.35 })
+);
+balanceBase.position.y = 0.25;
+balanceBase.castShadow = true; balanceBase.receiveShadow = true;
+balanceGroup.add(balanceBase);
+
+const balancePlate = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.72, 0.72, 0.1, 40),
+  new THREE.MeshStandardMaterial({ color:0xcfd3da, metalness:0.6, roughness:0.22 })
+);
+balancePlate.position.y = 0.55;
+balancePlate.castShadow = true; balancePlate.receiveShadow = true;
+balanceGroup.add(balancePlate);
+
+const balanceScreenObj = makeDisplayScreen();
+const balanceScreen = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.75, 0.4),
+  new THREE.MeshBasicMaterial({ map: balanceScreenObj.tex })
+);
+balanceScreen.position.set(0, 0.85, 1.05);
+balanceScreen.rotation.x = -0.25;
+balanceGroup.add(balanceScreen);
+
+const balanceRestPos = new THREE.Vector3(CFG.balancePos.x, 0.55+0.14, CFG.balancePos.z);
+
+/* ============================= GRADUATED CYLINDER ============================= */
+const cylGroup = new THREE.Group();
+cylGroup.position.copy(CFG.cylinderPos);
+scene.add(cylGroup);
+
+const CYL_R = 1.95, CYL_H = 8.6;
+const cylBase = new THREE.Mesh(
+  new THREE.CylinderGeometry(2.05, 2.15, 0.28, 40),
+  new THREE.MeshStandardMaterial({ color:0xe7e9ee, metalness:0.3, roughness:0.4 })
+);
+cylBase.position.y = 0.14;
+cylBase.castShadow = true; cylBase.receiveShadow = true;
+cylGroup.add(cylBase);
+
+const cylGlassMat = new THREE.MeshPhysicalMaterial({
+  color:0xdff3ef, transmission:0.93, roughness:0.06, thickness:0.4,
+  ior:1.45, transparent:true, side:THREE.DoubleSide, depthWrite:false
+});
+const cylWall = new THREE.Mesh(
+  new THREE.CylinderGeometry(CYL_R, CYL_R, CYL_H, 40, 1, true),
+  cylGlassMat
+);
+cylWall.position.y = 0.28 + CYL_H/2;
+cylWall.castShadow = true;
+cylWall.receiveShadow = true;
+cylGroup.add(cylWall);
+
+const cylGradTex = makeGraduationTexture(CYL_R, CYL_H, { fontWorld:0.3 });
+const cylGrad = new THREE.Mesh(
+  new THREE.CylinderGeometry(CYL_R+0.015, CYL_R+0.015, CYL_H, 40, 1, true),
+  new THREE.MeshBasicMaterial({ map:cylGradTex, transparent:true, side:THREE.DoubleSide, depthWrite:false })
+);
+cylGrad.position.y = 0.28 + CYL_H/2;
+cylGroup.add(cylGrad);
+
+const waterMat = new THREE.MeshStandardMaterial({
+  color:0x2f9bd6, transparent:true, opacity:0.78, roughness:0.08, metalness:0.05
+});
+function volToHeight(vol){ return vol / (Math.PI*CYL_R*CYL_R); } // cm -> matches mL since 1cm^3 = 1mL
+const waterBaseH = volToHeight(CFG.alu.volBefore);
+const water = new THREE.Mesh(new THREE.CylinderGeometry(CYL_R*0.985, CYL_R*0.985, 1, 32), waterMat);
+water.scale.y = waterBaseH;
+water.position.y = 0.28 + waterBaseH/2;
+water.receiveShadow = true;
+cylGroup.add(water);
+
+function setWaterHeight(h){
+  water.scale.y = Math.max(0.01,h);
+  water.position.y = 0.28 + h/2;
+}
+
+/* ============================= CUSTOM ORBIT CONTROLS ============================= */
+const controls = {
+  target: new THREE.Vector3(0, 2.3, 0),
+  radius: 20, theta: 0.5, phi: 1.05,
+  minRadius: 4.8, maxRadius: 30,
+  minPhi: 0.35, maxPhi: 1.5,
+  enabled: true,
+};
+function applyControls(){
+  const p = controls;
+  camera.position.set(
+    p.target.x + p.radius*Math.sin(p.phi)*Math.sin(p.theta),
+    p.target.y + p.radius*Math.cos(p.phi),
+    p.target.z + p.radius*Math.sin(p.phi)*Math.cos(p.theta)
+  );
+  camera.lookAt(p.target);
+}
+function syncControlsFromCamera(){
+  const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+  controls.radius = offset.length();
+  controls.phi = Math.acos(THREE.MathUtils.clamp(offset.y/controls.radius, -1, 1));
+  controls.theta = Math.atan2(offset.x, offset.z);
+}
+applyControls();
+
+let dragging=false, lastX=0, lastY=0, touchesActive=0;
+function pointerDown(x,y,e){
+  if(!controls.enabled) return;
+  if(e && e.pointerType==='touch' && touchesActive>1) return; // let two-finger pinch own this gesture
+  dragging=true; lastX=x; lastY=y;
+}
+function pointerMove(x,y,e){
+  if(!dragging || !controls.enabled) return;
+  if(e && e.pointerType==='touch' && touchesActive>1) return;
+  const dx=x-lastX, dy=y-lastY;
+  lastX=x; lastY=y;
+  controls.theta -= dx*0.0055;
+  controls.phi = THREE.MathUtils.clamp(controls.phi - dy*0.0055, controls.minPhi, controls.maxPhi);
+  applyControls();
+}
+function pointerUp(){ dragging=false; }
+renderer.domElement.addEventListener('pointerdown', (e)=>{ renderer.domElement.setPointerCapture(e.pointerId); pointerDown(e.clientX,e.clientY,e); });
+renderer.domElement.addEventListener('pointermove', (e)=> pointerMove(e.clientX,e.clientY,e));
+window.addEventListener('pointerup', pointerUp);
+window.addEventListener('pointercancel', pointerUp);
+renderer.domElement.addEventListener('wheel', (e)=>{
+  if(!controls.enabled) return;
+  e.preventDefault();
+  controls.radius = THREE.MathUtils.clamp(controls.radius + e.deltaY*0.012, controls.minRadius, controls.maxRadius);
+  applyControls();
+}, { passive:false });
+
+/* pinch zoom for touch — tracks finger count so a 2nd finger cleanly hands
+   the gesture off from single-finger rotate to two-finger pinch-zoom */
+let pinchDist = null;
+renderer.domElement.addEventListener('touchstart', (e)=>{
+  touchesActive = e.touches.length;
+  if(touchesActive>1){ dragging=false; pinchDist=null; }
+}, { passive:true });
+renderer.domElement.addEventListener('touchmove', (e)=>{
+  touchesActive = e.touches.length;
+  if(e.touches.length===2){
+    e.preventDefault();
+    const [a,b] = e.touches;
+    const d = Math.hypot(a.clientX-b.clientX, a.clientY-b.clientY);
+    if(pinchDist!==null && controls.enabled){
+      controls.radius = THREE.MathUtils.clamp(controls.radius - (d-pinchDist)*0.02, controls.minRadius, controls.maxRadius);
+      applyControls();
+    }
+    pinchDist = d;
+  }
+}, { passive:false });
+renderer.domElement.addEventListener('touchend', (e)=>{ touchesActive = e.touches.length; pinchDist=null; }, { passive:true });
+renderer.domElement.addEventListener('touchcancel', (e)=>{ touchesActive = e.touches.length; pinchDist=null; }, { passive:true });
+
+
+/* camera scripted transitions */
+function flyCameraTo(target, radius, theta, phi, duration, onComplete){
+  controls.enabled = false;
+  const from = { target: controls.target.clone(), radius: controls.radius, theta: controls.theta, phi: controls.phi };
+  const to = { target, radius, theta, phi };
+  tween(duration, (t)=>{
+    controls.target.lerpVectors(from.target, to.target, t);
+    controls.radius = lerp(from.radius, to.radius, t);
+    controls.phi = lerp(from.phi, to.phi, t);
+    let dt = to.theta - from.theta;
+    while(dt>Math.PI) dt-=Math.PI*2;
+    while(dt<-Math.PI) dt+=Math.PI*2;
+    controls.theta = from.theta + dt*t;
+    applyControls();
+  }, ()=>{ controls.enabled = true; if(onComplete) onComplete(); });
+}
+const VIEW_FULL   = { target:new THREE.Vector3(0,2.3,0), radius:20, theta:0.45, phi:1.05 };
+const VIEW_BEAKER = { target:new THREE.Vector3(0,2.5,0), radius:13, theta:0.45, phi:1.05 };
+const VIEW_BALANCE= { target:new THREE.Vector3(CFG.balancePos.x, 1.1, CFG.balancePos.z), radius:5.5, theta:-0.35, phi:0.95 };
+const VIEW_CYL    = { target:new THREE.Vector3(CFG.cylinderPos.x, 3.8, CFG.cylinderPos.z), radius:13, theta:0.35, phi:1.05 };
+
+/* ============================= BALL FLIGHT ============================= */
+function flyBall(mesh, from, to, duration, arcHeight, onComplete){
+  const axis = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+  const spin = 3 + Math.random()*3;
+  tween(duration, (t)=>{
+    const x = lerp(from.x, to.x, t);
+    const z = lerp(from.z, to.z, t);
+    const y = lerp(from.y, to.y, t) + Math.sin(t*Math.PI)*arcHeight;
+    mesh.position.set(x,y,z);
+    mesh.rotateOnAxis(axis, spin*0.02);
+  }, onComplete, easeInOutCubic);
+}
+
+/* ============================= UI STATE MACHINE ============================= */
+const dock = document.getElementById('dock');
+const readingPanel = document.getElementById('reading-panel');
+const readingTitle = document.getElementById('reading-title');
+const readingBig = document.getElementById('reading-big');
+const readingLine1 = document.getElementById('reading-line1');
+const readingLine2 = document.getElementById('reading-line2');
+const questionsEl = document.getElementById('questions');
+document.getElementById('restart-btn').addEventListener('click', ()=>{ location.reload(); });
+
+const notebook = {
+  aluMass: document.getElementById('val-alu-mass'),
+  aluVol: document.getElementById('val-alu-vol'),
+  clayMass: document.getElementById('val-clay-mass'),
+  clayVol: document.getElementById('val-clay-vol'),
+};
+function setNotebook(el, text){ el.textContent = text; el.classList.remove('empty'); }
+
+function setDock(buttons){
+  dock.classList.add('swapping');
+  setTimeout(()=>{
+    dock.innerHTML = '';
+    buttons.forEach(b=>{
+      const btn = document.createElement('button');
+      btn.className = 'btn' + (b.secondary?' secondary':'');
+      btn.textContent = b.label;
+      btn.disabled = !!b.disabled;
+      btn.addEventListener('click', b.onClick);
+      dock.appendChild(btn);
+    });
+    dock.classList.remove('swapping');
+  }, 220);
+}
+function setDockDisabled(disabled){
+  dock.querySelectorAll('button').forEach(b=> b.disabled = disabled);
+}
+function showReading(title){
+  readingTitle.textContent = title;
+  readingLine1.textContent = '';
+  readingLine2.textContent = '';
+  readingPanel.classList.add('show');
+}
+function hideReading(){ readingPanel.classList.remove('show'); }
+
+/* state flags */
+const state = {
+  mixed:false,
+  aluWeighed:false, clayWeighed:false,
+  aluMeasured:false, clayMeasured:false,
+};
+
+/* -------- PHASE 0 : former le mélange -------- */
+setDock([{ label:"Former le mélange", onClick:formMixture }]);
+
+function formMixture(){
+  setDockDisabled(true);
+  const order = [...aluBalls, ...clayBalls].sort(()=>Math.random()-0.5);
+  const stagger = 130;
+  order.forEach((ball, i)=>{
+    setTimeout(()=>{
+      const from = ball.position.clone();
+      const to = ball.userData.homePos;
+      flyBall(ball, from, to, 650, 1.6 + Math.random()*0.6, ()=>{
+        if(i === order.length-1){
+          state.mixed = true;
+          fadeOutBox(boxA);
+          fadeOutBox(boxB);
+          flyCameraTo(VIEW_BEAKER.target, VIEW_BEAKER.radius, VIEW_BEAKER.theta, VIEW_BEAKER.phi, 1200, ()=>{
+            setDock([
+              { label:"Peser une boule d'alu", onClick:()=>weigh('alu') },
+              { label:"Peser une boule de pâte à modeler", onClick:()=>weigh('clay'), secondary:true },
+            ]);
+          });
+        }
+      });
+    }, i*stagger);
+  });
+}
+function fadeOutBox(boxGroup){
+  const mats = boxGroup.children[0].material;
+  tween(700, (t)=>{
+    mats.forEach(m=>{ if(m.opacity!==undefined){ m.transparent=true; m.opacity = lerp(1,0,t); } });
+    boxGroup.position.y = lerp(0, -0.6, t);
+  }, ()=>{ boxGroup.visible = false; });
+}
+
+/* -------- PHASE 1 : peser -------- */
+function weigh(type){
+  setDockDisabled(true);
+  const cfg = type==='alu' ? CFG.alu : CFG.clay;
+  const balls = type==='alu' ? aluBalls : clayBalls;
+  const ball = balls[0];
+  const home = ball.position.clone();
+
+  showReading(type==='alu' ? "Masse — boule d'aluminium" : "Masse — boule de pâte à modeler");
+  readingBig.textContent = "0,0 g";
+
+  flyCameraTo(VIEW_BALANCE.target, VIEW_BALANCE.radius, VIEW_BALANCE.theta, VIEW_BALANCE.phi, 900);
+  flyBall(ball, home, balanceRestPos, 900, 2.2, ()=>{
+    tween(900, (t, raw)=>{
+      const val = cfg.mass*t;
+      readingBig.textContent = fmt1(val) + " g";
+      balanceScreenObj.draw(fmt1(val));
+    }, ()=>{
+      readingLine1.textContent = "lecture stabilisée";
+      wait(1400, ()=>{
+        flyCameraTo(VIEW_BEAKER.target, VIEW_BEAKER.radius, VIEW_BEAKER.theta, VIEW_BEAKER.phi, 900);
+        flyBall(ball, ball.position.clone(), home, 900, 2.0, ()=>{
+          hideReading();
+          balanceScreenObj.draw('0,0');
+          if(type==='alu'){ state.aluWeighed=true; setNotebook(notebook.aluMass, fmt1(CFG.alu.mass)+" g"); }
+          else { state.clayWeighed=true; setNotebook(notebook.clayMass, fmt1(CFG.clay.mass)+" g"); }
+
+          if(state.aluWeighed && state.clayWeighed){
+            setDock([
+              { label:"Mesurer le volume de la boule d'alu", onClick:()=>measureVolume('alu') },
+              { label:"Mesurer le volume de la boule de pâte à modeler", onClick:()=>measureVolume('clay'), secondary:true },
+            ]);
+          } else {
+            setDock([
+              { label:"Peser une boule d'alu", onClick:()=>weigh('alu'), disabled: state.aluWeighed },
+              { label:"Peser une boule de pâte à modeler", onClick:()=>weigh('clay'), disabled: state.clayWeighed, secondary:true },
+            ]);
+          }
+        });
+      });
+    }, easeOutCubic);
+  });
+}
+
+/* -------- PHASE 2 : mesurer le volume -------- */
+function measureVolume(type){
+  setDockDisabled(true);
+  const cfg = type==='alu' ? CFG.alu : CFG.clay;
+  const balls = type==='alu' ? aluBalls : clayBalls;
+  const ball = balls[type==='alu'?1:0];
+  const home = ball.position.clone();
+
+  setWaterHeight(waterBaseH);
+
+  showReading(type==='alu' ? "Volume — boule d'aluminium" : "Volume — boule de pâte à modeler");
+  readingBig.textContent = fmt1(cfg.volBefore) + " mL";
+  readingLine1.textContent = "volume initial";
+
+  const dropTarget = new THREE.Vector3(CFG.cylinderPos.x, 0.28 + waterBaseH + 1.4, CFG.cylinderPos.z);
+  const sinkTarget = new THREE.Vector3(CFG.cylinderPos.x, 0.28 + waterBaseH*0.4, CFG.cylinderPos.z);
+
+  flyCameraTo(VIEW_CYL.target, VIEW_CYL.radius, VIEW_CYL.theta, VIEW_CYL.phi, 900);
+  flyBall(ball, home, dropTarget, 900, 2.4, ()=>{
+    tween(500, (t)=>{
+      ball.position.y = lerp(dropTarget.y, sinkTarget.y, t);
+    }, ()=>{
+      tween(700, (t)=>{
+        const h = lerp(waterBaseH, volToHeight(cfg.volAfter), t);
+        setWaterHeight(h);
+        const val = lerp(cfg.volBefore, cfg.volAfter, t);
+        readingBig.textContent = fmt1(val) + " mL";
+        readingLine1.textContent = "volume final";
+      }, ()=>{
+        wait(500, ()=>{
+          readingLine2.textContent = "V(bille) = " + fmt1(cfg.volAfter) + " − " + fmt1(cfg.volBefore) + " = " + fmt1(cfg.volAfter-cfg.volBefore) + " mL";
+          wait(1700, ()=>{
+            flyCameraTo(VIEW_BEAKER.target, VIEW_BEAKER.radius, VIEW_BEAKER.theta, VIEW_BEAKER.phi, 900);
+            const riseTarget = new THREE.Vector3(CFG.cylinderPos.x, dropTarget.y, CFG.cylinderPos.z);
+            tween(400, (t)=>{ ball.position.y = lerp(sinkTarget.y, riseTarget.y, t); }, ()=>{
+              flyBall(ball, riseTarget, home, 900, 2.0, ()=>{
+                setWaterHeight(waterBaseH);
+                hideReading();
+                if(type==='alu'){ state.aluMeasured=true; setNotebook(notebook.aluVol, fmt1(cfg.volAfter-cfg.volBefore)+" mL"); }
+                else { state.clayMeasured=true; setNotebook(notebook.clayVol, fmt1(cfg.volAfter-cfg.volBefore)+" mL"); }
+
+                if(state.aluMeasured && state.clayMeasured){
+                  setDock([{ label:"Afficher les questions", onClick:toggleQuestions }]);
+                } else {
+                  setDock([
+                    { label:"Mesurer le volume de la boule d'alu", onClick:()=>measureVolume('alu'), disabled: state.aluMeasured },
+                    { label:"Mesurer le volume de la boule de pâte à modeler", onClick:()=>measureVolume('clay'), disabled: state.clayMeasured, secondary:true },
+                  ]);
+                }
+              });
+            });
+          });
+        });
+      }, easeOutCubic);
+    });
+  });
+}
+
+/* -------- PHASE 3 : questions -------- */
+let questionsShown = false;
+function toggleQuestions(){
+  questionsShown = !questionsShown;
+  questionsEl.classList.toggle('show', questionsShown);
+  const btn = dock.querySelector('button');
+  if(btn) btn.textContent = questionsShown ? "Masquer les questions" : "Afficher les questions";
+}
+
+/* ============================= RENDER LOOP ============================= */
+function onResize(){
+  const aspect = window.innerWidth/window.innerHeight;
+  camera.aspect = aspect;
+  /* on tall/narrow (portrait phone) screens, a fixed vertical FOV crops the
+     sides badly; widen the FOV as the screen gets narrower so the boxes and
+     beaker stay in frame, capped so it never looks fisheye-distorted */
+  camera.fov = aspect < 1 ? THREE.MathUtils.clamp(45/aspect, 45, 78) : 45;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', onResize);
+onResize();
+
+function animate(now){
+  requestAnimationFrame(animate);
+  updateTweens(now);
+  renderer.render(scene, camera);
+}
+requestAnimationFrame(animate);
+
+} catch(err){
+  showFatalError(err && err.stack ? err.stack : String(err));
+}
+})();
+</script>
+</body>
+</html>
