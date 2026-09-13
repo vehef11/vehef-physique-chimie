@@ -336,7 +336,7 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
   <main>
     <!-- TAB 1 -->
     <section id="tab-1" class="tab active">
-      <h2>Principe de la technique de déplacement d'eau</h2>
+      <h2>la technique de déplacement d'eau</h2>
       <div class="stage3d" id="stage3d-1">
         <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div>
         <div class="explosion-flash" id="explosionFlash1"></div>
@@ -358,13 +358,13 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         <div class="puzzle-grid" id="puzzleGrid1">
           <button class="icon-btn puzzle-btn" id="tuyauBtn1" disabled><span class="puzzle-num">7</span>🧪 Placer le tuyau</button>
           <button class="icon-btn puzzle-btn" id="soufflerBtn1" disabled><span class="puzzle-num">8</span>👄 Souffler dans le tuyau</button>
-          <button class="icon-btn puzzle-btn" id="fillAlcoolBtn1" disabled><span class="puzzle-num">?</span>🧴 Remplir la bouteille (alcool ménager)</button>
+          <button class="icon-btn puzzle-btn" id="fillAlcoolBtn1" disabled><span class="puzzle-num">2</span>🧴 Remplir la bouteille (alcool ménager)</button>
           <button class="icon-btn puzzle-btn" id="chooseBottleBtn1"><span class="puzzle-num">1</span>🧺 Choisir une bouteille</button>
-          <button class="icon-btn puzzle-btn" id="deboucherBtn1" disabled><span class="puzzle-num">?</span>🧴 Déboucher la bouteille</button>
+          <button class="icon-btn puzzle-btn" id="deboucherBtn1" disabled><span class="puzzle-num">6</span>🧴 Déboucher la bouteille</button>
           <button class="icon-btn puzzle-btn" id="retournerBtn1" disabled><span class="puzzle-num">4</span>🔄 Retourner la bouteille</button>
-          <button class="icon-btn puzzle-btn" id="fillEauBtn1" disabled><span class="puzzle-num">?</span>🚰 Remplir la bouteille (eau)</button>
+          <button class="icon-btn puzzle-btn" id="fillEauBtn1" disabled><span class="puzzle-num">2</span>🚰 Remplir la bouteille (eau)</button>
           <button class="icon-btn puzzle-btn" id="plongerBtn1" disabled><span class="puzzle-num">5</span>⬇️ Plonger l'ouverture sous l'eau</button>
-          <button class="icon-btn puzzle-btn" id="boucherBtn1" disabled><span class="puzzle-num">?</span>🧴 Boucher la bouteille</button>
+          <button class="icon-btn puzzle-btn" id="boucherBtn1" disabled><span class="puzzle-num">3</span>🧴 Boucher la bouteille</button>
         </div>
         <div class="aux-row">
           <button class="icon-btn" id="colorantBtn1">🎨 Ajouter un colorant</button>
@@ -415,10 +415,10 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         <button class="main-action" id="showQuestionBtn3" disabled>❓ Afficher la question</button>
         <div class="puzzle-grid" id="puzzleGrid3">
           <button class="icon-btn puzzle-btn" id="appuyerBtn3" disabled><span class="puzzle-num">4</span>👊 Appuyer sur le ballon</button>
-          <button class="icon-btn puzzle-btn" id="remplirAlcoolBtn3" disabled><span class="puzzle-num">?</span>🧴 Remplir la bouteille (alcool ménager)</button>
+          <button class="icon-btn puzzle-btn" id="remplirAlcoolBtn3" disabled><span class="puzzle-num">2</span>🧴 Remplir la bouteille (alcool ménager)</button>
           <button class="icon-btn puzzle-btn" id="chooseBottleBtn3"><span class="puzzle-num">1</span>🧺 Choisir une bouteille</button>
-          <button class="icon-btn puzzle-btn" id="relierBtn3" disabled><span class="puzzle-num">?</span>🔗 Relier le ballon au tuyau</button>
-          <button class="icon-btn puzzle-btn" id="remplirEauBtn3" disabled><span class="puzzle-num">?</span>🚰 Remplir la bouteille (eau)</button>
+          <button class="icon-btn puzzle-btn" id="relierBtn3" disabled><span class="puzzle-num">3</span>🔗 Relier le ballon au tuyau</button>
+          <button class="icon-btn puzzle-btn" id="remplirEauBtn3" disabled><span class="puzzle-num">2</span>🚰 Remplir la bouteille (eau)</button>
         </div>
         <div class="aux-row">
           <button class="icon-btn" id="colorantBtn3">🎨 Ajouter un colorant</button>
@@ -539,10 +539,10 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
 
       <div class="prop-slider-block">
         <input class="val-slider" type="range" id="propMixSlider" min="0" max="100" step="1" value="50">
-        <div class="prop-mix-readout" id="propMixReadout">Mélange : <b>50 % O₂ / 50 % N₂</b><br>masse volumique du mélange : <b id="propMixValue">? g/L</b></div>
+        <div class="prop-mix-readout" id="propMixReadout">Composition air : <b>50 % O₂ / 50 % N₂</b><br>masse volumique du mélange : <b id="propMixValue">? g/L</b></div>
       </div>
       <div class="note-bubble note-bubble-neon note-bubble-oneline">7. Entre O₂ et N₂, qui a la plus grande masse volumique ? Justifie.</div>
-      <div class="note-bubble note-bubble-neon">8. À quelle composition de l'air (en %) correspond ta valeur de masse volumique ?</div>
+      <div class="note-bubble note-bubble-neon">8. À quelle composition de l'air (en %) correspond ta valeur de masse volumique ? Ça correspond à la réalité ?</div>
     </section>
 
     <div class="formula-modal" id="formulaModal5">
@@ -902,11 +902,21 @@ function makeBottle(volumeL){
 
 function makeMouth(){
   const group = new THREE.Group();
-  const mat = new THREE.MeshStandardMaterial({map:skinTex, color:0xC9776B, roughness:0.5});
-  const upper = new THREE.Mesh(new THREE.TorusGeometry(0.13,0.045,10,20,Math.PI), mat);
-  upper.rotation.x=Math.PI; upper.position.y=0.03; group.add(upper);
-  const lower = new THREE.Mesh(new THREE.TorusGeometry(0.13,0.05,10,20,Math.PI), mat);
-  lower.position.y=-0.03; group.add(lower);
+  const lipMat = new THREE.MeshStandardMaterial({map:skinTex, color:0xC9776B, roughness:0.45});
+  // dark open-mouth cavity, visible through the "O" shape while blowing into the tube
+  const cavityMat = new THREE.MeshStandardMaterial({color:0x3a1418, roughness:0.9});
+  const cavity = new THREE.Mesh(new THREE.CircleGeometry(0.095,24), cavityMat);
+  cavity.position.z = -0.02;
+  group.add(cavity);
+  // fuller, rounder lips (thinner upper lip, fuller lower lip, like a pursed "blowing" shape)
+  const upper = new THREE.Mesh(new THREE.TorusGeometry(0.12,0.038,12,24,Math.PI), lipMat);
+  upper.rotation.x=Math.PI; upper.position.y=0.02; group.add(upper);
+  const lower = new THREE.Mesh(new THREE.TorusGeometry(0.12,0.05,12,24,Math.PI), lipMat);
+  lower.position.y=-0.025; group.add(lower);
+  // small rounded spheres at the mouth corners so the lips meet smoothly instead of a hard seam
+  const cornerGeo = new THREE.SphereGeometry(0.038,12,12);
+  const cornerL = new THREE.Mesh(cornerGeo, lipMat); cornerL.position.set(-0.12,-0.002,0); group.add(cornerL);
+  const cornerR = new THREE.Mesh(cornerGeo, lipMat); cornerR.position.set(0.12,-0.002,0); group.add(cornerR);
   group.scale.set(0.001,0.001,0.001); group.visible=false;
   return group;
 }
@@ -2610,7 +2620,7 @@ function updatePropMix(){
   const fracN2 = sliderVal;
   const mix = (fracO2/100)*propDensityO2 + (fracN2/100)*propDensityN2;
   document.getElementById('propMixReadout').innerHTML =
-    'Mélange : <b>' + fracO2 + ' % O₂ / ' + fracN2 + ' % N₂</b><br>masse volumique du mélange : <b>' + mix.toFixed(3) + ' g/L</b>';
+    'Composition air : <b>' + fracO2 + ' % O₂ / ' + fracN2 + ' % N₂</b><br>masse volumique du mélange : <b>' + mix.toFixed(3) + ' g/L</b>';
 }
 
 document.getElementById('propMixSlider').addEventListener('input', updatePropMix);
