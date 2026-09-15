@@ -293,6 +293,16 @@ textarea{width:100%; min-height:90px; font-family:var(--font-body); font-size:.8
 .final-flash-emoji{ font-size:5rem; filter:drop-shadow(0 4px 8px rgba(0,0,0,.3)); }
 .final-flash-text{ font-family:var(--font-display); font-weight:800; font-size:1.9rem; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.35); }
 
+.order-error-overlay{
+  position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+  background:#c23b2b; opacity:0; pointer-events:none; transition:opacity .15s ease;
+}
+.order-error-overlay.show{ opacity:1; pointer-events:auto; }
+.order-error-text{
+  font-family:var(--font-display); font-weight:800; font-size:1.7rem; line-height:1.3; color:#fff;
+  text-align:center; padding:20px 34px; text-shadow:0 2px 6px rgba(0,0,0,.35);
+}
+
 .notebook-line.slider-line{ display:block; padding:5px 0; line-height:normal; }
 .notebook-line.slider-line .lab{ display:block; height:31px; line-height:31px; }
 .slider-wrap{ display:flex; align-items:center; gap:10px; height:31px; }
@@ -330,7 +340,6 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
     <button class="tab-btn" data-tab="3" onclick="showTab(3)">Extraire</button>
     <button class="tab-btn" data-tab="4" onclick="showTab(4)">Peser</button>
     <button class="tab-btn" data-tab="5" onclick="showTab(5)">Le cahier</button>
-    <button class="tab-btn" data-tab="6" onclick="showTab(6)">Proportions</button>
   </div>
 
   <main>
@@ -339,14 +348,13 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
       <h2>la technique de déplacement d'eau</h2>
       <div class="stage3d" id="stage3d-1">
         <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div>
-        <div class="explosion-flash" id="explosionFlash1"></div>
         <div class="scene-dim" id="sceneDim1"></div>
         <div class="scene-msg-box" id="sceneIntroMsg1">
           <div class="msg-text">commence par choisir les actions à faire dans l'ordre</div>
           <div class="msg-close" id="sceneIntroClose1">✕</div>
         </div>
-        <div class="scene-dim" id="overflowDim1"></div>
-        <div class="scene-neon-msg" id="overflowMsg1">t'as mis trop de liquide &gt;.&lt;</div>
+        <div class="explosion-flash" id="explosionFlash1"></div>
+        <div class="scene-banner" id="burstMsg1"></div>
         <div class="bottle-label-overlay" id="bottleRow1" style="display:none;">
           <button data-vol="3.3">3,3 L</button>
           <button data-vol="2.8">2,8 L</button>
@@ -356,20 +364,18 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
       <div class="readout" id="readout1">Étape 1 : choisis une bouteille.</div>
       <div class="action-row">
         <div class="puzzle-grid" id="puzzleGrid1">
-          <button class="icon-btn puzzle-btn" id="tuyauBtn1" disabled><span class="puzzle-num">7</span>🧪 Placer le tuyau</button>
-          <button class="icon-btn puzzle-btn" id="soufflerBtn1" disabled><span class="puzzle-num">8</span>👄 Souffler dans le tuyau</button>
-          <button class="icon-btn puzzle-btn" id="fillAlcoolBtn1" disabled><span class="puzzle-num">2</span>🧴 Remplir la bouteille (alcool ménager)</button>
+          <button class="icon-btn puzzle-btn" id="tuyauBtn1" disabled><span class="puzzle-num">8</span>🧪 Placer le tuyau</button>
+          <button class="icon-btn puzzle-btn" id="soufflerBtn1" disabled><span class="puzzle-num">9</span>👄 Souffler dans le tuyau</button>
           <button class="icon-btn puzzle-btn" id="chooseBottleBtn1"><span class="puzzle-num">1</span>🧺 Choisir une bouteille</button>
-          <button class="icon-btn puzzle-btn" id="deboucherBtn1" disabled><span class="puzzle-num">6</span>🧴 Déboucher la bouteille</button>
-          <button class="icon-btn puzzle-btn" id="retournerBtn1" disabled><span class="puzzle-num">4</span>🔄 Retourner la bouteille</button>
+          <button class="icon-btn puzzle-btn" id="deboucherBtn1" disabled><span class="puzzle-num">7</span>🧴 Déboucher la bouteille</button>
+          <button class="icon-btn puzzle-btn" id="retournerBtn1" disabled><span class="puzzle-num">5</span>🔄 Retourner la bouteille</button>
           <button class="icon-btn puzzle-btn" id="fillEauBtn1" disabled><span class="puzzle-num">2</span>🚰 Remplir la bouteille (eau)</button>
-          <button class="icon-btn puzzle-btn" id="plongerBtn1" disabled><span class="puzzle-num">5</span>⬇️ Plonger l'ouverture sous l'eau</button>
-          <button class="icon-btn puzzle-btn" id="boucherBtn1" disabled><span class="puzzle-num">3</span>🧴 Boucher la bouteille</button>
+          <button class="icon-btn puzzle-btn" id="plongerBtn1" disabled><span class="puzzle-num">6</span>⬇️ Plonger l'ouverture sous l'eau</button>
+          <button class="icon-btn puzzle-btn" id="boucherBtn1" disabled><span class="puzzle-num">4</span>🧴 Boucher la bouteille</button>
         </div>
         <div class="aux-row">
-          <button class="icon-btn" id="colorantBtn1">🎨 Ajouter un colorant</button>
+          <button class="icon-btn" id="colorantBtn1"><span class="puzzle-num">3</span>🎨 Ajouter un colorant</button>
           <button class="icon-btn" id="resetBtn1">↺ Recommencer</button>
-          <button class="icon-btn warn" id="retryBtn1">💥 Réessayer</button>
         </div>
         <div class="color-row" id="colorRow1" style="display:none;">
           <button class="swatch" data-color="#2f6fd6" style="background:#2f6fd6" title="Bleu" aria-label="Bleu"></button>
@@ -407,7 +413,7 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         <div class="bottle-label-overlay" id="bottleRow3" style="display:flex;">
           <button data-vol="3.3">3,3 L</button>
           <button data-vol="2.8">2,8 L</button>
-          <button data-vol="4.1">4,1 L</button>
+          <button data-vol="1.6">1,6 L</button>
         </div>
       </div>
       <div class="readout" id="readout3">Étape 1 : choisis une bouteille.</div>
@@ -444,6 +450,10 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         <div class="scientist-face" id="scientistFace4"></div>
         <div class="scene-dim" id="napDim4"></div>
         <div class="nap-moon" id="napMoon4">🌙</div>
+        <div class="scene-msg-box" id="question4Box">
+          <div class="msg-text">5. note la masse du ballon dégonflé</div>
+          <div class="msg-close" id="question4Close">✕</div>
+        </div>
       </div>
       <div class="readout" id="readout4">Pose le ballon et allume la balance, dans l'ordre de ton choix.</div>
       <div class="action-row">
@@ -464,7 +474,6 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         <div class="ghost-dim" id="ghostDim5"></div>
         <div class="ghost-figure" id="ghostFigure5"></div>
         <div class="tab5-lines" id="tab5Lines">
-          <div>5. note tes 3 valeurs</div>
           <div>6. calcule la masse volumique de l'air</div>
         </div>
       </div>
@@ -505,52 +514,13 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
       </div>
     </section>
 
-    <!-- TAB 6 -->
-    <section id="tab-6" class="tab">
-      <div class="prop-experiments">
-        <div class="prop-exp">
-          <div class="prop-exp-title">Dioxygène <b>O₂</b></div>
-          <div class="prop-balloon-stage">
-            <div class="prop-scale-display" id="propScaleO2">— g</div>
-            <div class="prop-liter-badge" id="propBadgeO2">+1 L de O₂</div>
-            <div class="prop-balloon" id="propBalloonO2">
-              <svg class="balloon-flat" viewBox="0 0 64 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="26" rx="26" ry="10" fill="#e0575a"/><path d="M10 26 Q32 16 54 26" stroke="rgba(0,0,0,.15)" stroke-width="1.5" fill="none"/><path d="M14 30 Q32 22 50 30" stroke="rgba(0,0,0,.12)" stroke-width="1.5" fill="none"/><path d="M32 36 L27 40 L37 40 Z" fill="#e0575a"/></svg>
-              <svg class="balloon-full" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="32" rx="28" ry="32" fill="#e0575a"/><ellipse cx="21" cy="18" rx="8" ry="11" fill="rgba(255,255,255,.35)"/><path d="M32 63 L27 71 L37 71 Z" fill="#e0575a"/></svg>
-            </div>
-            <div class="prop-scale-base"></div>
-          </div>
-          <div class="prop-readout" id="propReadoutO2"></div>
-        </div>
-        <div class="prop-exp">
-          <div class="prop-exp-title">Diazote <b>N₂</b></div>
-          <div class="prop-balloon-stage">
-            <div class="prop-scale-display" id="propScaleN2">— g</div>
-            <div class="prop-liter-badge" id="propBadgeN2">+1 L de N₂</div>
-            <div class="prop-balloon" id="propBalloonN2">
-              <svg class="balloon-flat" viewBox="0 0 64 40" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="26" rx="26" ry="10" fill="#3b82f6"/><path d="M10 26 Q32 16 54 26" stroke="rgba(0,0,0,.15)" stroke-width="1.5" fill="none"/><path d="M14 30 Q32 22 50 30" stroke="rgba(0,0,0,.12)" stroke-width="1.5" fill="none"/><path d="M32 36 L27 40 L37 40 Z" fill="#3b82f6"/></svg>
-              <svg class="balloon-full" viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg"><ellipse cx="32" cy="32" rx="28" ry="32" fill="#3b82f6"/><ellipse cx="21" cy="18" rx="8" ry="11" fill="rgba(255,255,255,.35)"/><path d="M32 63 L27 71 L37 71 Z" fill="#3b82f6"/></svg>
-            </div>
-            <div class="prop-scale-base"></div>
-          </div>
-          <div class="prop-readout" id="propReadoutN2"></div>
-        </div>
-      </div>
-      <div class="action-row"><button class="main-action" id="propActionBtn">⚖️ Peser le ballon vide</button></div>
-
-      <div class="prop-slider-block">
-        <input class="val-slider" type="range" id="propMixSlider" min="0" max="100" step="1" value="50">
-        <div class="prop-mix-readout" id="propMixReadout">Composition air : <b>50 % O₂ / 50 % N₂</b><br>masse volumique du mélange : <b id="propMixValue">? g/L</b></div>
-      </div>
-      <div class="note-bubble note-bubble-neon note-bubble-oneline">7. Entre O₂ et N₂, qui a la plus grande masse volumique ? Justifie.</div>
-      <div class="note-bubble note-bubble-neon">8. À quelle composition de l'air (en %) correspond ta valeur de masse volumique ? Ça correspond à la réalité ?</div>
-    </section>
-
     <div class="formula-modal" id="formulaModal5">
       <div class="formula-modal-card" id="formulaModalCard5"></div>
     </div>
   </main>
 </div>
 <div class="screamer-overlay" id="screamerOverlay"></div>
+<div class="order-error-overlay" id="orderErrorOverlay"><div class="order-error-text">fais les actions dans l'ordre</div></div>
 
 <script>
 /* ===================== shared experiment data ===================== */
@@ -646,6 +616,24 @@ function flashExplosion(overlayId){
   if(!el) return;
   el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
 }
+
+// Full-screen red reminder used in tab 1 whenever an action is attempted out of order.
+let orderErrorTimer = null;
+function showOrderError(){
+  const overlay = document.getElementById('orderErrorOverlay');
+  if(!overlay) return;
+  overlay.classList.add('show');
+  if(orderErrorTimer) clearTimeout(orderErrorTimer);
+  orderErrorTimer = setTimeout(()=> overlay.classList.remove('show'), 1600);
+}
+(function(){
+  const overlay = document.getElementById('orderErrorOverlay');
+  if(!overlay) return;
+  overlay.addEventListener('click', ()=>{
+    overlay.classList.remove('show');
+    if(orderErrorTimer){ clearTimeout(orderErrorTimer); orderErrorTimer=null; }
+  });
+})();
 
 /* ===================== stepper (single evolving action button) ===================== */
 function makeStepper(steps, btn){
@@ -1348,112 +1336,93 @@ function buildScene1(){
   sceneIntroClose1.onclick = hideIntroMessage1;
 
   let tubeGroup = null;
-  const state = { colorHex:null, bottleVolume:null, liquidType:null, fillPresses:0, air:0 };
+  const state = { colorHex:null, bottleVolume:null, liquidType:null, fillPresses:0, air:0, overfillPresses:0, exploded:false };
   const readout = document.getElementById('readout1');
+  const burstMsg1 = document.getElementById('burstMsg1');
   const colorantBtn = document.getElementById('colorantBtn1');
   const colorRow = document.getElementById('colorRow1');
-  colorantBtn.onclick = ()=>{ if(exploded) return; colorRow.style.display = colorRow.style.display==='none' ? 'flex' : 'none'; };
+  // if the student keeps versant de l'eau après le ras bord, la bouteille finit par déborder puis éclater
+  // (seuil aléatoire, comme pour le ballon de l'onglet 2)
+  function randomOverfillThreshold(){ return 2 + Math.floor(Math.random()*4); }
+  let overfillBurstAt = randomOverfillThreshold();
+  function explodeBottle1(){
+    state.exploded = true;
+    burstMsg1.innerHTML = '💥 <b>Boom !</b> Trop d\'eau : la bouteille a éclaté. Appuie sur « Recommencer ».';
+    burstMsg1.classList.add('show');
+    flashExplosion('explosionFlash1');
+    const center = bottleObj.getNeckWorld().add(new THREE.Vector3(0,-bottleObj.H*0.3,0));
+    const shreds=[];
+    for(let i=0;i<12;i++){
+      const geo = new THREE.ConeGeometry(0.035,0.11,6);
+      const mat = new THREE.MeshStandardMaterial({color: i%2===0 ? 0xCFE9F0 : 0xEFF6EC, roughness:0.4, metalness:0.1, transparent:true, opacity:0.9});
+      const m = new THREE.Mesh(geo, mat);
+      m.position.copy(center); scene.add(m);
+      const dir = new THREE.Vector3(Math.random()*2-1, Math.random()*1.3+0.2, Math.random()*2-1).normalize();
+      shreds.push({mesh:m, dir});
+    }
+    tween(750, p=>{
+      shreds.forEach(s=>{
+        s.mesh.position.copy(center).addScaledVector(s.dir, p*0.95);
+        s.mesh.position.y -= p*p*0.55;
+        s.mesh.material.opacity = 0.9*(1-p);
+        s.mesh.rotation.x += 0.35; s.mesh.rotation.y += 0.22;
+      });
+    }, ()=>{ shreds.forEach(s=>scene.remove(s.mesh)); });
+    bottleObj.stopShimmer();
+    bottleObj.group.visible = false;
+    puzzleActionBtns.forEach(b=>b.disabled=true);
+    chooseBottleBtn.disabled = true;
+  }
+  // Ajouter un colorant est désormais l'étape 3, obligatoire : impossible d'ouvrir les pastilles
+  // avant d'avoir rempli la bouteille, et impossible de passer au bouchon sans en avoir choisi une.
+  colorantBtn.onclick = ()=>{
+    if(nextStep!==2){ wrongOrder(); return; }
+    colorRow.style.display = colorRow.style.display==='none' ? 'flex' : 'none';
+  };
   colorRow.querySelectorAll('.swatch').forEach(sw=>{
     sw.onclick = ()=>{
-      if(exploded || !bottleObj) return;
+      if(nextStep!==2 || !bottleObj) return;
       colorRow.querySelectorAll('.swatch').forEach(s=>s.classList.remove('picked'));
       sw.classList.add('picked');
       state.colorHex = sw.dataset.color;
       bottleObj.setWaterColor(state.colorHex);
+      colorRow.style.display = 'none';
       readout.innerHTML = 'Le colorant se diffuse dans le liquide de la bouteille.';
+      nextStep = 3;
     };
   });
 
-  // ---- the 9 action buttons, deliberately laid out out of order — the student has to work out the real sequence ----
+  // ---- the 8 action buttons, deliberately laid out out of order — the student has to work out the real sequence ----
   const chooseBottleBtn = document.getElementById('chooseBottleBtn1');
   const bottleRow = document.getElementById('bottleRow1');
   setupBottleLabelOverlay(bottleRow, ()=>candidates, 1);
   const fillEauBtn = document.getElementById('fillEauBtn1');
-  const fillAlcoolBtn = document.getElementById('fillAlcoolBtn1');
   const boucherBtn = document.getElementById('boucherBtn1');
   const retournerBtn = document.getElementById('retournerBtn1');
   const plongerBtn = document.getElementById('plongerBtn1');
   const deboucherBtn = document.getElementById('deboucherBtn1');
   const tuyauBtn = document.getElementById('tuyauBtn1');
   const soufflerBtn = document.getElementById('soufflerBtn1');
-  const retryBtn = document.getElementById('retryBtn1');
-  const puzzleActionBtns = [fillEauBtn, fillAlcoolBtn, boucherBtn, retournerBtn, plongerBtn, deboucherBtn, tuyauBtn, soufflerBtn];
+  const puzzleActionBtns = [fillEauBtn, boucherBtn, retournerBtn, plongerBtn, deboucherBtn, tuyauBtn, soufflerBtn];
 
-  // nextStep tracks the one correct action expected right now: 0=choose a bottle, 1=fill it (eau OU alcool, 9 clicks),
-  // 2=boucher, 3=retourner, 4=plonger, 5=déboucher, 6=placer le tuyau, 7=souffler (several clicks), 8=done.
+  // nextStep tracks the one correct action expected right now: 0=choose a bottle, 1=fill it with water (9 clicks),
+  // 2=ajouter un colorant (obligatoire), 3=boucher, 4=retourner, 5=plonger, 6=déboucher, 7=placer le tuyau,
+  // 8=souffler (several clicks), 9=done.
   let nextStep = 0;
-  let exploded = false;
 
-  function explodeApparatus(){
-    if(exploded) return;
-    exploded = true;
-    puzzleActionBtns.forEach(b=>b.disabled=true);
-    bottleRow.style.display='none'; colorRow.style.display='none';
-    mouth.visible=false; mouth.scale.set(0.001,0.001,0.001);
-    const origin = bottleObj ? bottleObj.getNeckWorld().add(new THREE.Vector3(0,-0.2,0)) : holdPos.clone();
-    spawnExplosionAt(scene, origin);
-    shakeCamera();
-    flashExplosion('explosionFlash1');
-    if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
-    if(tubeGroup){ scene.remove(tubeGroup); tubeGroup=null; }
-    readout.innerHTML = '💥 <b>Boom !</b> Ce n\'était pas le bon ordre : tout est cassé.';
-    retryBtn.style.display='inline-block';
-  }
-
-  const overflowDim1 = document.getElementById('overflowDim1');
-  const overflowMsg1 = document.getElementById('overflowMsg1');
-  // A brief spill of droplets over the bottle's neck before the whole thing gives way.
-  function spawnOverflow(neckPos){
-    const drops=[];
-    for(let i=0;i<9;i++){
-      const geo = new THREE.SphereGeometry(0.022+Math.random()*0.012,6,6);
-      const col = state.liquidType==='alcool' ? 0xEAF7FF : 0x3fa9e0;
-      const mat = new THREE.MeshStandardMaterial({color:col, transparent:true, opacity:0.92, roughness:0.15, metalness:0.1});
-      const m = new THREE.Mesh(geo, mat);
-      const ang = Math.random()*Math.PI*2;
-      m.position.copy(neckPos).add(new THREE.Vector3(Math.cos(ang)*0.05, 0.01, Math.sin(ang)*0.05));
-      scene.add(m);
-      drops.push({ m, startY:m.position.y, fallDist:0.5+Math.random()*0.3 });
-    }
-    tween(600, p=>{
-      drops.forEach(d=>{
-        d.m.position.y = d.startY - d.fallDist*p*p;
-        d.m.material.opacity = 0.92*(1-p);
-      });
-    }, ()=>{ drops.forEach(d=>scene.remove(d.m)); });
-  }
-  function explodeOverflow(){
-    if(exploded) return;
-    exploded = true;
-    puzzleActionBtns.forEach(b=>b.disabled=true);
-    bottleRow.style.display='none'; colorRow.style.display='none';
-    mouth.visible=false; mouth.scale.set(0.001,0.001,0.001);
-    const neckPos = bottleObj ? bottleObj.getNeckWorld() : holdPos.clone();
-    spawnOverflow(neckPos);
-    readout.innerHTML = 'L\'eau déborde de la bouteille…';
-    setTimeout(()=>{
-      const origin = bottleObj ? bottleObj.getNeckWorld().add(new THREE.Vector3(0,-0.2,0)) : holdPos.clone();
-      spawnExplosionAt(scene, origin);
-      shakeCamera();
-      flashExplosion('explosionFlash1');
-      if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
-      if(tubeGroup){ scene.remove(tubeGroup); tubeGroup=null; }
-      overflowDim1.classList.add('show');
-      overflowMsg1.classList.add('show');
-      readout.innerHTML = 'La bouteille a débordé puis explosé. Appuie sur « Réessayer ».';
-      retryBtn.style.display='inline-block';
-    }, 600);
+  // Clicking out of order no longer breaks the apparatus — it just flashes a full-screen reminder
+  // so the student can try again straight away.
+  function wrongOrder(){
+    showOrderError();
   }
 
   chooseBottleBtn.onclick = ()=>{
-    if(exploded) return;
     const opening = bottleRow.style.display==='none';
     bottleRow.style.display = opening ? 'flex' : 'none';
     candidates.forEach(c=>{ c.lbl.visible = opening; });
   };
   function applyBottleVolume(vol){
-    if(exploded) return;
-    if(nextStep!==0){ explodeApparatus(); return; }
+    if(nextStep!==0){ wrongOrder(); return; }
     state.bottleVolume = vol;
     const chosen = candidates.find(c=>c.vol===vol);
     if(!chosen) return;
@@ -1484,68 +1453,64 @@ function buildScene1(){
     b.onclick = ()=> applyBottleVolume(parseFloat(b.dataset.vol));
   });
 
-  // filling now takes 9 clicks on the same button to go from empty to brimful — a 10th click overflows it
-  function doFill(type){
-    if(exploded) return;
-    if(state.fillPresses>=9){ explodeOverflow(); return; }
-    if(nextStep!==1){ explodeApparatus(); return; }
+  // filling now takes 9 clicks on the same button to go from empty to brimful — extra clicks past that are just ignored
+  function doFill(){
+    if(state.exploded) return;
+    if(nextStep!==1){ wrongOrder(); return; }
     if(state.liquidType===null){
-      state.liquidType = type;
-      bottleObj.setLiquidType(type);
-      (type==='alcool' ? fillEauBtn : fillAlcoolBtn).disabled = true;
-    } else if(state.liquidType!==type){
-      explodeApparatus(); return;
+      state.liquidType = 'eau';
+      bottleObj.setLiquidType('eau');
+    }
+    if(state.fillPresses>=9){
+      // la bouteille est déjà pleine : continuer à verser la fait déborder, puis éclater
+      state.overfillPresses++;
+      if(state.overfillPresses>=overfillBurstAt){ explodeBottle1(); return; }
+      readout.innerHTML = '<b>Attention, ça déborde !</b> Il y a trop d\'eau, la bouteille ne va pas tenir...';
+      return;
     }
     state.fillPresses = Math.min(9, state.fillPresses+1);
     bottleObj.setFilling(state.fillPresses/9);
     if(state.fillPresses>=9){
-      readout.innerHTML = '<b>La bouteille est remplie à ras bord !</b>';
+      readout.innerHTML = '<b>La bouteille est remplie à ras bord !</b> Ajoute maintenant un colorant.';
       nextStep = 2;
     } else {
       readout.innerHTML = 'Continue à remplir la bouteille ('+state.fillPresses+'/9).';
     }
   }
-  fillEauBtn.onclick = ()=> doFill('eau');
-  fillAlcoolBtn.onclick = ()=> doFill('alcool');
+  fillEauBtn.onclick = ()=> doFill();
 
   boucherBtn.onclick = ()=>{
-    if(exploded) return;
-    if(nextStep!==2){ explodeApparatus(); return; }
+    if(nextStep!==3){ wrongOrder(); return; }
     bottleObj.cap.visible=true; bottleObj.cap.scale.set(0.001,0.001,0.001);
     tween(300,p=>{ const s=0.001+p*0.999; bottleObj.cap.scale.set(s,s,s); }, ()=>{ readout.innerHTML='Le bouchon ferme l\'ouverture : aucun liquide ne peut sortir.'; });
-    nextStep = 3;
-  };
-  retournerBtn.onclick = ()=>{
-    if(exploded) return;
-    if(nextStep!==3){ explodeApparatus(); return; }
-    const r0=bottleObj.group.rotation.x; tween(800,p=>{ bottleObj.group.rotation.x=r0+(Math.PI-r0)*p; }, ()=>{ readout.innerHTML='Bouteille retournée : le bouchon maintient toujours l\'ouverture fermée.'; });
     nextStep = 4;
   };
-  plongerBtn.onclick = ()=>{
-    if(exploded) return;
-    if(nextStep!==4){ explodeApparatus(); return; }
-    const startPos=bottleObj.group.position.clone(); tween(900,p=>{ bottleObj.group.position.lerpVectors(startPos,submergedPos,p); }, ()=>{ readout.innerHTML='L\'ouverture est maintenant immergée dans le cristallisoir.'; });
+  retournerBtn.onclick = ()=>{
+    if(nextStep!==4){ wrongOrder(); return; }
+    const r0=bottleObj.group.rotation.x; tween(800,p=>{ bottleObj.group.rotation.x=r0+(Math.PI-r0)*p; }, ()=>{ readout.innerHTML='Bouteille retournée : le bouchon maintient toujours l\'ouverture fermée.'; });
     nextStep = 5;
   };
-  deboucherBtn.onclick = ()=>{
-    if(exploded) return;
-    if(nextStep!==5){ explodeApparatus(); return; }
-    tween(300,p=>{ const s=1-0.999*p; bottleObj.cap.scale.set(s,s,s); }, ()=>{ bottleObj.cap.visible=false; readout.innerHTML='Aucun liquide ne s\'échappe : la pression atmosphérique le maintient en place.'; });
+  plongerBtn.onclick = ()=>{
+    if(nextStep!==5){ wrongOrder(); return; }
+    const startPos=bottleObj.group.position.clone(); tween(900,p=>{ bottleObj.group.position.lerpVectors(startPos,submergedPos,p); }, ()=>{ readout.innerHTML='L\'ouverture est maintenant immergée dans le cristallisoir.'; });
     nextStep = 6;
   };
+  deboucherBtn.onclick = ()=>{
+    if(nextStep!==6){ wrongOrder(); return; }
+    tween(300,p=>{ const s=1-0.999*p; bottleObj.cap.scale.set(s,s,s); }, ()=>{ bottleObj.cap.visible=false; readout.innerHTML='Aucun liquide ne s\'échappe : la pression atmosphérique le maintient en place.'; });
+    nextStep = 7;
+  };
   tuyauBtn.onclick = ()=>{
-    if(exploded) return;
-    if(nextStep!==6){ explodeApparatus(); return; }
+    if(nextStep!==7){ wrongOrder(); return; }
     const points = computeTubePoints(basin, bottleObj, bottleObj.getNeckWorld(), tubeOuterPos());
     tubeGroup = makeTube(points); scene.add(tubeGroup);
     tween(700,p=>{ tubeGroup.children.forEach(c=>{ c.material.opacity=p; }); }, ()=>{
       readout.innerHTML='Le tuyau relie l\'ouverture immergée à l\'extérieur, sans traverser aucun verre.';
     });
-    nextStep = 7;
+    nextStep = 8;
   };
   soufflerBtn.onclick = ()=>{
-    if(exploded) return;
-    if(nextStep!==7){ explodeApparatus(); return; }
+    if(nextStep!==8){ wrongOrder(); return; }
     if(state.air===0){ mouth.visible=true; mouth.position.copy(tubeOuterPos()).add(new THREE.Vector3(0.15,0,0.05)); tween(350,p=>{ const s=0.001+p*0.999; mouth.scale.set(s,s,s); }); }
     state.air = Math.min(100, state.air+16);
     bottleObj.setVenting(state.air/100);
@@ -1554,14 +1519,16 @@ function buildScene1(){
     spawnBubble3D(scene, bottleObj.getNeckWorld().add(new THREE.Vector3(0,0.15,0)));
     if(state.air>=100){
       readout.innerHTML='<b>Bravo !</b> Le liquide de la bouteille a été entièrement remplacé par de l\'air.';
-      nextStep = 8;
+      nextStep = 9;
       setTimeout(()=>{ sign1.visible=true; flyTo(signCam, 1400); }, 1000);
     } else readout.innerHTML = 'L\'air remplace le liquide, qui remonte dans le cristallisoir.';
   };
 
   function resetAll(){
-    exploded = false; nextStep = 0;
+    nextStep = 0;
     state.colorHex=null; state.bottleVolume=null; state.liquidType=null; state.fillPresses=0; state.air=0;
+    state.overfillPresses=0; state.exploded=false; overfillBurstAt = randomOverfillThreshold();
+    burstMsg1.classList.remove('show');
     if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
     candidates.forEach(c=>{ c.bottle.stopShimmer(); scene.remove(c.bottle.group); scene.remove(c.lbl); });
     candidates = createCandidates();
@@ -1574,15 +1541,12 @@ function buildScene1(){
     colorRow.style.display='none'; colorRow.querySelectorAll('.swatch').forEach(s=>s.classList.remove('picked'));
     bottleRow.style.display='none';
     puzzleActionBtns.forEach(b=>b.disabled=true);
-    fillEauBtn.disabled=true; fillAlcoolBtn.disabled=true;
+    fillEauBtn.disabled=true;
     chooseBottleBtn.disabled = false;
-    retryBtn.style.display='none';
-    overflowDim1.classList.remove('show'); overflowMsg1.classList.remove('show');
     flyTo(trueDefaultCam, 700);
     readout.innerHTML='Étape 1 : choisis une bouteille.';
   }
   document.getElementById('resetBtn1').onclick = resetAll;
-  retryBtn.onclick = resetAll;
   return {
     scene, camAngles:{ theta:0.5, phi:1.05, radius:5.6, target:new THREE.Vector3(0,1.2,0.3) },
     onEnter(){
@@ -1612,7 +1576,7 @@ function buildScene2(){
   scene.add(introBalance.mesh);
 
   // question sign, lying flat on the table — revealed once the balloon has actually been weighed
-  const sign2 = makeSignBoard(["L'air a une masse.","3. Comment le prouver avec cette expérience ?"], {width:1125,height:425,fontSize:50,planeWidth:2.1, numbered:false, header:"note la réponse sur ton cahier :"});
+  const sign2 = makeSignBoard(["3. note la masse du ballon gonflé"], {width:1125,height:425,fontSize:50,planeWidth:2.1, numbered:false});
   sign2.rotation.x=-Math.PI/2; sign2.position.set(-0.16, BENCH_TOP+0.006, 1.0); sign2.visible=false; scene.add(sign2);
   // dedicated close-up framing used to reveal the sign, and the tab's normal resting view to fly back to on reset
   const trueDefaultCam2 = { theta:-0.4, phi:1.05, radius:5.4, target:new THREE.Vector3(0,1.1,0.35) };
@@ -1727,7 +1691,7 @@ function buildScene3(){
   const basin = makeBasin(); basin.group.position.set(1.2, BENCH_TOP, 0.3); scene.add(basin.group);
 
   // Three candidate bottles sit on the table at once; picking one fades out & removes the other two.
-  const candidateVols = [3.3, 2.8, 4.1];
+  const candidateVols = [3.3, 2.8, 1.6];
   const candidateX = [-2.05, -1.3, -0.55];
   function createCandidates(){
     return candidateVols.map((vol,i)=>{
@@ -1849,7 +1813,8 @@ function buildScene3(){
     puzzleActionBtns3.forEach(b=>b.disabled=false);
     chooseBottleBtn.disabled = true;
     nextStep = 1;
-    readout.innerHTML = 'La bouteille est choisie. À toi de deviner le bon ordre des actions suivantes !';
+    applyRandomColorant();
+    readout.innerHTML = 'La bouteille est choisie, colorant ajouté automatiquement. À toi de deviner le bon ordre des actions suivantes !';
   }
   bottleRow.querySelectorAll('button[data-vol]').forEach(b=>{
     b.onclick = ()=> applyBottleVolume(parseFloat(b.dataset.vol));
@@ -1857,6 +1822,17 @@ function buildScene3(){
 
   const colorantBtn = document.getElementById('colorantBtn3');
   const colorRow = document.getElementById('colorRow3');
+  // Un colorant aléatoire est ajouté automatiquement dès que la bouteille est choisie ;
+  // le bouton et les pastilles restent disponibles pour en changer manuellement ensuite.
+  function applyRandomColorant(){
+    const swatches = Array.from(colorRow.querySelectorAll('.swatch'));
+    if(!swatches.length || !bottleObj) return;
+    const sw = swatches[Math.floor(Math.random()*swatches.length)];
+    swatches.forEach(s=>s.classList.remove('picked'));
+    sw.classList.add('picked');
+    state.colorHex = sw.dataset.color;
+    bottleObj.setWaterColor(state.colorHex);
+  }
   colorantBtn.onclick = ()=>{ if(exploded) return; colorRow.style.display = colorRow.style.display==='none' ? 'flex' : 'none'; };
   colorRow.querySelectorAll('.swatch').forEach(sw=>{
     sw.onclick = ()=>{
@@ -2042,6 +2018,10 @@ function buildScene4(){
   const napDim = document.getElementById('napDim4');
   const napMoon = document.getElementById('napMoon4');
   const scientistFace = document.getElementById('scientistFace4');
+  const question4Box = document.getElementById('question4Box');
+  const question4Close = document.getElementById('question4Close');
+  let question4Timer = null;
+  question4Close.onclick = ()=> question4Box.classList.remove('show');
   let critters = [];
   let critterTimers = [];
   let faceTimer = null;
@@ -2202,6 +2182,8 @@ function buildScene4(){
       return;
     }
     readout.innerHTML = 'Le ballon est posé sur le plateau…';
+    if(question4Timer) clearTimeout(question4Timer);
+    question4Timer = setTimeout(()=>{ question4Box.classList.add('show'); }, 3000);
     const start = balloon.group.position.clone();
     tween(800, p=>{ balloon.group.position.lerpVectors(start, weighPos, p); }, ()=>{
       onScale = true;
@@ -2258,6 +2240,8 @@ function buildScene4(){
     if(napTimer){ clearTimeout(napTimer); napTimer=null; }
     siesteBtn.disabled = false;
     surpriseBtn.style.display='none';
+    if(question4Timer){ clearTimeout(question4Timer); question4Timer=null; }
+    question4Box.classList.remove('show');
     flyTo(trueDefaultCam4, 700);
     readout.innerHTML='Pose le ballon et allume la balance, dans l\'ordre de ton choix.';
   };
@@ -2282,9 +2266,6 @@ function showTab(n){
       if(tab5LinesTimer) clearTimeout(tab5LinesTimer);
       tab5LinesTimer = setTimeout(()=>{ lines5.classList.add('show'); }, 1200);
     }
-  }
-  if(n===6 && typeof propInitState==='function'){
-    propInitState();
   }
 }
 // Sliders replace free-text entry: each has to actually be dragged (not just left at 0) before it counts as filled in.
@@ -2491,141 +2472,6 @@ function ghostSVG2(face){
     }, 3000);
   };
 })();
-
-/* ===================== TAB 6 : proportions O2/N2 ===================== */
-// Densités réalistes (masse molaire / 24 L·mol⁻¹, conditions ordinaires) : O2 = 32/24, N2 = 28/24.
-// Avec ces valeurs, un mélange à 20% O2 / 80% N2 redonne bien ≈ 1,20 g/L, la valeur théorique de l'air.
-const PROP_BASE_MASS = 450;   // masse fictive du ballon vide, g (n'a pas d'importance : elle s'annule dans la soustraction)
-let propDensityO2 = 1.33, propDensityN2 = 1.17;
-let propStep = 0; // 0=peser à vide, 1=mettre 1L, 2=peser gonflé, 3=calculer, 4=recommencer
-const PROP_STEP_LABELS = [
-  '⚖️ Peser le ballon vide',
-  '💨 Mettre 1 L de gaz',
-  '⚖️ Peser le ballon gonflé',
-  "🧮 Calculer la masse d'1 L de gaz"
-];
-const PROP_GAS_KEYS = ['O2', 'N2'];
-function propDensity(key){ return key === 'O2' ? propDensityO2 : propDensityN2; }
-function propGasLabel(key){ return key === 'O2' ? 'O\u2082' : 'N\u2082'; }
-
-function propResetVisuals(){
-  PROP_GAS_KEYS.forEach(key=>{
-    const balloon = document.getElementById('propBalloon'+key);
-    const badge = document.getElementById('propBadge'+key);
-    const scale = document.getElementById('propScale'+key);
-    const readout = document.getElementById('propReadout'+key);
-    balloon.style.transition = 'none';
-    balloon.style.opacity = '0';
-    balloon.style.transform = 'translate(-50%, -90px) scale(0.5)';
-    balloon.classList.remove('inflated');
-    badge.style.opacity = '0';
-    scale.textContent = '— g';
-    readout.innerHTML = '';
-  });
-}
-
-function propInitState(){
-  propDensityO2 = +(1.33 + (Math.random()*0.04 - 0.02)).toFixed(3);
-  propDensityN2 = +(1.17 + (Math.random()*0.04 - 0.02)).toFixed(3);
-  propResetVisuals();
-  propStep = 0;
-  const btn = document.getElementById('propActionBtn');
-  btn.textContent = PROP_STEP_LABELS[0];
-  btn.disabled = false;
-  updatePropMix();
-}
-
-// Un seul bouton pilote les 2 expériences (O2 et N2) en même temps, étape par étape.
-function propDoStep(){
-  const btn = document.getElementById('propActionBtn');
-  btn.disabled = true;
-
-  if(propStep === 0){
-    // peser le ballon vide : il descend se poser sur la balance, puis la balance affiche sa masse
-    PROP_GAS_KEYS.forEach(key=>{
-      const balloon = document.getElementById('propBalloon'+key);
-      balloon.style.transition = 'transform .6s ease, opacity .3s ease';
-      balloon.style.opacity = '1';
-      balloon.style.transform = 'translate(-50%, 0) scale(0.55)';
-    });
-    setTimeout(()=>{
-      PROP_GAS_KEYS.forEach(key=>{
-        const scale = document.getElementById('propScale'+key);
-        const readout = document.getElementById('propReadout'+key);
-        tween(500, p=>{ scale.textContent = (PROP_BASE_MASS*p).toFixed(1) + ' g'; }, ()=>{
-          scale.textContent = PROP_BASE_MASS.toFixed(1) + ' g';
-          readout.innerHTML = 'm(vide) = <b>' + PROP_BASE_MASS.toFixed(1) + ' g</b>';
-        });
-      });
-      propStep = 1; btn.textContent = PROP_STEP_LABELS[1]; btn.disabled = false;
-    }, 650);
-
-  } else if(propStep === 1){
-    // on retire le ballon de la balance pour le gonfler : il remonte, se gonfle (SVG plat -> SVG gonflé), et la balance revient à 0
-    PROP_GAS_KEYS.forEach(key=>{
-      const balloon = document.getElementById('propBalloon'+key);
-      balloon.classList.add('inflated');
-      balloon.style.transform = 'translate(-50%, -60px) scale(1.15)';
-      document.getElementById('propBadge'+key).style.opacity = '1';
-      document.getElementById('propScale'+key).textContent = '0 g';
-    });
-    setTimeout(()=>{
-      propStep = 2; btn.textContent = PROP_STEP_LABELS[2]; btn.disabled = false;
-    }, 650);
-
-  } else if(propStep === 2){
-    // on repose le ballon gonflé sur la balance, qui affiche sa nouvelle masse
-    PROP_GAS_KEYS.forEach(key=>{
-      const density = propDensity(key);
-      const filledMass = PROP_BASE_MASS + density;
-      const balloon = document.getElementById('propBalloon'+key);
-      const scale = document.getElementById('propScale'+key);
-      const readout = document.getElementById('propReadout'+key);
-      balloon.style.transform = 'translate(-50%, 0) scale(1.15)';
-      tween(650, p=>{
-        scale.textContent = (PROP_BASE_MASS + (filledMass - PROP_BASE_MASS)*p).toFixed(2) + ' g';
-      }, ()=>{
-        scale.textContent = filledMass.toFixed(2) + ' g';
-        readout.innerHTML =
-          'm(vide) = <b>' + PROP_BASE_MASS.toFixed(1) + ' g</b><br>' +
-          'm(gonflé) = <b>' + filledMass.toFixed(2) + ' g</b>';
-      });
-    });
-    setTimeout(()=>{
-      propStep = 3; btn.textContent = PROP_STEP_LABELS[3]; btn.disabled = false;
-    }, 750);
-
-  } else if(propStep === 3){
-    // calculer la masse d'1 L de gaz
-    PROP_GAS_KEYS.forEach(key=>{
-      const density = propDensity(key);
-      const gasLabel = propGasLabel(key);
-      const filledMass = PROP_BASE_MASS + density;
-      document.getElementById('propReadout'+key).innerHTML =
-        'm(vide) = <b>' + PROP_BASE_MASS.toFixed(1) + ' g</b><br>' +
-        'm(gonflé) = <b>' + filledMass.toFixed(2) + ' g</b><br>' +
-        'm(1L de ' + gasLabel + ') = <b>' + density.toFixed(2) + ' g/L</b>';
-    });
-    propStep = 4; btn.textContent = '🔁 Recommencer'; btn.disabled = false;
-
-  } else {
-    propInitState();
-  }
-}
-
-function updatePropMix(){
-  const slider = document.getElementById('propMixSlider');
-  const sliderVal = parseFloat(slider.value); // 0 = tout à gauche (100% O2) ... 100 = tout à droite (100% N2)
-  const fracO2 = 100 - sliderVal;
-  const fracN2 = sliderVal;
-  const mix = (fracO2/100)*propDensityO2 + (fracN2/100)*propDensityN2;
-  document.getElementById('propMixReadout').innerHTML =
-    'Composition air : <b>' + fracO2 + ' % O₂ / ' + fracN2 + ' % N₂</b><br>masse volumique du mélange : <b>' + mix.toFixed(3) + ' g/L</b>';
-}
-
-document.getElementById('propMixSlider').addEventListener('input', updatePropMix);
-document.getElementById('propActionBtn').addEventListener('click', propDoStep);
-updatePropMix();
 
 showTab(1);
 </script>
