@@ -108,7 +108,7 @@
   .mat-name{ display:flex; align-items:center; gap:6px; font-weight:600; color:var(--text-0); margin-bottom:4px; white-space:nowrap; }
   .mat-swatch{ width:9px; height:9px; border-radius:50%; display:inline-block; flex-shrink:0; }
   .mat-line{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; color:var(--text-1); font-size:12.5px; padding:1px 0; white-space:nowrap; }
-  .mat-line span.val{ font-family:'IBM Plex Mono',monospace; color:var(--teal-glow); }
+  .mat-line span.val{ font-family:'IBM Plex Mono',monospace; color:#1f8a5f; font-weight:600; }
   .mat-line span.val.empty{ color:var(--text-2); }
 
   .dock{
@@ -262,16 +262,22 @@
 
   <div class="questions" id="questions">
     <div class="qcard">
-      <p>1. Donner la composition massique du mélange (%).</p>
+      <p>1. Calcule la masse m<sub>totale</sub> des boules présentes dans le bécher.</p>
     </div>
     <div class="qcard">
-      <p>2. Donner la composition volumique du mélange (%).</p>
+      <p>2. Calcule le volume V<sub>total</sub> des boules dans le bécher.</p>
     </div>
     <div class="qcard">
-      <p>3. Donner la composition du mélange en nombre d'unités (%).</p>
+      <p>3. Calcule la proportion de l'alu en nombre d'unités.</p>
     </div>
     <div class="qcard">
-      <p>4. Calcule la masse volumique de l'aluminium (en g/L).</p>
+      <p>4. Calcule la proportion massique des boules d'alu dans le mélange qui est dans le bécher. On la notera P<sub>mass</sub>(alu).</p>
+    </div>
+    <div class="qcard">
+      <p>5. Calcule la proportion volumique des boules d'alu dans le mélange qui est dans le bécher. On la notera P<sub>vol</sub>(alu).</p>
+    </div>
+    <div class="qcard">
+      <p>6. Calcule la masse volumique de l'alu.</p>
     </div>
   </div>
 
@@ -316,6 +322,7 @@ const CFG = {
 function easeInOutCubic(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
 function easeOutCubic(t){ return 1-Math.pow(1-t,3); }
 function fmt1(n){ return n.toFixed(1).replace('.', ','); }
+function fmtInt(n){ return String(Math.round(n)); }
 function lerp(a,b,t){ return a+(b-a)*t; }
 
 function hash3(x,y,z){
@@ -531,7 +538,7 @@ function makeDisplayScreen(){
     ctx.fillText(text, 128, 64);
     tex.needsUpdate=true;
   }
-  draw('0,0');
+  draw('0');
   return { tex, draw };
 }
 
@@ -977,23 +984,23 @@ function weigh(type){
   const home = ball.position.clone();
 
   showReading(type==='alu' ? "Masse — boule d'aluminium" : "Masse — boule de pâte à modeler");
-  readingBig.textContent = "0,0 g";
+  readingBig.textContent = "0 g";
 
   flyCameraTo(VIEW_BALANCE.target, VIEW_BALANCE.radius, VIEW_BALANCE.theta, VIEW_BALANCE.phi, 900);
   flyBall(ball, home, balanceRestPos, 900, 2.2, ()=>{
     tween(900, (t, raw)=>{
       const val = cfg.mass*t;
-      readingBig.textContent = fmt1(val) + " g";
-      balanceScreenObj.draw(fmt1(val));
+      readingBig.textContent = fmtInt(val) + " g";
+      balanceScreenObj.draw(fmtInt(val));
     }, ()=>{
       readingLine1.textContent = "lecture stabilisée";
       wait(1400, ()=>{
         flyCameraTo(VIEW_BEAKER.target, VIEW_BEAKER.radius, VIEW_BEAKER.theta, VIEW_BEAKER.phi, 900);
         flyBall(ball, ball.position.clone(), home, 900, 2.0, ()=>{
           hideReading();
-          balanceScreenObj.draw('0,0');
-          if(type==='alu'){ state.aluWeighed=true; setNotebook(notebook.aluMass, fmt1(CFG.alu.mass)+" g"); }
-          else { state.clayWeighed=true; setNotebook(notebook.clayMass, fmt1(CFG.clay.mass)+" g"); }
+          balanceScreenObj.draw('0');
+          if(type==='alu'){ state.aluWeighed=true; setNotebook(notebook.aluMass, fmtInt(CFG.alu.mass)+" g"); }
+          else { state.clayWeighed=true; setNotebook(notebook.clayMass, fmtInt(CFG.clay.mass)+" g"); }
 
           if(state.aluWeighed && state.clayWeighed){
             setDock([
@@ -1023,7 +1030,7 @@ function measureVolume(type){
   setWaterHeight(waterBaseH);
 
   showReading(type==='alu' ? "Volume — boule d'aluminium" : "Volume — boule de pâte à modeler");
-  readingBig.textContent = fmt1(cfg.volBefore) + " mL";
+  readingBig.textContent = fmtInt(cfg.volBefore) + " mL";
   readingLine1.textContent = "volume initial";
 
   const dropTarget = new THREE.Vector3(CFG.cylinderPos.x, 0.28 + waterBaseH + 1.4, CFG.cylinderPos.z);
@@ -1038,11 +1045,11 @@ function measureVolume(type){
         const h = lerp(waterBaseH, volToHeight(cfg.volAfter), t);
         setWaterHeight(h);
         const val = lerp(cfg.volBefore, cfg.volAfter, t);
-        readingBig.textContent = fmt1(val) + " mL";
+        readingBig.textContent = fmtInt(val) + " mL";
         readingLine1.textContent = "volume final";
       }, ()=>{
         wait(500, ()=>{
-          readingLine2.textContent = "V(bille) = " + fmt1(cfg.volAfter) + " − " + fmt1(cfg.volBefore) + " = " + fmt1(cfg.volAfter-cfg.volBefore) + " mL";
+          readingLine2.textContent = "V(bille) = " + fmtInt(cfg.volAfter) + " − " + fmtInt(cfg.volBefore) + " = " + fmtInt(cfg.volAfter-cfg.volBefore) + " mL";
           wait(1700, ()=>{
             flyCameraTo(VIEW_BEAKER.target, VIEW_BEAKER.radius, VIEW_BEAKER.theta, VIEW_BEAKER.phi, 900);
             const riseTarget = new THREE.Vector3(CFG.cylinderPos.x, dropTarget.y, CFG.cylinderPos.z);
@@ -1050,8 +1057,8 @@ function measureVolume(type){
               flyBall(ball, riseTarget, home, 900, 2.0, ()=>{
                 setWaterHeight(waterBaseH);
                 hideReading();
-                if(type==='alu'){ state.aluMeasured=true; setNotebook(notebook.aluVol, fmt1(cfg.volAfter-cfg.volBefore)+" mL"); }
-                else { state.clayMeasured=true; setNotebook(notebook.clayVol, fmt1(cfg.volAfter-cfg.volBefore)+" mL"); }
+                if(type==='alu'){ state.aluMeasured=true; setNotebook(notebook.aluVol, fmtInt(cfg.volAfter-cfg.volBefore)+" mL"); }
+                else { state.clayMeasured=true; setNotebook(notebook.clayVol, fmtInt(cfg.volAfter-cfg.volBefore)+" mL"); }
 
                 if(state.aluMeasured && state.clayMeasured){
                   setDock([{ label:"Afficher les questions", onClick:toggleQuestions }]);
