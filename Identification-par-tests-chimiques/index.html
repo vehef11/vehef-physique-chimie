@@ -13,7 +13,7 @@
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body{ margin:0; height:100%; background:#000; color:var(--text); font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; overflow:hidden; }
   body{ display:flex; align-items:center; justify-content:center; }
-  #app{ position:relative; width:min(100vw,100dvh,780px); height:min(100vw,100dvh,780px); background:var(--bg); overflow:hidden; display:flex; flex-direction:column; }
+  #app{ position:relative; --w:min(100vw,75dvh,600px); width:var(--w); height:calc(var(--w)*4/3); background:var(--bg); overflow:hidden; display:flex; flex-direction:column; }
 
   .tabs{ display:flex; gap:6px; padding:8px; border-bottom:1px solid var(--border); background:#10132200; background:rgba(8,10,22,.95); z-index:30; }
   .tab{ flex:1 1 0; display:flex; align-items:center; justify-content:center; min-width:0; padding:8px 2px; border-radius:10px; font-size:12px; font-weight:600;
@@ -790,7 +790,9 @@ async function molStart(){
   document.querySelector('#molLeg .hm').classList.add('on');
   await wait(1600); if(!alive()) return;
   molLine('Le groupement <span class="bl">Fe-hème</span> est beaucoup plus complexe.');
-  await wait(4200); if(!alive()) return;
+  await wait(2400); if(!alive()) return;
+  molLine('On le retrouve dans le sang.');
+  await wait(3200); if(!alive()) return;
   molLine("…mais ça, ce n'est pas à savoir… <span class=\"bl\">Tu peux passer à l'onglet 3.</span>");   // 4. message final
   document.querySelector('.tab[data-tab="1"]').classList.add('pulse');
 }
@@ -1375,7 +1377,7 @@ function step(dt){
 function resize(){
   const w=stage.clientWidth,h=stage.clientHeight; if(!w||!h) return;
   renderer.setSize(w,h,false); { const db=renderer.getDrawingBufferSize(new THREE.Vector2()); rt.setSize(db.x,db.y); liqMats.forEach(m=>m.uniforms.res.value.copy(db)); window._db=db; } renderer.domElement.style.width='100%'; renderer.domElement.style.height='100%';
-  cam.aspect=w/h; cam.fov=w/h<1?38+(1/(w/h)-1)*30:38; cam.updateProjectionMatrix();
+  cam.aspect=w/h; cam.fov=w/h<1?2*Math.atan(Math.tan(19*Math.PI/180)*1.08/(w/h))*180/Math.PI:38; cam.updateProjectionMatrix();
 }
 window.addEventListener('resize',resize);
 setup(5); requestAnimationFrame(frame);
