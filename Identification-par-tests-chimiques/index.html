@@ -335,9 +335,9 @@ function wallTex(kind){
   else if(kind===2){ g.fillStyle='#232d31'; g.fillRect(0,0,1024,512);
     const s=64; for(let y=0;y<512;y+=s) for(let x=0;x<1024;x+=s){ const sh=g.createLinearGradient(x,y,x+s,y+s); sh.addColorStop(0,'#3d4b50'); sh.addColorStop(1,'#2a373b'); g.fillStyle=sh; g.fillRect(x+3,y+3,s-6,s-6); }
     for(let i=0;i<40;i++){ const x=rnd(0,1024),y=rnd(0,512),r=rnd(20,80); const rg=g.createRadialGradient(x,y,0,x,y,r); rg.addColorStop(0,'rgba(0,0,0,.28)'); rg.addColorStop(1,'rgba(0,0,0,0)'); g.fillStyle=rg; g.fillRect(x-r,y-r,2*r,2*r); } }
-  else { g.fillStyle='#f4f6f6'; g.fillRect(0,0,1024,512);
-    const s=64; for(let y=0;y<512;y+=s) for(let x=0;x<1024;x+=s){ const sh=g.createLinearGradient(x,y,x+s,y+s); sh.addColorStop(0,'#ffffff'); sh.addColorStop(1,'#e3e9ea'); g.fillStyle=sh; g.fillRect(x+2,y+2,s-4,s-4); }
-    g.strokeStyle='rgba(140,155,160,.65)'; g.lineWidth=3; for(let y=0;y<=512;y+=s){ g.beginPath(); g.moveTo(0,y); g.lineTo(1024,y); g.stroke(); } for(let x=0;x<=1024;x+=s){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,512); g.stroke(); } }
+  else { g.fillStyle='#8d9ba5'; g.fillRect(0,0,1024,512);
+    const s=64; for(let y=0;y<512;y+=s) for(let x=0;x<1024;x+=s){ const sh=g.createLinearGradient(x,y,x+s,y+s); sh.addColorStop(0,'#a3b1ba'); sh.addColorStop(1,'#7f8d97'); g.fillStyle=sh; g.fillRect(x+2,y+2,s-4,s-4); }
+    g.strokeStyle='rgba(38,50,60,.75)'; g.lineWidth=3; for(let y=0;y<=512;y+=s){ g.beginPath(); g.moveTo(0,y); g.lineTo(1024,y); g.stroke(); } for(let x=0;x<=1024;x+=s){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,512); g.stroke(); } }
   return tex(c);
 }
 function benchTex(kind){
@@ -400,7 +400,7 @@ function makeEnv(bright,tint){
   boxes.forEach(b=>{ const m=new THREE.Mesh(new THREE.BoxGeometry(b[3],b[4],b[5]), new THREE.MeshBasicMaterial({color:new THREE.Color(0xffffff).multiplyScalar(b[6])})); m.position.set(b[0],b[1],b[2]); s.add(m); });
   return pmrem.fromScene(s,.03).texture;
 }
-const ENV={ b0:makeEnv(true,0xaebcd8), d0:makeEnv(false), b1:makeEnv(true,0xf2f6f6), d1:makeEnv(false), b4:makeEnv(true,0x56646f), d4:makeEnv(false) };
+const ENV={ b0:makeEnv(true,0xaebcd8), d0:makeEnv(false), b1:makeEnv(true,0x64737e), d1:makeEnv(false), b4:makeEnv(true,0x56646f), d4:makeEnv(false) };
 
 // ============================================================ géométrie utilitaires
 const lc=h=>new THREE.Color(h).convertSRGBToLinear();
@@ -468,7 +468,7 @@ function build(n){
     const riser=new THREE.Mesh(new THREE.BoxGeometry(9.4,y0,1.5),wood); riser.position.set(.15,y0/2,tz); riser.castShadow=riser.receiveShadow=true; world.add(riser);
     const bar=holedPlate(9.4,1.2,.16,BX.slice(0,5).map(x=>x-.15),.47,wood); bar.position.set(.15,y0+1.55,tz); bar.castShadow=true; world.add(bar); T.rack=[riser,bar];
   } else {
-    const pl=new THREE.MeshStandardMaterial({color:lc(0xf8fafa),roughness:.35,metalness:0});
+    const pl=new THREE.MeshStandardMaterial({color:lc(0xaeb9bf),roughness:.35,metalness:0});
     const blk=new THREE.Mesh(new THREE.BoxGeometry(9.2,y0-.2,1.5),pl); blk.position.set(.1,(y0-.2)/2,tz); blk.castShadow=blk.receiveShadow=true; world.add(blk);
     const top=holedPlate(9.2,1.5,.2,BX.slice(0,5).map(x=>x-.1),.46,new THREE.MeshStandardMaterial({color:lc(0x3da4d8),roughness:.3})); top.position.set(.1,y0-.2,tz); top.castShadow=true; world.add(top);
   }
@@ -625,7 +625,7 @@ function showSheet(c,final){
       b.style.left=((x0+lw+c*cw+4)/W*100)+'%'; b.style.top=((y2+top)/H*100)+'%'; b.style.width=((cw-6)/W*100)+'%'; b.style.fontSize='clamp(10px,2.9vw,14px)'; if(label.length>14) b.style.fontSize='clamp(9px,2.5vw,12.5px)';
       b.addEventListener('click',()=>{ if(b.dataset.done) return; [...$('opts').children].forEach(x=>x.dataset.done=1); b.classList.add('on'); results[c]=val; SAVED[cur]=results.slice(); setTimeout(()=>{ $('opts').innerHTML=''; $('sheetSvg').innerHTML=sheetSvg(c,false); const last=$('sheetSvg').querySelector('text:last-of-type'); setTimeout(res,1500); },450); });
       $('opts').appendChild(b); };
-    mk('aucune réaction',6,'neg'); mk('changement de couleur',44,'pos');
+    mk('aucune réaction',6,'neg'); mk(cur===1?'lumineux dans le noir':'changement de couleur',44,'pos');
   });
 }
 function hideSheet(){ $('sheetWrap').classList.remove('show'); $('revTabs').style.display='none'; }
@@ -1334,10 +1334,10 @@ function step(dt){
   if(cur===2||cur===3||cur>=5) return;
   lightLvl+=((dark?.0:1)-lightLvl)*Math.min(1,dt*5);
   const L=(.07+.93*lightLvl)*(1-.68*DIM.v);
-  const KK=cur===4?.62:1; hemiL.intensity=(cur?.4:.5)*L*KK; dirL.intensity=(cur?.95:1.0)*L*KK; fillL.intensity=.4*L*KK;
+  const KK=cur===4?.62:cur===1?.7:1; hemiL.intensity=(cur?.4:.5)*L*KK; dirL.intensity=(cur?.95:1.0)*L*KK; fillL.intensity=.4*L*KK;
   scene.environment=L>.5?ENV['b'+cur]:ENV['d'+cur];
   renderer.toneMappingExposure=.92;
-  const bgc=[0xcfd9ec,0xe7ecee,0,0,0x3c4852][cur]; tmpC.setHex(bgc); scene.background.copy(tmpC).multiplyScalar(L*L);
+  const bgc=[0xcfd9ec,0x56646e,0,0,0x3c4852][cur]; tmpC.setHex(bgc); scene.background.copy(tmpC).multiplyScalar(L*L);
   if(T.wall){ T.wall.material.color.setScalar((.03+.97*L)*(cur?.8:1)); }
   if(T.led) T.led.material.color.setHex(L>.5?0xff7a2a:0xff3a10);
   if(swLever) swLever.rotation.x=L>.5?-.35:.35; swX.lev.forEach(l=>l.rotation.x=L>.5?-.35:.35); swX.led.forEach(d=>d.material.color.setHex(L>.5?0xff7a2a:0xff3a10));
