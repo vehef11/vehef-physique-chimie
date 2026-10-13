@@ -47,7 +47,7 @@ main{background:var(--panel); border:1px solid var(--line); border-radius:12px; 
 .tab.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 
-h2{font-family:var(--font-display); font-size:1.08rem; margin:0 0 4px;}
+h2{font-family:var(--font-display); font-size:1.08rem; margin:0 0 8px; text-align:center;}
 .hint{font-size:.82rem; color:var(--ink-soft); margin:0 0 10px; line-height:1.4;}
 
 .note-bubble{
@@ -104,7 +104,7 @@ h2{font-family:var(--font-display); font-size:1.08rem; margin:0 0 4px;}
 .prop-mix-readout{ text-align:center; font-family:var(--font-mono); font-size:.9rem; margin-top:10px; line-height:1.6; }
 
 .stage3d{
-  position:relative; width:100%; max-width:460px; aspect-ratio:4/3; margin:0 auto 10px;
+  position:relative; width:100%; max-width:440px; aspect-ratio:1/1; margin:0 auto 10px;
   background:#EDE8DC; border:1px solid var(--line); border-radius:14px; overflow:hidden;
 }
 .stage3d canvas{width:100%; height:100%; display:block; cursor:grab; touch-action:none;}
@@ -142,6 +142,9 @@ h2{font-family:var(--font-display); font-size:1.08rem; margin:0 0 4px;}
 .main-action:active{transform:scale(.97);}
 .main-action:disabled{opacity:.45; cursor:not-allowed; background:var(--panel2); color:var(--ink-soft); border-color:var(--line);}
 .main-action.warn{background:var(--brick); border-color:var(--brick-dark);}
+.btn-row3{display:flex; flex-wrap:nowrap; gap:6px; width:100%; max-width:420px;}
+.btn-row3 .main-action{flex:1 1 0; min-width:0; width:auto; max-width:none; font-size:.76rem; padding:10px 4px; min-height:48px; line-height:1.15;}
+.aux-row .icon-btn{display:inline-flex; align-items:center; gap:6px;}
 .aux-row{display:flex; gap:8px; justify-content:center; flex-wrap:wrap;}
 .icon-btn{
   font-family:var(--font-body); font-size:.72rem; font-weight:600; padding:7px 12px; border-radius:20px;
@@ -158,6 +161,14 @@ h2{font-family:var(--font-display); font-size:1.08rem; margin:0 0 4px;}
   font-family:var(--font-mono); font-size:.65rem; font-weight:800;
 }
 
+.reset-overlay{
+  position:absolute; top:8px; right:8px; z-index:9; display:flex; align-items:center; gap:6px;
+  font-family:var(--font-body); font-size:.72rem; font-weight:700; color:var(--ink);
+  background:rgba(251,249,242,.92); border:1px solid var(--line); border-radius:20px; padding:5px 11px 5px 7px;
+  cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.reset-overlay .reset-arrow{ width:20px; height:20px; animation:resetSpin 2.4s ease-in-out infinite alternate; }
+@keyframes resetSpin{ from{ transform:rotate(0deg); } to{ transform:rotate(-360deg); } }
 .explosion-flash{
   position:absolute; inset:0; z-index:7; pointer-events:none; opacity:0;
   background:radial-gradient(circle, rgba(255,214,140,.95), rgba(255,90,40,.65) 42%, rgba(0,0,0,0) 72%);
@@ -248,9 +259,9 @@ textarea{width:100%; min-height:90px; font-family:var(--font-body); font-size:.8
 .result-badge.warn{background:var(--brick);}
 
 .ghost-stage{ background:radial-gradient(circle at 30% 25%, #333c30, #14170f) !important; }
-.ghost-dim{ position:absolute; inset:0; background:#000; opacity:0; transition:opacity .6s ease; pointer-events:none; z-index:2; }
+.ghost-dim{ position:absolute; inset:0; background:#000; opacity:0; transition:opacity .2s ease; pointer-events:none; z-index:2; }
 .ghost-dim.on{ opacity:.72; }
-.ghost-figure{ position:absolute; top:50%; left:-110px; width:90px; height:100px; transform:translateY(-50%); z-index:3; display:none; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)); }
+.ghost-figure{ position:absolute; top:50%; left:-110px; width:90px; height:112px; transform:translateY(-50%); z-index:3; display:none; filter:drop-shadow(0 6px 10px rgba(0,0,0,.55)); }
 .screamer-overlay{ position:fixed; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:9999; opacity:0; pointer-events:none; transition:opacity .05s; }
 .screamer-overlay.show{ opacity:1; }
 .screamer-overlay svg{ width:62vmin; height:auto; max-width:520px; }
@@ -291,7 +302,7 @@ textarea{width:100%; min-height:90px; font-family:var(--font-body); font-size:.8
 .final-flash-overlay.tier-good{ background:#3fae5c; }
 .final-flash-overlay.tier-bad{ background:#c23b2b; }
 .final-flash-emoji{ font-size:5rem; filter:drop-shadow(0 4px 8px rgba(0,0,0,.3)); }
-.final-flash-text{ font-family:var(--font-display); font-weight:800; font-size:1.9rem; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.35); }
+.final-flash-text{ font-family:var(--font-display); font-weight:800; font-size:clamp(1.3rem,6vw,1.9rem); line-height:1.3; text-align:center; max-width:88vw; padding:0 12px; color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.35); }
 
 .order-error-overlay{
   position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
@@ -326,14 +337,16 @@ textarea{width:100%; min-height:90px; font-family:var(--font-body); font-size:.8
 }
 
 footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14px;}
+#puzzleGrid1{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; max-width:440px; width:100%; margin-bottom:0;}
+#puzzleGrid1 .puzzle-btn{max-width:none; width:100%; flex:none; min-height:38px; padding:5px 4px; font-size:.66rem; line-height:1.15; gap:4px; text-align:left; justify-content:flex-start;}
+#puzzleGrid1 .puzzle-num{width:16px; height:16px; font-size:.6rem;}
+#tab-1 .stage3d{margin-bottom:6px;}
+#tab-1 h2{margin-bottom:4px;}
+#tab-1 .color-row{margin-top:6px;}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="cover">
-    <h1>Déterminer la masse volumique de l'air</h1>
-  </div>
-
   <div class="tabs">
     <button class="tab-btn active" data-tab="1" onclick="showTab(1)">Intro</button>
     <button class="tab-btn" data-tab="2" onclick="showTab(2)">Gonfler et peser</button>
@@ -353,6 +366,10 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
           <div class="msg-text">commence par choisir les actions à faire dans l'ordre</div>
           <div class="msg-close" id="sceneIntroClose1">✕</div>
         </div>
+        <button class="reset-overlay" id="resetBtn1" aria-label="Recommencer" title="Recommencer">
+          <svg viewBox="0 0 24 24" class="reset-arrow" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9" fill="none" stroke="#d62d20" stroke-width="3" stroke-linecap="round"/><path d="M20.5 2.5v6h-6z" fill="#d62d20"/></svg>
+          <span>Recommencer</span>
+        </button>
         <div class="explosion-flash" id="explosionFlash1"></div>
         <div class="scene-banner" id="burstMsg1"></div>
         <div class="bottle-label-overlay" id="bottleRow1" style="display:none;">
@@ -364,18 +381,15 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
       <div class="readout" id="readout1">Étape 1 : choisis une bouteille.</div>
       <div class="action-row">
         <div class="puzzle-grid" id="puzzleGrid1">
-          <button class="icon-btn puzzle-btn" id="tuyauBtn1" disabled><span class="puzzle-num">8</span>🧪 Placer le tuyau</button>
-          <button class="icon-btn puzzle-btn" id="soufflerBtn1" disabled><span class="puzzle-num">9</span>👄 Souffler dans le tuyau</button>
-          <button class="icon-btn puzzle-btn" id="chooseBottleBtn1"><span class="puzzle-num">1</span>🧺 Choisir une bouteille</button>
-          <button class="icon-btn puzzle-btn" id="deboucherBtn1" disabled><span class="puzzle-num">7</span>🧴 Déboucher la bouteille</button>
-          <button class="icon-btn puzzle-btn" id="retournerBtn1" disabled><span class="puzzle-num">5</span>🔄 Retourner la bouteille</button>
-          <button class="icon-btn puzzle-btn" id="fillEauBtn1" disabled><span class="puzzle-num">2</span>🚰 Remplir la bouteille (eau)</button>
-          <button class="icon-btn puzzle-btn" id="plongerBtn1" disabled><span class="puzzle-num">6</span>⬇️ Plonger l'ouverture sous l'eau</button>
-          <button class="icon-btn puzzle-btn" id="boucherBtn1" disabled><span class="puzzle-num">4</span>🧴 Boucher la bouteille</button>
-        </div>
-        <div class="aux-row">
-          <button class="icon-btn" id="colorantBtn1"><span class="puzzle-num">3</span>🎨 Ajouter un colorant</button>
-          <button class="icon-btn" id="resetBtn1">↺ Recommencer</button>
+          <button class="icon-btn puzzle-btn" id="tuyauBtn1" disabled><span class="puzzle-num">8</span>Placer tuyau</button>
+          <button class="icon-btn puzzle-btn" id="soufflerBtn1" disabled><span class="puzzle-num">9</span>Souffler dans tuyau</button>
+          <button class="icon-btn puzzle-btn" id="chooseBottleBtn1"><span class="puzzle-num">1</span>Choisir bouteille</button>
+          <button class="icon-btn puzzle-btn" id="deboucherBtn1" disabled><span class="puzzle-num">7</span>Déboucher bouteille</button>
+          <button class="icon-btn puzzle-btn" id="retournerBtn1" disabled><span class="puzzle-num">5</span>Retourner bouteille</button>
+          <button class="icon-btn puzzle-btn" id="fillEauBtn1" disabled><span class="puzzle-num">2</span>Remplir bouteille</button>
+          <button class="icon-btn puzzle-btn" id="plongerBtn1" disabled><span class="puzzle-num">6</span>Plonger ouverture sous eau</button>
+          <button class="icon-btn puzzle-btn" id="boucherBtn1" disabled><span class="puzzle-num">4</span>Boucher bouteille</button>
+          <button class="icon-btn puzzle-btn" id="colorantBtn1"><span class="puzzle-num">3</span>Ajouter colorant</button>
         </div>
         <div class="color-row" id="colorRow1" style="display:none;">
           <button class="swatch" data-color="#2f6fd6" style="background:#2f6fd6" title="Bleu" aria-label="Bleu"></button>
@@ -390,13 +404,20 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
     <!-- TAB 2 -->
     <section id="tab-2" class="tab">
       <h2>Masse d'un ballon à peu près gonflé</h2>
-      <div class="stage3d" id="stage3d-2"><div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div><div class="scene-banner" id="burstMsg2"></div></div>
+      <div class="stage3d" id="stage3d-2">
+        <button class="reset-overlay" id="resetBtn2" aria-label="Recommencer" title="Recommencer">
+          <svg viewBox="0 0 24 24" class="reset-arrow" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9" fill="none" stroke="#d62d20" stroke-width="3" stroke-linecap="round"/><path d="M20.5 2.5v6h-6z" fill="#d62d20"/></svg>
+          <span>Recommencer</span>
+        </button>
+        <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div><div class="scene-banner" id="burstMsg2"></div></div>
       <div class="readout" id="readout2">Étape 1 : gonfle le ballon.</div>
       <div class="action-row">
-        <button class="main-action" id="actionBtn2">🎈 Gonfler le ballon</button>
-        <button class="main-action" id="turnOnBtn2">🔌 Allumer la balance</button>
-        <button class="main-action" id="weighBtn2" disabled>⚖️ Peser le ballon</button>
-        <div class="aux-row"><button class="icon-btn" id="resetBtn2">↺ Recommencer</button></div>
+        <div class="btn-row3">
+          <button class="main-action" id="actionBtn2">Gonfler le ballon</button>
+          <button class="main-action" id="turnOnBtn2">Allumer la balance</button>
+          <button class="main-action" id="weighBtn2" disabled>Peser le ballon</button>
+        </div>
+        
       </div>
     </section>
 
@@ -404,6 +425,11 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
     <section id="tab-3" class="tab">
       <h2>Vide le ballon</h2>
       <div class="stage3d" id="stage3d-3">
+        <button class="reset-overlay" id="resetBtn3" aria-label="Recommencer" title="Recommencer">
+          <svg viewBox="0 0 24 24" class="reset-arrow" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9" fill="none" stroke="#d62d20" stroke-width="3" stroke-linecap="round"/><path d="M20.5 2.5v6h-6z" fill="#d62d20"/></svg>
+          <span>Recommencer</span>
+        </button>
+        
         <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div>
         <div class="explosion-flash" id="explosionFlash3"></div>
         <div class="scene-msg-box" id="camNagBox3">
@@ -429,7 +455,6 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         <div class="aux-row">
           <button class="icon-btn" id="colorantBtn3">🎨 Ajouter un colorant</button>
           <button class="icon-btn warn" id="stopBtn3"><span class="puzzle-num">5</span>🔌 Déconnecter le tuyau</button>
-          <button class="icon-btn" id="resetBtn3">↺ Recommencer</button>
           <button class="icon-btn warn" id="retryBtn3">💥 Réessayer</button>
         </div>
         <div class="color-row" id="colorRow3" style="display:none;">
@@ -446,6 +471,11 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
     <section id="tab-4" class="tab">
       <h2>Dernière pesée</h2>
       <div class="stage3d" id="stage3d-4">
+        <button class="reset-overlay" id="resetBtn4" aria-label="Recommencer" title="Recommencer">
+          <svg viewBox="0 0 24 24" class="reset-arrow" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9" fill="none" stroke="#d62d20" stroke-width="3" stroke-linecap="round"/><path d="M20.5 2.5v6h-6z" fill="#d62d20"/></svg>
+          <span>Recommencer</span>
+        </button>
+        
         <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div>
         <div class="scientist-face" id="scientistFace4"></div>
         <div class="scene-dim" id="napDim4"></div>
@@ -457,12 +487,13 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
       </div>
       <div class="readout" id="readout4">Pose le ballon et allume la balance, dans l'ordre de ton choix.</div>
       <div class="action-row">
-        <button class="main-action" id="poserBtn4">⚖️ Poser le ballon</button>
-        <button class="main-action" id="allumerBtn4">🔌 Allumer la balance</button>
-        <button class="main-action" id="siesteBtn4">😴 Faire une sieste</button>
+        <div class="btn-row3">
+          <button class="main-action" id="poserBtn4">Poser le ballon</button>
+          <button class="main-action" id="allumerBtn4">Allumer la balance</button>
+          <button class="main-action" id="siesteBtn4">Faire une sieste</button>
+        </div>
         <div class="aux-row">
-          <button class="icon-btn" id="resetBtn4">↺ Recommencer</button>
-          <button class="icon-btn" id="surpriseBtn4" style="display:none;">🎉 Surprise</button>
+          <button class="icon-btn" id="surpriseBtn4" style="display:none;">Surprise</button>
         </div>
       </div>
     </section>
@@ -772,6 +803,19 @@ function makeBasin(){
   const highlightMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.16, side:THREE.DoubleSide, depthWrite:false});
   const highlight = new THREE.Mesh(new THREE.CylinderGeometry(Rt*1.01,Rb*1.01,H*0.9,16,1,true,0.3,0.5), highlightMat);
   highlight.position.y=H/2; highlight.renderOrder=1.5; group.add(highlight);
+  // thick polished rim, heavy base and reflection streaks
+  const rimMat = new THREE.MeshStandardMaterial({color:0xF4FFFB, transparent:true, opacity:0.55, roughness:0.05, metalness:0.2, depthWrite:false});
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(Rt, 0.024, 10, 48), rimMat);
+  rim.rotation.x=Math.PI/2; rim.position.y=H; rim.renderOrder=1.4; group.add(rim);
+  const baseEdge = new THREE.Mesh(new THREE.TorusGeometry(Rb, 0.018, 8, 48), rimMat);
+  baseEdge.rotation.x=Math.PI/2; baseEdge.position.y=0.016; baseEdge.renderOrder=1.4; group.add(baseEdge);
+  const thickBase = new THREE.Mesh(new THREE.CylinderGeometry(Rb*0.99,Rb*0.99,0.04,48), new THREE.MeshStandardMaterial({color:0xD9EEEA, transparent:true, opacity:0.4, roughness:0.08, depthWrite:false}));
+  thickBase.position.y=0.02; thickBase.renderOrder=1.2; group.add(thickBase);
+  const bStreakMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.38, side:THREE.DoubleSide, depthWrite:false});
+  const bStreak1 = new THREE.Mesh(new THREE.CylinderGeometry(Rt*1.003,Rb*1.003,H*0.75,16,1,true,2.45,0.12), bStreakMat);
+  bStreak1.position.y=H*0.5; bStreak1.renderOrder=1.6; group.add(bStreak1);
+  const bStreak2 = new THREE.Mesh(new THREE.CylinderGeometry(Rt*1.003,Rb*1.003,H*0.5,16,1,true,3.8,0.06), bStreakMat);
+  bStreak2.position.y=H*0.45; bStreak2.renderOrder=1.6; group.add(bStreak2);
   const waterBaseColor = new THREE.Color(0xCFE9F0); // much clearer / paler water than before
   const waterMat = new THREE.MeshStandardMaterial({color:waterBaseColor.clone(), map:waterTex, bumpMap:waterTex, bumpScale:0.01, transparent:true, opacity:0.55, roughness:0.15, depthWrite:false});
   const water = new THREE.Mesh(new THREE.CylinderGeometry(Rb*0.95,Rb*0.95,1,32), waterMat);
@@ -814,6 +858,30 @@ function makeBottle(volumeL){
   const highlightMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.2, side:THREE.DoubleSide, depthWrite:false});
   const highlight = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.98*1.01,bodyR*1.01,bodyH*0.85,16,1,true,0.2,0.45), highlightMat);
   highlight.position.y = -H/2+bodyH/2; highlight.renderOrder=1.5; group.add(highlight);
+  // glass details: flat shoulder, thick base ring, moulded threads, polished lip, extra reflections
+  const edgeMat = new THREE.MeshStandardMaterial({color:0xF4FFFB, transparent:true, opacity:0.5, roughness:0.05, metalness:0.2, depthWrite:false});
+  const shoulder = new THREE.Mesh(new THREE.RingGeometry(neckRbot, bodyR*0.97, 32), glassMat);
+  shoulder.rotation.x=-Math.PI/2; shoulder.position.y=-H/2+bodyH; shoulder.renderOrder=1; group.add(shoulder);
+  const baseRing = new THREE.Mesh(new THREE.TorusGeometry(bodyR*0.97, 0.016*factor, 8, 32), edgeMat);
+  baseRing.rotation.x=Math.PI/2; baseRing.position.y=-H/2+0.012*factor; baseRing.renderOrder=1.4; group.add(baseRing);
+  const basePuck = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.95,bodyR*0.95,0.035*factor,32), new THREE.MeshStandardMaterial({color:0xDDEFEA, transparent:true, opacity:0.35, roughness:0.1, depthWrite:false}));
+  basePuck.position.y=-H/2+0.018*factor; basePuck.renderOrder=1.2; group.add(basePuck);
+  const shoulderRing = new THREE.Mesh(new THREE.TorusGeometry((neckRbot+bodyR*0.97)/2, 0.01*factor, 6, 32), edgeMat);
+  shoulderRing.rotation.x=Math.PI/2; shoulderRing.position.y=-H/2+bodyH; shoulderRing.scale.set(1,1,1); shoulderRing.renderOrder=1.4; group.add(shoulderRing);
+  for(let k=0;k<3;k++){
+    const f = 0.2+k*0.28, r = neckRbot+(neckR-neckRbot)*f;
+    const th = new THREE.Mesh(new THREE.TorusGeometry(r*1.02, 0.009*factor, 6, 24), edgeMat);
+    th.rotation.x=Math.PI/2; th.position.y=-H/2+bodyH+neckH*f; th.renderOrder=1.4; group.add(th);
+  }
+  const lip = new THREE.Mesh(new THREE.TorusGeometry(neckR*1.04, 0.018*factor, 8, 24), edgeMat);
+  lip.rotation.x=Math.PI/2; lip.position.y=H/2; lip.renderOrder=1.4; group.add(lip);
+  const streakMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.4, side:THREE.DoubleSide, depthWrite:false});
+  const streak1 = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.985,bodyR*1.005,bodyH*0.8,12,1,true,2.55,0.1), streakMat);
+  streak1.position.y=-H/2+bodyH*0.5; streak1.renderOrder=1.6; group.add(streak1);
+  const streak2 = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.985,bodyR*1.005,bodyH*0.5,12,1,true,3.9,0.05), streakMat);
+  streak2.position.y=-H/2+bodyH*0.45; streak2.renderOrder=1.6; group.add(streak2);
+  const neckStreak = new THREE.Mesh(new THREE.CylinderGeometry(neckR*1.0,neckRbot*1.0,neckH*0.8,8,1,true,0.35,0.22), streakMat);
+  neckStreak.position.y=H/2-neckH/2; neckStreak.renderOrder=1.6; group.add(neckStreak);
   // water is split in two parts (body + neck) so it always respects the cone-shaped neck instead of overflowing it
   const waterBaseColor = 0xCFE9F0; // much clearer / paler water than before
   const waterMat = new THREE.MeshStandardMaterial({color:waterBaseColor, map:waterTex, bumpMap:waterTex, bumpScale:0.008, transparent:true, opacity:0.5, depthWrite:false});
@@ -969,19 +1037,44 @@ function makeDisplayTexture(text){
   return new THREE.CanvasTexture(cnv);
 }
 
+let _basketTex = null;
+// Painted basketball skin: orange pebbled leather, deep black channels (equator, pole-to-pole line, two curved side lines).
+function getBasketballTexture(){
+  if(_basketTex) return _basketTex;
+  const W=1024, H=512, c=document.createElement('canvas'); c.width=W; c.height=H;
+  const g=c.getContext('2d');
+  g.fillStyle='#d8681d'; g.fillRect(0,0,W,H);
+  // pebbles
+  for(let y=4;y<H;y+=8){
+    for(let x=4;x<W;x+=8){
+      const px=x+(Math.random()-0.5)*5, py=y+(Math.random()-0.5)*5;
+      const gr=g.createRadialGradient(px-0.8,py-0.8,0.3,px,py,3.4);
+      gr.addColorStop(0,'#f6a45e'); gr.addColorStop(0.55,'#df7022'); gr.addColorStop(1,'#a8440e');
+      g.fillStyle=gr; g.beginPath(); g.arc(px,py,3.3,0,Math.PI*2); g.fill();
+    }
+  }
+  function seam(drawPath){
+    g.lineCap='round'; g.lineJoin='round';
+    g.strokeStyle='rgba(60,20,0,.45)'; g.lineWidth=13; g.beginPath(); drawPath(); g.stroke();
+    g.strokeStyle='#15100c'; g.lineWidth=7; g.beginPath(); drawPath(); g.stroke();
+  }
+  seam(()=>{ g.moveTo(0,H/2); g.lineTo(W,H/2); });
+  [0,W/2,W].forEach(x=> seam(()=>{ g.moveTo(x,0); g.lineTo(x,H); }));
+  [W*0.25, W*0.75].forEach(cx=>{
+    [1,-1].forEach(sg=> seam(()=>{
+      for(let k=0;k<=40;k++){ const v=k/40, x=cx+sg*120*Math.pow(Math.sin(Math.PI*v),0.9); if(k===0) g.moveTo(x,v*H); else g.lineTo(x,v*H); }
+    }));
+  });
+  const tex=new THREE.CanvasTexture(c);
+  tex.wrapS=tex.wrapT=THREE.RepeatWrapping; tex.anisotropy=8;
+  _basketTex=tex; return tex;
+}
 function makeBalloon(){
   const group = new THREE.Group();
   const R = 0.32;
-  const mat = new THREE.MeshStandardMaterial({map:pebbleTex, bumpMap:pebbleTex, bumpScale:0.004, color:0xE07A2E, roughness:0.8, metalness:0.02});
-  const sphere = new THREE.Mesh(new THREE.SphereGeometry(R,28,20), mat); sphere.castShadow=true; group.add(sphere);
-  const seamMat = new THREE.MeshStandardMaterial({color:0x241F1A, roughness:0.6});
-  const seamR = R*1.006;
-  const equator = new THREE.Mesh(new THREE.TorusGeometry(seamR,0.012,8,32), seamMat);
-  group.add(equator);
-  const merid1 = new THREE.Mesh(new THREE.TorusGeometry(seamR,0.012,8,32), seamMat);
-  merid1.rotation.x=Math.PI/2; group.add(merid1);
-  const merid2 = new THREE.Mesh(new THREE.TorusGeometry(seamR,0.012,8,32), seamMat);
-  merid2.rotation.x=Math.PI/2; merid2.rotation.y=Math.PI/2; group.add(merid2);
+  const tex = getBasketballTexture();
+  const mat = new THREE.MeshStandardMaterial({map:tex, bumpMap:tex, bumpScale:1.2, roughness:0.72, metalness:0.03});
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(R,48,32), mat); sphere.castShadow=true; group.add(sphere);
   let curXZ=0.32, curY=0.32; group.scale.set(curXZ,curY,curXZ);
   // setScale(targetXZ, targetY) — targetY optional, defaults to a uniform scale like before (backward-compatible).
   function setScale(targetXZ, targetY){
@@ -1100,62 +1193,254 @@ function makeBalance(){
   return { group, plate, setDisplay };
 }
 
-// A cheerful low-poly quadruped, built from primitives, reused for the tab-4 chase animation:
-// pass 'mouse', 'cat' or 'dino' to get a different palette / size / silhouette.
+// Procedural fur / scale textures (cached per animal) so each critter gets a real surface instead of a flat colour.
+const critterTexCache = {};
+function getCritterTexture(kind){
+  if(critterTexCache[kind]) return critterTexCache[kind];
+  const S = 256, c = document.createElement('canvas'); c.width = c.height = S;
+  const g = c.getContext('2d');
+  const cfg = {
+    mouse:{ base:'#a9a49c', hi:'#d6d1c8', lo:'#69645c' },
+    cat:  { base:'#e2a359', hi:'#f7d29a', lo:'#8a501f' },
+    dino: { base:'#5f9d55', hi:'#a2d27f', lo:'#27562e' }
+  }[kind];
+  g.fillStyle = cfg.base; g.fillRect(0,0,S,S);
+  if(kind==='dino'){
+    // overlapping rounded scales, shaded like little domes (period divides 256 so the seam is invisible)
+    const r = 16;
+    for(let row=0; row<=Math.ceil(S/(r*0.9))+1; row++){
+      for(let col=-1; col<=S/(r*2)+1; col++){
+        const x = col*r*2 + (row%2 ? r : 0), y = row*r*0.9;
+        const grd = g.createRadialGradient(x-r*0.3, y-r*0.35, 1, x, y, r*1.05);
+        grd.addColorStop(0, cfg.hi); grd.addColorStop(0.6, cfg.base); grd.addColorStop(1, cfg.lo);
+        g.fillStyle = grd; g.beginPath(); g.arc(x, y, r, 0, Math.PI*2); g.fill();
+        g.strokeStyle = 'rgba(15,45,20,.55)'; g.lineWidth = 1; g.stroke();
+      }
+    }
+  } else {
+    if(kind==='cat'){
+      // tabby stripes, drawn three times so they wrap around the seam
+      g.fillStyle = cfg.lo;
+      for(let i=0;i<8;i++){
+        for(const off of [-S,0,S]){
+          const x = i*32 + 10 + off;
+          g.globalAlpha = 0.55;
+          g.beginPath(); g.moveTo(x,0);
+          g.bezierCurveTo(x+12,S*0.3,x-10,S*0.62,x+6,S);
+          g.lineTo(x+17,S);
+          g.bezierCurveTo(x+1,S*0.62,x+22,S*0.3,x+11,0);
+          g.closePath(); g.fill();
+        }
+      }
+      g.globalAlpha = 1;
+    }
+    // thousands of fine hairs
+    for(let i=0;i<7000;i++){
+      const x = Math.random()*S, y = Math.random()*S, l = 3+Math.random()*6;
+      const a = Math.PI/2 + (Math.random()-0.5)*0.9;
+      g.strokeStyle = Math.random()<0.5 ? cfg.hi : cfg.lo;
+      g.globalAlpha = 0.1 + Math.random()*0.22; g.lineWidth = 0.8 + Math.random()*0.5;
+      g.beginPath(); g.moveTo(x,y); g.lineTo(x+Math.cos(a)*l, y+Math.sin(a)*l); g.stroke();
+    }
+    g.globalAlpha = 1;
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 4;
+  if(kind==='dino') tex.repeat.set(3,2); else if(kind==='mouse') tex.repeat.set(2,2);
+  critterTexCache[kind] = tex;
+  return tex;
+}
+
+// A detailed low-poly quadruped with a procedural fur/scale texture, real eyes, whiskers, paws, tail and a walk cycle.
+// Reused for the tab-4 chase animation: 'mouse', 'cat' or 'dino'. Faces +x.
 function makeCritter(kind){
   const presets = {
-    mouse: { furColor:0x9c9690, darkColor:0x6b665f, scale:0.62, ears:'round', mane:false, teeth:false },
-    cat:   { furColor:0xE0A85C, darkColor:0x8a5a2b, scale:1.0,  ears:'point', mane:false, teeth:false },
-    dino:  { furColor:0x4f8a4f, darkColor:0x2e5a2e, scale:1.7,  ears:'none',  mane:false, teeth:true  }
+    mouse:{ scale:0.62, headR:0.13, bodyX:1.25, bodyY:0.85, belly:0xf1ddd2, nose:0xe98aa0, paw:0xf0b6b0, legR:0.032, bump:0.45, pace:17, amp:0.7 },
+    cat:  { scale:1.0,  headR:0.15, bodyX:1.4,  bodyY:0.9,  belly:0xf8ecd8, nose:0xd9788a, paw:0xf8ecd8, legR:0.04,  bump:0.5,  pace:12, amp:0.6 },
+    dino: { scale:1.7,  headR:0.17, bodyX:1.35, bodyY:1.0,  belly:0xe6d98e, nose:0x24351f, paw:0x3f7a42, legR:0.062, bump:1.1,  pace:8,  amp:0.45 }
   };
-  const p = presets[kind] || presets.cat;
+  if(!presets[kind]) kind = 'cat';
+  const p = presets[kind];
   const group = new THREE.Group();
-  const fur = new THREE.MeshStandardMaterial({color:p.furColor, roughness:0.9});
-  const dark = new THREE.MeshStandardMaterial({color:p.darkColor, roughness:0.9});
-  const nose = new THREE.MeshStandardMaterial({color:0x2B2820, roughness:0.4});
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.22,16,12), fur);
-  body.scale.set(1.35,0.95,0.95); body.position.set(0,0.24,0); group.add(body);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.15,16,12), fur);
-  head.position.set(0.3,0.36,0); group.add(head);
-  const snout = new THREE.Mesh(new THREE.SphereGeometry(0.075,10,8), fur);
-  snout.scale.set(1.3,0.8,0.8); snout.position.set(0.43,0.32,0); group.add(snout);
-  const noseTip = new THREE.Mesh(new THREE.SphereGeometry(0.022,8,6), nose);
-  noseTip.position.set(0.5,0.32,0); group.add(noseTip);
-  if(p.ears==='point'){
-    const earGeo = new THREE.ConeGeometry(0.06,0.15,8);
-    const earL = new THREE.Mesh(earGeo, dark); earL.position.set(0.24,0.48,0.1); earL.rotation.set(0.3,0,-0.3); group.add(earL);
-    const earR = new THREE.Mesh(earGeo, dark); earR.position.set(0.24,0.48,-0.1); earR.rotation.set(-0.3,0,-0.3); group.add(earR);
-  } else if(p.ears==='round'){
-    const earGeo = new THREE.SphereGeometry(0.055,10,8);
-    const earL = new THREE.Mesh(earGeo, dark); earL.position.set(0.26,0.47,0.09); group.add(earL);
-    const earR = new THREE.Mesh(earGeo, dark); earR.position.set(0.26,0.47,-0.09); group.add(earR);
+  const tex = getCritterTexture(kind);
+  const fur = new THREE.MeshStandardMaterial({ map:tex, bumpMap:tex, bumpScale:p.bump, roughness:0.95, metalness:0 });
+  const belly = new THREE.MeshStandardMaterial({ color:p.belly, roughness:0.9 });
+  const noseM = new THREE.MeshStandardMaterial({ color:p.nose, roughness:0.35 });
+  const pawM = new THREE.MeshStandardMaterial({ color:p.paw, roughness:0.85 });
+  const black = new THREE.MeshStandardMaterial({ color:0x0c0c0e, roughness:0.2 });
+  const shine = new THREE.MeshBasicMaterial({ color:0xffffff });
+  const SPH = (r,w,h)=> new THREE.SphereGeometry(r, w||20, h||16);
+  function add(geo, mat, x, y, z, sx, sy, sz, parent){
+    const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z);
+    if(sx!==undefined) m.scale.set(sx,sy,sz);
+    (parent||group).add(m); return m;
   }
-  if(p.mane){
-    const maneMat = new THREE.MeshStandardMaterial({color:0x9c5f22, roughness:0.95});
-    for(let i=0;i<10;i++){
-      const tuft = new THREE.Mesh(new THREE.SphereGeometry(0.09,8,6), maneMat);
-      const ang = (i/10)*Math.PI*2;
-      tuft.position.set(0.3+Math.cos(ang)*0.14, 0.36+Math.sin(ang)*0.14, Math.sin(ang*1.7)*0.06);
-      group.add(tuft);
-    }
-  }
-  if(p.teeth){
-    const teethMat = new THREE.MeshStandardMaterial({color:0xF7F4EA, roughness:0.3});
-    const toothGeo = new THREE.ConeGeometry(0.014,0.05,6);
-    [[0.44,0.285,0.045],[0.44,0.285,-0.045],[0.47,0.283,0.02],[0.47,0.283,-0.02]].forEach(([x,y,z])=>{
-      const tooth = new THREE.Mesh(toothGeo, teethMat);
-      tooth.position.set(x,y,z); tooth.rotation.x = Math.PI;
-      group.add(tooth);
+
+  // body: back, lighter underside, rump and shoulders
+  add(SPH(0.22,26,18), fur, 0,0.26,0, p.bodyX,0.95*p.bodyY,0.95);
+  add(SPH(0.2), belly, 0,0.2,0, p.bodyX*0.9,0.62,0.82);
+  add(SPH(0.17), fur, -0.17,0.27,0, 1,1,1.05);
+  add(SPH(0.15), fur, 0.17,0.29,0, 1,1,1);
+
+  // head
+  const hr = p.headR, hx = 0.31, hy = (kind==='dino') ? 0.4 : 0.38;
+  add(SPH(hr,26,18), fur, hx,hy,0);
+  if(kind==='cat'){
+    add(SPH(hr*0.5), fur, hx+0.03,hy-0.04, 0.085, 1,0.9,0.8);
+    add(SPH(hr*0.5), fur, hx+0.03,hy-0.04,-0.085, 1,0.9,0.8);
+    add(SPH(0.065), belly, hx+0.11,hy-0.05,0, 1.1,0.8,1.1);
+    add(SPH(0.04), belly, hx+0.1,hy-0.11,0, 1,0.7,1);
+    add(SPH(0.026), noseM, hx+0.165,hy-0.025,0, 0.8,0.6,1.2);
+  } else if(kind==='mouse'){
+    add(SPH(hr*0.45), fur, hx+0.02,hy-0.04, 0.07, 1,0.9,0.8);
+    add(SPH(hr*0.45), fur, hx+0.02,hy-0.04,-0.07, 1,0.9,0.8);
+    const snout = add(new THREE.ConeGeometry(0.065,0.17,16), fur, hx+0.14,hy-0.035,0);
+    snout.rotation.z = -Math.PI/2;
+    add(SPH(0.024), noseM, hx+0.225,hy-0.035,0);
+    // two tiny buck teeth
+    const toothM = new THREE.MeshStandardMaterial({color:0xfff6e0, roughness:0.4});
+    add(new THREE.BoxGeometry(0.014,0.03,0.014), toothM, hx+0.185,hy-0.085, 0.01);
+    add(new THREE.BoxGeometry(0.014,0.03,0.014), toothM, hx+0.185,hy-0.085,-0.01);
+  } else {
+    // dino: long snout, lower jaw, nostrils and a row of teeth
+    add(SPH(0.1,22,16), fur, hx+0.15,hy-0.03,0, 1.5,0.75,0.95);
+    add(SPH(0.09,20,14), belly, hx+0.14,hy-0.105,0, 1.5,0.35,0.85);
+    add(SPH(0.012,8,6), black, hx+0.3,hy-0.005, 0.035);
+    add(SPH(0.012,8,6), black, hx+0.3,hy-0.005,-0.035);
+    const toothM = new THREE.MeshStandardMaterial({color:0xfaf6e8, roughness:0.3});
+    const toothGeo = new THREE.ConeGeometry(0.012,0.045,6);
+    [0.12,0.17,0.22,0.27].forEach(dx=>{
+      [1,-1].forEach(s=>{
+        const up = add(toothGeo, toothM, hx+dx,hy-0.085,s*0.055); up.rotation.x = Math.PI;
+        const lo = add(toothGeo, toothM, hx+dx+0.02,hy-0.092,s*0.05);
+      });
+    });
+    // little horns
+    const hornM = new THREE.MeshStandardMaterial({color:0xefe2b5, roughness:0.5});
+    [1,-1].forEach(s=>{
+      const h = add(new THREE.ConeGeometry(0.025,0.09,8), hornM, hx+0.0,hy+hr*0.92,s*0.07);
+      h.rotation.x = s*0.25; h.rotation.z = 0.2;
     });
   }
-  const legGeo = new THREE.CylinderGeometry(0.045,0.045,0.24,8);
-  [[0.14,0.1],[0.14,-0.1],[-0.16,0.1],[-0.16,-0.1]].forEach(([x,z])=>{
-    const leg=new THREE.Mesh(legGeo, fur); leg.position.set(x,0.12,z); group.add(leg);
+
+  // eyes: real eyeballs sitting on the surface of the head, with pupil and highlight
+  const d = new THREE.Vector3(0.74,0.34,0.58).normalize();
+  [1,-1].forEach(s=>{
+    const dir = new THREE.Vector3(d.x,d.y,d.z*s);
+    const ec = new THREE.Vector3(hx,hy,0).addScaledVector(dir, hr*0.93);
+    const er = hr*(kind==='mouse' ? 0.21 : 0.25);
+    if(kind==='mouse'){
+      add(SPH(er,16,12), black, ec.x,ec.y,ec.z);
+    } else {
+      const irisM = new THREE.MeshStandardMaterial({ color:(kind==='cat'?0xa7d34a:0xf2c230), roughness:0.25 });
+      add(SPH(er,18,14), irisM, ec.x,ec.y,ec.z);
+      const pc = ec.clone().addScaledVector(dir, er*0.7);
+      add(SPH(er*0.55,12,10), black, pc.x,pc.y,pc.z, 0.4,1.25,0.7);
+    }
+    const hp = ec.clone().addScaledVector(dir, er*0.92); hp.y += er*0.32;
+    add(SPH(er*0.27,8,6), shine, hp.x,hp.y,hp.z);
   });
-  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.05,0.26,8), fur);
-  tail.position.set(-0.3,0.34,0); tail.rotation.z=Math.PI/2-0.5; group.add(tail);
-  group.traverse(o=>{ if(o.isMesh){ o.castShadow=true; } });
+
+  // ears
+  if(kind==='cat'){
+    const outer = new THREE.ConeGeometry(0.065,0.15,10), inner = new THREE.ConeGeometry(0.04,0.1,10);
+    const innerM = new THREE.MeshStandardMaterial({color:0xe9a0a8, roughness:0.8});
+    [1,-1].forEach(s=>{
+      const e = add(outer, fur, 0.25,0.51,s*0.09); e.rotation.set(s*0.35,0,0.12);
+      const ei = add(inner, innerM, 0.268,0.505,s*0.088); ei.rotation.set(s*0.35,0,0.12);
+    });
+  } else if(kind==='mouse'){
+    const innerM = new THREE.MeshStandardMaterial({color:0xf0a9b4, roughness:0.8});
+    [1,-1].forEach(s=>{
+      const e = add(SPH(0.09,18,14), fur, 0.25,0.5,s*0.1, 1,1,0.22); e.rotation.y = s*0.35;
+      const ei = add(SPH(0.065,16,12), innerM, 0.255,0.5,s*0.115, 1,1,0.2); ei.rotation.y = s*0.35;
+    });
+  }
+
+  // whiskers
+  if(kind!=='dino'){
+    const wm = new THREE.MeshBasicMaterial({color:0xf4f1ea});
+    const wGeo = new THREE.CylinderGeometry(0.0018,0.0018,0.2,4);
+    const wx = (kind==='mouse') ? hx+0.16 : hx+0.13;
+    const wy = (kind==='mouse') ? hy-0.03 : hy-0.045;
+    [1,-1].forEach(s=>{
+      for(let i=0;i<3;i++){
+        const pv = new THREE.Group(); pv.position.set(wx, wy+(i-1)*0.018, s*0.035);
+        pv.scale.z = s; pv.rotation.y = (i-1)*0.3 - 0.2; pv.rotation.z = (i-1)*0.06;
+        const w = new THREE.Mesh(wGeo, wm); w.rotation.x = Math.PI/2; w.position.z = 0.1;
+        pv.add(w); group.add(pv);
+      }
+    });
+  }
+
+  // legs (hip pivots so they can swing), paws and claws
+  const legs = [];
+  [[0.17,0.11,0],[0.17,-0.11,Math.PI],[-0.19,0.11,Math.PI],[-0.19,-0.11,0]].forEach(([x,z,ph])=>{
+    const piv = new THREE.Group(); piv.position.set(x,0.21,z); group.add(piv);
+    const lr = p.legR;
+    add(new THREE.CylinderGeometry(lr*1.15, lr*0.85, 0.2, 12), fur, 0,-0.09,0, 1,1,1, piv);
+    add(SPH(lr*1.35,14,10), pawM, 0.02,-0.2,0, 1.35,0.7,1.1, piv);
+    if(kind==='dino'){
+      const clawM = new THREE.MeshStandardMaterial({color:0xf2ecd6, roughness:0.4});
+      [-1,0,1].forEach(k=>{
+        const cl = add(new THREE.ConeGeometry(0.012,0.05,6), clawM, 0.085,-0.205,k*0.028, 1,1,1, piv);
+        cl.rotation.z = -Math.PI/2;
+      });
+    }
+    legs.push({ piv, ph });
+  });
+
+  // tail
+  const tailPiv = new THREE.Group(); group.add(tailPiv);
+  if(kind==='cat'){
+    tailPiv.position.set(-0.3,0.3,0);
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0,0,0), new THREE.Vector3(-0.12,0.02,0), new THREE.Vector3(-0.22,0.1,0),
+      new THREE.Vector3(-0.27,0.22,0), new THREE.Vector3(-0.25,0.33,0)
+    ]);
+    add(new THREE.TubeGeometry(curve, 18, 0.03, 10, false), fur, 0,0,0, 1,1,1, tailPiv);
+    add(SPH(0.032,12,10), new THREE.MeshStandardMaterial({color:0x6b3d17, roughness:0.9}), -0.25,0.33,0, 1,1,1, tailPiv);
+  } else if(kind==='mouse'){
+    tailPiv.position.set(-0.3,0.2,0);
+    const curve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0,0,0), new THREE.Vector3(-0.15,-0.05,0), new THREE.Vector3(-0.3,-0.09,0.05), new THREE.Vector3(-0.43,-0.04,0.1)
+    ]);
+    add(new THREE.TubeGeometry(curve, 16, 0.009, 6, false), new THREE.MeshStandardMaterial({color:0xe9a9a6, roughness:0.7}), 0,0,0, 1,1,1, tailPiv);
+  } else {
+    tailPiv.position.set(-0.3,0.3,0);
+    const t = add(new THREE.ConeGeometry(0.1,0.58,16), fur, -0.29,0,0, 1,1,1, tailPiv);
+    t.rotation.z = Math.PI/2;
+  }
+
+  // dino back plates
+  if(kind==='dino'){
+    const plateM = new THREE.MeshStandardMaterial({color:0xe08a3c, roughness:0.6});
+    for(let i=0;i<6;i++){
+      const x = 0.2 - i*0.1, h = 0.1 + 0.07*Math.sin(i/5*Math.PI);
+      const yTop = 0.26 + 0.209*Math.sqrt(Math.max(0, 1-Math.pow(x/0.3,2)));
+      const pl = add(new THREE.ConeGeometry(0.05,h,4), plateM, x, yTop+h*0.3, 0);
+      pl.rotation.z = 0.3; pl.scale.z = 0.5;
+    }
+    for(let i=0;i<3;i++){
+      const pl = add(new THREE.ConeGeometry(0.035-i*0.007,0.08-i*0.015,4), plateM, -0.12-i*0.12, 0.07-i*0.015, 0, 1,1,0.5, tailPiv);
+      pl.rotation.z = 0.35;
+    }
+  }
+
+  group.traverse(o=>{ if(o.isMesh){ o.castShadow = true; } });
   const s = 1.5*p.scale; group.scale.set(s,s,s);
+
+  // walk cycle: diagonal legs swing together, tail sways; stops by itself once the critter is removed from the scene
+  const t0 = performance.now() + Math.random()*800;
+  let seen = false;
+  frameUpdaters.push((now)=>{
+    if(group.parent) seen = true; else return !seen;
+    const t = (now - t0)/1000;
+    legs.forEach(l=>{ l.piv.rotation.z = Math.sin(t*p.pace + l.ph)*p.amp; });
+    tailPiv.rotation.y = Math.sin(t*p.pace*0.6)*0.3;
+    return true;
+  });
   return group;
 }
 
@@ -1235,7 +1520,9 @@ function resizeCanvas(){
   const w = parent.clientWidth, h = parent.clientHeight;
   if(w<10||h<10) return;
   renderer.setSize(w,h,false);
-  camera.aspect = w/h;
+  const a = w/h, refAspect = 4/3;
+  camera.aspect = a;
+  camera.fov = a < refAspect ? Math.min(78, 2*Math.atan(Math.tan(45*Math.PI/360)*refAspect/a)*180/Math.PI) : 45;
   camera.updateProjectionMatrix();
 }
 window.addEventListener('resize', resizeCanvas);
@@ -2350,7 +2637,7 @@ function t5_calc(){
   function evaluate(v){
     if(v < 1.1 || v > 1.46) return { tier:'bad', text:'pas terrible :(', emoji:'😕' };
     if(v <= 1.2) return { tier:'good', text:'pas mal', emoji:'🙂' };
-    if(v <= 1.35) return { tier:'excellent', text:'excellent :)', emoji:'🤩' };
+    if(v <= 1.35) return { tier:'excellent', text:'Excellent ! Tu es incroyable ! On est tous fiers de toi ! :)', emoji:'🤩' };
     return { tier:'good', text:'pas mal', emoji:'🙂' };
   }
 
@@ -2363,7 +2650,7 @@ function t5_calc(){
     setTimeout(()=>{
       overlay.classList.remove('show');
       setTimeout(()=> overlay.remove(), 250);
-    }, 1000);
+    }, r.tier==='excellent' ? 2200 : 1000);
   }
 
   checkBtn.onclick = ()=>{
@@ -2376,60 +2663,125 @@ function t5_calc(){
 })();
 
 /* ===================== TAB 5 : ghost jump-scare ===================== */
-function ghostSVG(face){
-  const strokeCol = '#7fa0ad';
-  let faceMarkup = '';
-  if(face==='side'){
-    faceMarkup = '<ellipse cx="63" cy="46" rx="6" ry="8" fill="#26262e"/>'
-      + '<path d="M58 63 q6 5 11 0" stroke="#26262e" stroke-width="3" fill="none" stroke-linecap="round"/>';
-  } else if(face==='front'){
-    faceMarkup = '<ellipse cx="37" cy="47" rx="7" ry="9" fill="#26262e"/>'
-      + '<ellipse cx="63" cy="47" rx="7" ry="9" fill="#26262e"/>'
-      + '<circle cx="50" cy="66" r="6" fill="#26262e"/>';
-  } else {
-    faceMarkup = '<ellipse cx="34" cy="45" rx="11" ry="14" fill="#000"/>'
-      + '<ellipse cx="66" cy="45" rx="11" ry="14" fill="#000"/>'
-      + '<ellipse cx="50" cy="74" rx="15" ry="18" fill="#000"/>';
-  }
-  return '<svg viewBox="0 0 100 112" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">'
-    + '<defs><radialGradient id="ghostGrad'+face+'" cx="35%" cy="28%" r="75%">'
-    + '<stop offset="0%" stop-color="#ffffff"/><stop offset="55%" stop-color="#eaf6fb"/><stop offset="100%" stop-color="#b9d3dc"/>'
-    + '</radialGradient></defs>'
-    + '<path d="M12 62 C12 20 88 20 88 62 L88 98 Q78 84 68 98 Q58 84 48 98 Q38 84 28 98 Q18 84 12 98 Z" '
-    + 'fill="url(#ghostGrad'+face+')" stroke="'+strokeCol+'" stroke-width="2.2" opacity="0.9"/>'
-    + faceMarkup + '</svg>';
-}
+let _ghostUid = 0;
+// Realistic apparition: translucent shroud that fades into mist, ragged hem, soft folds, hollow sunken eyes with a cold glow.
+// face: 'side' | 'front' | 'scream'.  opt: colours + optional long hair and bow.
+function ghostBuild(face, opt){
+  const u = 'gh' + (++_ghostUid);
+  const body = 'M50 5 C33 5 26 19 26 34 C26 46 22 52 16 62 C9 76 6 98 3 125 L10 112 L15 127 L23 111 L30 126 L39 109 L46 128 L54 110 L62 127 L70 109 L78 126 L86 111 L91 124 L97 125 C94 98 91 76 84 62 C78 52 74 46 74 34 C74 19 67 5 50 5 Z';
 
-// Second design used from the 2nd press onward: a slightly scarier ghost — narrower, sharper eyes,
-// a sickly pale-green tint, jagged teeth on the scream frame, and a pink bow tied in her hair.
-function ghostSVG2(face){
-  const strokeCol = '#4a6b78';
-  let faceMarkup = '';
+  // face
+  let f = '';
+  const sock = (cx,cy,rx,ry)=>
+      '<ellipse cx="'+cx+'" cy="'+(cy-1.5)+'" rx="'+(rx+2)+'" ry="'+(ry+3)+'" fill="url(#'+u+'brow)"/>'
+    + '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="url(#'+u+'eye)"/>'
+    + '<circle cx="'+cx+'" cy="'+(cy+ry*0.15)+'" r="'+Math.max(1.1,rx*0.2)+'" fill="'+opt.glow+'" filter="url(#'+u+'soft)"/>';
   if(face==='side'){
-    faceMarkup = '<ellipse cx="63" cy="46" rx="6" ry="9" fill="#12121a"/>'
-      + '<path d="M56 65 q7 7 14 0" stroke="#12121a" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    f += '<ellipse cx="68" cy="40" rx="6" ry="9" fill="url(#'+u+'cheek)"/>'
+      +  sock(63,30,4.6,7)
+      +  '<path d="M73 36 Q79 40 73 45 Z" fill="rgba(30,50,65,.35)"/>'
+      +  '<ellipse cx="66" cy="52" rx="2.6" ry="5" fill="url(#'+u+'mouth)"/>';
   } else if(face==='front'){
-    faceMarkup = '<path d="M27 39 L47 47 L27 55 Z" fill="#0b0b10"/>'
-      + '<path d="M73 39 L53 47 L73 55 Z" fill="#0b0b10"/>'
-      + '<path d="M39 68 Q50 79 61 68" stroke="#0b0b10" stroke-width="4" fill="none" stroke-linecap="round"/>';
+    f += '<ellipse cx="34" cy="42" rx="6" ry="8" fill="url(#'+u+'cheek)"/><ellipse cx="66" cy="42" rx="6" ry="8" fill="url(#'+u+'cheek)"/>'
+      +  sock(40,30,6.2,8.5) + sock(60,30,6.2,8.5)
+      +  '<path d="M50 35 L47.3 44 Q50 46 52.7 44 Z" fill="rgba(30,50,65,.35)"/>'
+      +  '<ellipse cx="50" cy="54" rx="4.6" ry="7.5" fill="url(#'+u+'mouth)"/>';
   } else {
-    faceMarkup = '<ellipse cx="32" cy="44" rx="13" ry="17" fill="#000"/>'
-      + '<ellipse cx="68" cy="44" rx="13" ry="17" fill="#000"/>'
-      + '<path d="M31 70 Q50 96 69 70 Q50 84 31 70 Z" fill="#000"/>'
-      + '<path d="M35 72 L39 81 L43 72 L47 81 L51 72 L55 81 L59 72 L63 81 L67 72" stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round"/>';
+    f += '<ellipse cx="33" cy="44" rx="7" ry="11" fill="url(#'+u+'cheek)"/><ellipse cx="67" cy="44" rx="7" ry="11" fill="url(#'+u+'cheek)"/>'
+      +  '<path d="M28 20 Q40 25 47 33 L46 26 Q38 19 28 20 Z" fill="rgba(10,20,30,.55)"/>'
+      +  '<path d="M72 20 Q60 25 53 33 L54 26 Q62 19 72 20 Z" fill="rgba(10,20,30,.55)"/>'
+      +  sock(38,30,8.4,12) + sock(62,30,8.4,12)
+      +  '<path d="M50 36 L46.5 47 Q50 49.5 53.5 47 Z" fill="rgba(30,50,65,.4)"/>'
+      +  '<ellipse cx="50" cy="63" rx="10" ry="19" fill="url(#'+u+'mouth)"/>'
+      +  '<ellipse cx="50" cy="63" rx="12" ry="21" fill="none" stroke="rgba(10,25,35,.35)" stroke-width="2" filter="url(#'+u+'soft)"/>';
   }
-  const bow = '<g transform="translate(50 16) rotate(-8)">'
-    + '<path d="M0 0 L-17 -10 L-17 10 Z" fill="#e8557a" stroke="#b8365a" stroke-width="1.5"/>'
-    + '<path d="M0 0 L17 -10 L17 10 Z" fill="#e8557a" stroke="#b8365a" stroke-width="1.5"/>'
-    + '<circle cx="0" cy="0" r="5.5" fill="#d94a72" stroke="#b8365a" stroke-width="1.5"/>'
-    + '</g>';
-  return '<svg viewBox="0 0 100 112" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">'
-    + '<defs><radialGradient id="ghostGrad2'+face+'" cx="35%" cy="28%" r="75%">'
-    + '<stop offset="0%" stop-color="#f2fff6"/><stop offset="55%" stop-color="#d8f2e0"/><stop offset="100%" stop-color="#9fc9ad"/>'
-    + '</radialGradient></defs>'
-    + '<path d="M12 62 C12 20 88 20 88 62 L88 98 Q78 84 68 98 Q58 84 48 98 Q38 84 28 98 Q18 84 12 98 Z" '
-    + 'fill="url(#ghostGrad2'+face+')" stroke="'+strokeCol+'" stroke-width="2.2" opacity="0.92"/>'
-    + faceMarkup + bow + '</svg>';
+
+  // sleeves / arms (reaching out when it screams, hanging otherwise)
+  let arms = '';
+  if(face==='scream'){
+    arms = '<path d="M24 62 C8 54 2 36 6 16 C11 28 17 42 30 52 Z" fill="url(#'+u+'body)"/>'
+         + '<path d="M76 62 C92 54 98 36 94 16 C89 28 83 42 70 52 Z" fill="url(#'+u+'body)"/>'
+         + '<path d="M6 16 L3 6 M6 16 L8 5 M6 16 L12 8 M94 16 L97 6 M94 16 L92 5 M94 16 L88 8" stroke="rgba(235,245,252,.8)" stroke-width="1.6" stroke-linecap="round"/>';
+  } else if(face==='front'){
+    arms = '<path d="M24 62 C14 74 10 90 14 106 C20 94 22 84 30 74 Z" fill="url(#'+u+'body)"/>'
+         + '<path d="M76 62 C86 74 90 90 86 106 C80 94 78 84 70 74 Z" fill="url(#'+u+'body)"/>';
+  }
+
+  // long hair (second ghost): dark wet strands framing the face
+  let hair = '', bow = '';
+  if(opt.hair){
+    hair = '<g filter="url(#'+u+'soft)" opacity=".9">'
+      + '<path d="M26 34 C23 10 38 1 50 1 C62 1 77 10 74 34 C72 22 64 12 50 12 C36 12 28 22 26 34 Z" fill="'+opt.hair+'"/>'
+      + '<path d="M27 30 C19 52 24 72 14 100 C22 84 28 72 33 52 Z" fill="'+opt.hair+'"/>'
+      + '<path d="M73 30 C81 52 76 72 86 100 C78 84 72 72 67 52 Z" fill="'+opt.hair+'"/>'
+      + '<path d="M32 22 C36 40 30 60 32 84 C35 64 40 46 38 28 Z" fill="'+opt.hair+'" opacity=".8"/>'
+      + '<path d="M68 22 C64 40 70 60 68 84 C65 64 60 46 62 28 Z" fill="'+opt.hair+'" opacity=".8"/>'
+      + '</g>';
+    bow = '<g transform="translate(63 11) rotate(14)">'
+      + '<path d="M0 0 C-6 -9 -17 -11 -19 -3 C-20 5 -9 8 0 0 Z" fill="url(#'+u+'bow)" stroke="#a02c52" stroke-width="1"/>'
+      + '<path d="M0 0 C6 -9 17 -11 19 -3 C20 5 9 8 0 0 Z" fill="url(#'+u+'bow)" stroke="#a02c52" stroke-width="1"/>'
+      + '<path d="M-5 -2 L-14 -4 M5 -2 L14 -4" stroke="rgba(255,255,255,.5)" stroke-width=".8" stroke-linecap="round"/>'
+      + '<ellipse cx="0" cy="0" rx="4.2" ry="4.8" fill="#d64a77" stroke="#a02c52" stroke-width="1"/>'
+      + '<ellipse cx="-1.3" cy="-1.6" rx="1.4" ry="1.6" fill="rgba(255,255,255,.55)"/>'
+      + '</g>';
+  }
+
+  return '<svg viewBox="-6 -4 112 138" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">'
+    + '<defs>'
+    + '<linearGradient id="'+u+'body" x1="0" y1="0" x2="0" y2="1">'
+    +   '<stop offset="0%" stop-color="'+opt.top+'" stop-opacity=".97"/>'
+    +   '<stop offset="45%" stop-color="'+opt.mid+'" stop-opacity=".82"/>'
+    +   '<stop offset="100%" stop-color="'+opt.bot+'" stop-opacity="0"/></linearGradient>'
+    + '<radialGradient id="'+u+'shade" cx="50%" cy="30%" r="72%">'
+    +   '<stop offset="0%" stop-color="#fff" stop-opacity="0"/>'
+    +   '<stop offset="68%" stop-color="'+opt.shade+'" stop-opacity=".12"/>'
+    +   '<stop offset="100%" stop-color="'+opt.shade+'" stop-opacity=".5"/></radialGradient>'
+    + '<radialGradient id="'+u+'eye" cx="50%" cy="45%" r="55%">'
+    +   '<stop offset="0%" stop-color="#000" stop-opacity="1"/><stop offset="65%" stop-color="#05090f" stop-opacity=".92"/>'
+    +   '<stop offset="100%" stop-color="#05090f" stop-opacity="0"/></radialGradient>'
+    + '<radialGradient id="'+u+'brow" cx="50%" cy="50%" r="50%">'
+    +   '<stop offset="0%" stop-color="'+opt.shade+'" stop-opacity=".55"/><stop offset="100%" stop-color="'+opt.shade+'" stop-opacity="0"/></radialGradient>'
+    + '<radialGradient id="'+u+'cheek" cx="50%" cy="50%" r="50%">'
+    +   '<stop offset="0%" stop-color="'+opt.shade+'" stop-opacity=".35"/><stop offset="100%" stop-color="'+opt.shade+'" stop-opacity="0"/></radialGradient>'
+    + '<radialGradient id="'+u+'mouth" cx="50%" cy="40%" r="60%">'
+    +   '<stop offset="0%" stop-color="#000" stop-opacity="1"/><stop offset="70%" stop-color="#040a10" stop-opacity=".9"/>'
+    +   '<stop offset="100%" stop-color="#040a10" stop-opacity=".25"/></radialGradient>'
+    + '<radialGradient id="'+u+'aura" cx="50%" cy="45%" r="55%">'
+    +   '<stop offset="0%" stop-color="'+opt.aura+'" stop-opacity=".55"/><stop offset="100%" stop-color="'+opt.aura+'" stop-opacity="0"/></radialGradient>'
+    + '<linearGradient id="'+u+'bow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff86a8"/><stop offset="100%" stop-color="#d64a77"/></linearGradient>'
+    + '<filter id="'+u+'soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.1"/></filter>'
+    + '<filter id="'+u+'blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>'
+    + '<filter id="'+u+'rag" x="-10%" y="-10%" width="120%" height="120%">'
+    +   '<feTurbulence type="fractalNoise" baseFrequency="0.04 0.055" numOctaves="2" seed="'+(3+(_ghostUid%7))+'" result="n"/>'
+    +   '<feDisplacementMap in="SourceGraphic" in2="n" scale="5"/></filter>'
+    + '</defs>'
+    + '<g>'
+    +   '<animateTransform attributeName="transform" type="translate" values="0 0;0 -2.5;0 0" dur="1.6s" repeatCount="indefinite"/>'
+    +   '<ellipse cx="50" cy="66" rx="52" ry="68" fill="url(#'+u+'aura)" filter="url(#'+u+'blur)"/>'
+    +   '<g filter="url(#'+u+'rag)">'
+    +     arms
+    +     '<path d="'+body+'" fill="url(#'+u+'body)"/>'
+    +     '<path d="'+body+'" fill="url(#'+u+'shade)"/>'
+    +     '<g fill="none" stroke-linecap="round" filter="url(#'+u+'soft)">'
+    +       '<path d="M36 58 C32 82 30 102 24 124" stroke="rgba(40,75,100,.3)" stroke-width="3"/>'
+    +       '<path d="M50 52 C50 80 51 102 50 126" stroke="rgba(40,75,100,.22)" stroke-width="3.4"/>'
+    +       '<path d="M64 58 C68 82 70 102 76 124" stroke="rgba(40,75,100,.3)" stroke-width="3"/>'
+    +       '<path d="M39 58 C35 82 33 102 28 122" stroke="rgba(255,255,255,.6)" stroke-width="1.6"/>'
+    +       '<path d="M54 54 C54 80 55 100 55 124" stroke="rgba(255,255,255,.45)" stroke-width="1.5"/>'
+    +       '<path d="M67 60 C71 82 73 102 79 122" stroke="rgba(255,255,255,.55)" stroke-width="1.5"/>'
+    +       '<path d="M34 12 C38 8 46 6 54 7" stroke="rgba(255,255,255,.7)" stroke-width="2"/>'
+    +     '</g>'
+    +   '</g>'
+    +   hair + f + bow
+    + '</g>'
+    + '</svg>';
+}
+function ghostSVG(face){
+  return ghostBuild(face, { top:'#f6fbff', mid:'#cfe3f0', bot:'#a9cbe0', shade:'#3a6a8a', aura:'#9fd6ff', glow:'#c4ecff' });
+}
+// Second design: a drowned, long-haired apparition with a pale green cast and a bow still tied in her hair.
+function ghostSVG2(face){
+  return ghostBuild(face, { top:'#f3fff7', mid:'#cdeedb', bot:'#9fd2b2', shade:'#2f6a4b', aura:'#9fffc4', glow:'#d2ffe0', hair:'#18242a' });
 }
 (function setupGhost(){
   const stage = document.getElementById('ghostStage5');
@@ -2453,10 +2805,10 @@ function ghostSVG2(face){
     setTimeout(()=>{
       const w = stage.clientWidth;
       const startLeft = -110, midLeft = w/2-45, endLeft = w+20;
-      tween(1400, p=>{ figure.style.left = (startLeft+(midLeft-startLeft)*p)+'px'; }, ()=>{
+      tween(550, p=>{ figure.style.left = (startLeft+(midLeft-startLeft)*p)+'px'; }, ()=>{
         figure.innerHTML = svgFor('front'); // the ghost turns to look at us
         setTimeout(()=>{
-          tween(1400, p=>{ figure.style.left = (midLeft+(endLeft-midLeft)*p)+'px'; }, ()=>{
+          tween(550, p=>{ figure.style.left = (midLeft+(endLeft-midLeft)*p)+'px'; }, ()=>{
             figure.style.display = 'none';
             dim.classList.remove('on');
             screamer.innerHTML = svgFor('scream');
@@ -2467,9 +2819,9 @@ function ghostSVG2(face){
               btn.disabled = false; running = false;
             }, 260);
           });
-        }, 550);
+        }, 350);
       });
-    }, 3000);
+    }, 0);
   };
 })();
 
