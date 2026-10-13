@@ -336,6 +336,26 @@ textarea{width:100%; min-height:90px; font-family:var(--font-body); font-size:.8
   filter:drop-shadow(0 4px 8px rgba(0,0,0,.4));
 }
 
+.scene-neon-red{
+  position:absolute; left:8%; right:8%; top:50%; transform:translateY(-50%);
+  font-family:var(--font-body); font-weight:800; font-size:1.2rem; line-height:1.3; text-align:center;
+  color:#ffe6e6; z-index:7; opacity:0; pointer-events:none; transition:opacity .4s ease;
+  text-shadow:0 0 4px rgba(255,40,40,.95), 0 0 10px rgba(255,20,20,.8), 0 0 22px rgba(255,0,0,.55);
+}
+.scene-neon-red.show{ opacity:1; }
+.tabs.locked button{ opacity:.4; pointer-events:none; filter:grayscale(1); }
+.lockable.locked .icon-btn{ opacity:.4; pointer-events:none; filter:grayscale(1); }
+.stage-extra{ position:absolute; top:46px; right:8px; z-index:9; display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.stage-extra .icon-btn, .stage-extra-btn{
+  background:rgba(251,249,242,.92); color:var(--ink); font-weight:700; border:1px solid var(--line);
+  border-radius:20px; padding:5px 11px; font-size:.72rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.stage-extra .icon-btn:disabled, .stage-extra-btn:disabled{ opacity:.5; cursor:not-allowed; }
+.stage-extra-btn{ position:absolute; top:8px; right:8px; z-index:9; }
+#puzzleGrid3{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; max-width:440px; width:100%; margin-bottom:0;}
+#puzzleGrid3 .puzzle-btn{max-width:none; width:100%; flex:none; min-height:38px; padding:5px 4px; font-size:.66rem; line-height:1.15; gap:4px; text-align:left; justify-content:flex-start; display:inline-flex;}
+#puzzleGrid3 .puzzle-num{width:16px; height:16px; font-size:.6rem;}
+#puzzleGrid3 .icon-btn.warn{display:inline-flex;}
 footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14px;}
 #puzzleGrid1{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; max-width:440px; width:100%; margin-bottom:0;}
 #puzzleGrid1 .puzzle-btn{max-width:none; width:100%; flex:none; min-height:38px; padding:5px 4px; font-size:.66rem; line-height:1.15; gap:4px; text-align:left; justify-content:flex-start;}
@@ -347,7 +367,7 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
 </head>
 <body>
 <div class="app">
-  <div class="tabs">
+  <div class="tabs locked" id="tabsBar">
     <button class="tab-btn active" data-tab="1" onclick="showTab(1)">Intro</button>
     <button class="tab-btn" data-tab="2" onclick="showTab(2)">Gonfler et peser</button>
     <button class="tab-btn" data-tab="3" onclick="showTab(3)">Extraire</button>
@@ -372,6 +392,7 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         </button>
         <div class="explosion-flash" id="explosionFlash1"></div>
         <div class="scene-banner" id="burstMsg1"></div>
+        <div class="scene-neon-red" id="neonRed1">remplis exactement à ras bord</div>
         <div class="bottle-label-overlay" id="bottleRow1" style="display:none;">
           <button data-vol="3.3">3,3 L</button>
           <button data-vol="2.8">2,8 L</button>
@@ -379,7 +400,7 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         </div>
       </div>
       <div class="readout" id="readout1">Étape 1 : choisis une bouteille.</div>
-      <div class="action-row">
+      <div class="action-row lockable locked" id="actionRow1">
         <div class="puzzle-grid" id="puzzleGrid1">
           <button class="icon-btn puzzle-btn" id="tuyauBtn1" disabled><span class="puzzle-num">8</span>Placer tuyau</button>
           <button class="icon-btn puzzle-btn" id="soufflerBtn1" disabled><span class="puzzle-num">9</span>Souffler dans tuyau</button>
@@ -444,17 +465,16 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
       </div>
       <div class="readout" id="readout3">Étape 1 : choisis une bouteille.</div>
       <div class="action-row">
-        <button class="main-action" id="showQuestionBtn3" disabled>❓ Afficher la question</button>
+        <button class="main-action" id="showQuestionBtn3" style="display:none;" disabled>❓ Afficher la question</button>
         <div class="puzzle-grid" id="puzzleGrid3">
           <button class="icon-btn puzzle-btn" id="appuyerBtn3" disabled><span class="puzzle-num">4</span>👊 Appuyer sur le ballon</button>
-          <button class="icon-btn puzzle-btn" id="remplirAlcoolBtn3" disabled><span class="puzzle-num">2</span>🧴 Remplir la bouteille (alcool ménager)</button>
+          <button class="icon-btn puzzle-btn" id="colorantBtn3">🎨 Ajouter un colorant</button>
           <button class="icon-btn puzzle-btn" id="chooseBottleBtn3"><span class="puzzle-num">1</span>🧺 Choisir une bouteille</button>
           <button class="icon-btn puzzle-btn" id="relierBtn3" disabled><span class="puzzle-num">3</span>🔗 Relier le ballon au tuyau</button>
           <button class="icon-btn puzzle-btn" id="remplirEauBtn3" disabled><span class="puzzle-num">2</span>🚰 Remplir la bouteille (eau)</button>
+          <button class="icon-btn puzzle-btn warn" id="stopBtn3" disabled><span class="puzzle-num">5</span>🔌 Déconnecter le tuyau</button>
         </div>
         <div class="aux-row">
-          <button class="icon-btn" id="colorantBtn3">🎨 Ajouter un colorant</button>
-          <button class="icon-btn warn" id="stopBtn3"><span class="puzzle-num">5</span>🔌 Déconnecter le tuyau</button>
           <button class="icon-btn warn" id="retryBtn3">💥 Réessayer</button>
         </div>
         <div class="color-row" id="colorRow3" style="display:none;">
@@ -477,6 +497,10 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         </button>
         
         <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div>
+        <div class="stage-extra">
+          <button class="icon-btn" id="siesteBtn4">Faire une sieste</button>
+          <button class="icon-btn" id="surpriseBtn4" style="display:none;">Surprise</button>
+        </div>
         <div class="scientist-face" id="scientistFace4"></div>
         <div class="scene-dim" id="napDim4"></div>
         <div class="nap-moon" id="napMoon4">🌙</div>
@@ -490,10 +514,6 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         <div class="btn-row3">
           <button class="main-action" id="poserBtn4">Poser le ballon</button>
           <button class="main-action" id="allumerBtn4">Allumer la balance</button>
-          <button class="main-action" id="siesteBtn4">Faire une sieste</button>
-        </div>
-        <div class="aux-row">
-          <button class="icon-btn" id="surpriseBtn4" style="display:none;">Surprise</button>
         </div>
       </div>
     </section>
@@ -502,6 +522,7 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
     <section id="tab-5" class="tab">
       <h2>Exploitation de l'animation</h2>
       <div class="stage3d ghost-stage" id="ghostStage5">
+        <button class="icon-btn stage-extra-btn" id="surpriseBtn5">👻 Surprise</button>
         <div class="ghost-dim" id="ghostDim5"></div>
         <div class="ghost-figure" id="ghostFigure5"></div>
         <div class="tab5-lines" id="tab5Lines">
@@ -533,7 +554,6 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
       </div>
       <div class="aux-row">
         <button class="icon-btn" id="forgotFormulaBtn5">🤔 J'ai oublié la formule</button>
-        <button class="icon-btn" id="surpriseBtn5">👻 Surprise</button>
         <button class="icon-btn" onclick="t5_calc()">🧮 Calculer avec mes valeurs</button>
       </div>
       <div id="t5-badge" class="result-badge"></div>
@@ -551,7 +571,7 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
   </main>
 </div>
 <div class="screamer-overlay" id="screamerOverlay"></div>
-<div class="order-error-overlay" id="orderErrorOverlay"><div class="order-error-text">fais les actions dans l'ordre</div></div>
+<div class="order-error-overlay" id="orderErrorOverlay"><div class="order-error-text">Fais les actions dans l'ordre</div></div>
 
 <script>
 /* ===================== shared experiment data ===================== */
@@ -1611,14 +1631,19 @@ function buildScene1(){
   const sceneIntroClose1 = document.getElementById('sceneIntroClose1');
   let introMsgTimer1 = null;
   let introCaptionsTimer1 = null;
+  // tous les boutons d'action restent grisés tant que le message initial n'a pas été fermé avec la croix rouge
+  const actionRow1 = document.getElementById('actionRow1');
+  actionRow1.addEventListener('click', e=>{ if(actionRow1.classList.contains('locked')){ e.stopPropagation(); e.preventDefault(); } }, true);
   function hideIntroMessage1(){
     if(introMsgTimer1){ clearTimeout(introMsgTimer1); introMsgTimer1=null; }
     sceneDim1.classList.remove('show'); sceneIntroMsg1.classList.remove('show');
+    actionRow1.classList.remove('locked');
+    document.getElementById('tabsBar').classList.remove('locked'); // tous les onglets s'activent en même temps
   }
   function showIntroMessage1(){
     if(introMsgTimer1) clearTimeout(introMsgTimer1);
     sceneDim1.classList.add('show'); sceneIntroMsg1.classList.add('show');
-    introMsgTimer1 = setTimeout(hideIntroMessage1, 6000);
+    actionRow1.classList.add('locked');
   }
   sceneIntroClose1.onclick = hideIntroMessage1;
 
@@ -1626,6 +1651,13 @@ function buildScene1(){
   const state = { colorHex:null, bottleVolume:null, liquidType:null, fillPresses:0, air:0, overfillPresses:0, exploded:false };
   const readout = document.getElementById('readout1');
   const burstMsg1 = document.getElementById('burstMsg1');
+  const neonRed1 = document.getElementById('neonRed1');
+  let neonRedTimer1 = null;
+  function showNeonRed1(){
+    neonRed1.classList.add('show');
+    if(neonRedTimer1) clearTimeout(neonRedTimer1);
+    neonRedTimer1 = setTimeout(()=> neonRed1.classList.remove('show'), 3200);
+  }
   const colorantBtn = document.getElementById('colorantBtn1');
   const colorRow = document.getElementById('colorRow1');
   // if the student keeps versant de l'eau après le ras bord, la bouteille finit par déborder puis éclater
@@ -1676,6 +1708,7 @@ function buildScene1(){
       colorRow.style.display = 'none';
       readout.innerHTML = 'Le colorant se diffuse dans le liquide de la bouteille.';
       nextStep = 3;
+      fillEauBtn.disabled = true; colorantBtn.disabled = true; // actions 2 et 3 terminées
     };
   });
 
@@ -1699,8 +1732,47 @@ function buildScene1(){
 
   // Clicking out of order no longer breaks the apparatus — it just flashes a full-screen reminder
   // so the student can try again straight away.
+  let wreck = [];
+  function clearWreck(){
+    wreck.forEach(o=>scene.remove(o)); wreck = [];
+    basin.group.rotation.set(0,0,0); basin.group.position.set(1.2, BENCH_TOP, 0.3);
+  }
+  // Mauvais ordre : écran rouge ET tout explose ; les dégâts restent visibles dans la scène après l'écran rouge.
   function wrongOrder(){
+    if(state.exploded) return;
+    state.exploded = true;
     showOrderError();
+    const origin = bottleObj ? bottleObj.group.position.clone() : new THREE.Vector3(-1.3, BENCH_TOP+0.55, 0.3);
+    spawnExplosionAt(scene, origin);
+    spawnExplosionAt(scene, basin.group.position.clone().add(new THREE.Vector3(0,0.4,0)));
+    shakeCamera(); flashExplosion('explosionFlash1');
+    candidates.forEach(c=>{ c.bottle.stopShimmer(); scene.remove(c.bottle.group); scene.remove(c.lbl); });
+    if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); }
+    label.visible = false;
+    if(tubeGroup){ scene.remove(tubeGroup); tubeGroup=null; }
+    mouth.visible = false; sign1.visible = false;
+    // dégâts durables : cristallisoir fêlé, penché et presque vidé, flaque, traces de brûlure, éclats de verre
+    basin.group.rotation.z = 0.14; basin.group.rotation.x = -0.06; basin.group.position.y = BENCH_TOP + 0.1;
+    basin.setLevel(0.02);
+    const glassCols = [0xCFE9F0, 0xEFF6EC, 0xB8D8E2];
+    const scorch = new THREE.Mesh(new THREE.CircleGeometry(0.75,32), new THREE.MeshBasicMaterial({color:0x0e0a07, transparent:true, opacity:0.6, depthWrite:false}));
+    scorch.rotation.x = -Math.PI/2; scorch.position.set(origin.x, BENCH_TOP+0.004, 0.3); scene.add(scorch); wreck.push(scorch);
+    const puddleCol = state.colorHex ? new THREE.Color(state.colorHex).lerp(new THREE.Color(0xffffff),0.5) : new THREE.Color(0x9fd0e0);
+    const puddle = new THREE.Mesh(new THREE.CircleGeometry(0.9,32), new THREE.MeshBasicMaterial({color:puddleCol, transparent:true, opacity:0.45, depthWrite:false}));
+    puddle.rotation.x = -Math.PI/2; puddle.position.set(basin.group.position.x-0.7, BENCH_TOP+0.006, 1.1); scene.add(puddle); wreck.push(puddle);
+    const stump = new THREE.Mesh(new THREE.CylinderGeometry(0.27,0.3,0.2,10,1,true), new THREE.MeshStandardMaterial({color:0xEFF6EC, transparent:true, opacity:0.5, roughness:0.2, side:THREE.DoubleSide, depthWrite:false}));
+    stump.position.set(origin.x, BENCH_TOP+0.1, 0.3); stump.rotation.z = 0.18; scene.add(stump); wreck.push(stump);
+    for(let i=0;i<44;i++){
+      const big = i<10;
+      const geo = new THREE.ConeGeometry(0.03+Math.random()*(big?0.05:0.03), 0.08+Math.random()*(big?0.18:0.1), 5);
+      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({color:glassCols[i%3], transparent:true, opacity:0.75, roughness:0.3}));
+      m.position.set(-2.6+Math.random()*5.4, BENCH_TOP+0.03, -0.4+Math.random()*1.6);
+      m.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+      m.castShadow = true; scene.add(m); wreck.push(m);
+    }
+    colorRow.style.display='none'; bottleRow.style.display='none';
+    puzzleActionBtns.forEach(b=>b.disabled=true);
+    chooseBottleBtn.disabled = true; colorantBtn.disabled = true;
   }
 
   chooseBottleBtn.onclick = ()=>{
@@ -1743,7 +1815,7 @@ function buildScene1(){
   // filling now takes 9 clicks on the same button to go from empty to brimful — extra clicks past that are just ignored
   function doFill(){
     if(state.exploded) return;
-    if(nextStep!==1){ wrongOrder(); return; }
+    if(nextStep!==1 && nextStep!==2){ wrongOrder(); return; } // le bouton reste actif jusqu'à l'ajout du colorant
     if(state.liquidType===null){
       state.liquidType = 'eau';
       bottleObj.setLiquidType('eau');
@@ -1756,6 +1828,7 @@ function buildScene1(){
       return;
     }
     state.fillPresses = Math.min(9, state.fillPresses+1);
+    if(state.fillPresses===2) showNeonRed1();
     bottleObj.setFilling(state.fillPresses/9);
     if(state.fillPresses>=9){
       readout.innerHTML = '<b>La bouteille est remplie à ras bord !</b> Ajoute maintenant un colorant.';
@@ -1816,6 +1889,8 @@ function buildScene1(){
     state.colorHex=null; state.bottleVolume=null; state.liquidType=null; state.fillPresses=0; state.air=0;
     state.overfillPresses=0; state.exploded=false; overfillBurstAt = randomOverfillThreshold();
     burstMsg1.classList.remove('show');
+    clearWreck(); colorantBtn.disabled = false;
+    neonRed1.classList.remove('show'); if(neonRedTimer1){ clearTimeout(neonRedTimer1); neonRedTimer1=null; }
     if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
     candidates.forEach(c=>{ c.bottle.stopShimmer(); scene.remove(c.bottle.group); scene.remove(c.lbl); });
     candidates = createCandidates();
@@ -1874,7 +1949,7 @@ function buildScene2(){
   const airFullMass = +(2.4 + Math.random()*1.2).toFixed(1);
   function currentMass(){ return rubberMass + (state.inflate/100)*airFullMass; }
   // the balloon bursts after a random number of presses (between 3 and 10) rather than always the same count
-  function randomBurstThreshold(){ return 3 + Math.floor(Math.random()*8); }
+  function randomBurstThreshold(){ return 3 + Math.floor(Math.random()*14); } // jusqu'à 15 pressions possibles, éclatement au plus tard à la 16e
 
   const state = { inflate:0, onScale:false, balanceOn:false, pressCount:0, exploded:false };
   let burstAt = randomBurstThreshold();
@@ -1920,14 +1995,14 @@ function buildScene2(){
     if(state.exploded) return;
     state.pressCount++;
     if(state.pressCount>=burstAt){ explodeBalloon(); return; }
-    state.inflate = Math.min(100, state.inflate+11);
+    state.inflate = Math.min(100, state.inflate+100/15);
     balloon.setScale(0.30+(state.inflate/100)*0.70, 0.035+(state.inflate/100)*0.965);
     if(state.onScale){
       experiment.massGonfle = currentMass();
       balance.setDisplay(currentMass().toFixed(1)+' g');
       readout.innerHTML='La masse affichée change avec la quantité d\'air : regarde l\'écran devant la balance.';
     } else {
-      readout.innerHTML = state.inflate>=100 ? '<b>Le ballon est bien gonflé.</b> Quand tu es prêt, allume la balance puis pèse-le.' : 'Continue à gonfler le ballon.';
+      readout.innerHTML = state.inflate>=99.9 ? '<b>Le ballon est bien gonflé.</b> Quand tu es prêt, allume la balance puis pèse-le.' : 'Continue à gonfler le ballon.';
     }
   };
   turnOnBtn.onclick = function(){
@@ -2027,7 +2102,7 @@ function buildScene3(){
   showQuestionBtn.disabled = true;
   showQuestionBtn.onclick = ()=>{ if(showQuestionBtn.disabled) return; sign3.visible = true; flyTo(signCam3, 1400); };
   const stopBtn = document.getElementById('stopBtn3');
-  stopBtn.style.display='none';
+  stopBtn.disabled=true;
   const state = { localVolume:0, bottleVolume:null, colorHex:null, liquidType:null };
 
   // ---- camera reminder: nags once if the student mashes "appuyer sur le ballon" 5 times
@@ -2048,11 +2123,10 @@ function buildScene3(){
   const bottleRow = document.getElementById('bottleRow3');
   setupBottleLabelOverlay(bottleRow, ()=>candidates, 3);
   const remplirEauBtn = document.getElementById('remplirEauBtn3');
-  const remplirAlcoolBtn = document.getElementById('remplirAlcoolBtn3');
   const relierBtn = document.getElementById('relierBtn3');
   const appuyerBtn = document.getElementById('appuyerBtn3');
   const retryBtn = document.getElementById('retryBtn3');
-  const puzzleActionBtns3 = [remplirEauBtn, remplirAlcoolBtn, relierBtn, appuyerBtn];
+  const puzzleActionBtns3 = [remplirEauBtn, relierBtn, appuyerBtn];
 
   // nextStep tracks the one correct action expected right now: 0=choose a bottle, 1=remplir (eau OU alcool),
   // 2=relier le ballon au tuyau, 3=appuyer sur le ballon (repeated, extraction in progress).
@@ -2064,7 +2138,7 @@ function buildScene3(){
     exploded = true;
     puzzleActionBtns3.forEach(b=>b.disabled=true);
     bottleRow.style.display='none'; colorRow.style.display='none';
-    stopBtn.style.display='none';
+    stopBtn.disabled=true;
     const origin = bottleObj ? bottleObj.getNeckWorld().add(new THREE.Vector3(0,-0.2,0)) : restPos.clone();
     spawnExplosionAt(scene, origin);
     shakeCamera();
@@ -2154,7 +2228,6 @@ function buildScene3(){
     }, 450);
   }
   remplirEauBtn.onclick = ()=> doMontage('eau');
-  remplirAlcoolBtn.onclick = ()=> doMontage('alcool');
 
   relierBtn.onclick = ()=>{
     if(exploded) return;
@@ -2191,20 +2264,20 @@ function buildScene3(){
     const remain = Math.max(0, experiment.totalBalloonCapacity-state.localVolume)/experiment.totalBalloonCapacity;
     balloon.setScale(0.3+remain*0.7);
     spawnBubble3D(scene, bottleObj.getNeckWorld().add(new THREE.Vector3(0,0.15,0)));
-    stopBtn.style.display='inline-block';
+    stopBtn.disabled=false;
     const v = state.localVolume;
     if(v>=experiment.totalBalloonCapacity){ readout.innerHTML='Le ballon est complètement à plat.'; appuyerBtn.disabled=true; }
     else readout.innerHTML='Observe le niveau dans la bouteille graduée à '+state.bottleVolume.toFixed(1).replace('.',',')+' L pour savoir quand t\'arrêter.';
   };
   stopBtn.onclick = function(){
-    stopBtn.style.display='none'; appuyerBtn.disabled=true;
+    stopBtn.disabled=true; appuyerBtn.disabled=true;
     readout.innerHTML='Tuyau déconnecté. Lis toi-même le volume sur la graduation de la bouteille et note-le sur ton cahier. Passe ensuite à l\'onglet 4.';
     if(tubeGroup){
       const tg = tubeGroup; tubeGroup=null;
       const startOps = tg.children.map(c=>c.material.opacity);
       tween(500, p=>{ tg.children.forEach((c,i)=>{ c.material.opacity = startOps[i]*(1-p); }); }, ()=>{ scene.remove(tg); });
     }
-    showQuestionBtn.disabled = false;
+    showQuestionBtn.style.display = ''; showQuestionBtn.disabled = false;
   };
   function resetAll3(){
     exploded = false; nextStep = 0;
@@ -2219,11 +2292,11 @@ function buildScene3(){
     basin.setLevel(0.5);
     balloon.group.position.copy(balloonRest); balloon.setScale(1.0);
     if(tubeGroup){ scene.remove(tubeGroup); tubeGroup=null; }
-    stopBtn.style.display='none';
+    stopBtn.disabled=true;
     puzzleActionBtns3.forEach(b=>b.disabled=true);
     chooseBottleBtn.disabled = false;
     pressesWithoutCam = 0; camNagShown = false; hideCamNag3();
-    showQuestionBtn.disabled = true;
+    showQuestionBtn.disabled = true; showQuestionBtn.style.display='none';
     retryBtn.style.display='none';
     bottleRow.style.display='flex'; colorRow.style.display='none';
     colorRow.querySelectorAll('.swatch').forEach(s=>s.classList.remove('picked'));
@@ -2541,6 +2614,7 @@ function buildScene4(){
 /* ===================== tabs & cahier ===================== */
 let tab5LinesTimer = null;
 function showTab(n){
+  if(n!==1 && document.getElementById('tabsBar').classList.contains('locked')) return;
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+n).classList.add('active');
