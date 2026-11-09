@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Identifier le dioxygène — test à la buchette incandescente</title>
+<style>
+:root{--bg:#eef0ea;--panel:#f7f5ee;--text:#211d16;--muted:#736a5b;--accent:#ff7a30;--ok:#1f9d64;--bad:#d94b4b;}
+@media (prefers-color-scheme: dark){
+ :root:not([data-mode="light"]){--bg:#11161d;--panel:#1c232c;--text:#f1efe9;--muted:#98a1ac;}
+}
+:root[data-mode="dark"]{--bg:#11161d;--panel:#1c232c;--text:#f1efe9;--muted:#98a1ac;}
+:root[data-mode="light"]{--bg:#eef0ea;--panel:#f7f5ee;--text:#211d16;--muted:#736a5b;}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+ padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+#app{display:flex;flex-direction:column;min-height:100%;}
+#tabs{display:flex;gap:6px;padding:12px 12px 6px;}
+.tab{flex:1;text-align:center;padding:9px 4px;border-radius:10px;background:var(--panel);color:var(--muted);
+ font-size:11.5px;font-weight:500;border:1px solid transparent;}
+.tab.active{color:var(--accent);border-color:var(--accent);}
+#viewport{position:relative;aspect-ratio:4/3;width:calc(100% - 24px);max-width:640px;margin:6px auto;border-radius:16px;overflow:hidden;
+ background:radial-gradient(ellipse at 50% 30%,#3c4658,#141a22 74%);}
+#viewport canvas{position:absolute;inset:0;z-index:1;display:block;width:100%;height:100%;touch-action:none;}
+#bgLayer{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse at 50% 30%,#3c4658,#141a22 74%);}
+#quizOverlay{position:absolute;left:0;right:0;bottom:0;z-index:5;padding:8px;pointer-events:none;}
+#quizOptions{display:flex;flex-wrap:nowrap;gap:5px;}
+#quizOptions button{pointer-events:auto;flex:1 1 0;min-width:0;padding:9px 3px;font-size:clamp(9.5px,2.7vw,12px);line-height:1.15;
+ border-radius:9px;background:rgba(15,20,28,.8);color:#fff;border:1px solid rgba(255,255,255,.35);text-align:center;overflow-wrap:anywhere;}
+#panel{flex:1;padding:6px 16px 28px;display:flex;flex-direction:column;gap:12px;}
+.step{display:none;flex-direction:column;gap:12px;}
+.step.active{display:flex;}
+h2{font-size:16px;font-weight:500;margin:4px 0 0;}
+p{font-size:13.5px;line-height:1.6;color:var(--muted);margin:0;}
+button{font:inherit;font-weight:500;font-size:14px;padding:13px 16px;border-radius:12px;border:none;
+ background:var(--accent);color:#241100;}
+button.secondary{background:var(--panel);color:var(--text);border:1px solid var(--muted);}
+button:disabled{opacity:.35;}
+.row{display:flex;gap:10px;align-items:center;}
+.stack{display:flex;flex-direction:column;gap:8px;}
+input[type=range]{width:100%;}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--panel);font-size:12px;
+ color:var(--muted);border:1px solid var(--muted);white-space:nowrap;}
+.obs{background:var(--panel);border-left:3px solid var(--accent);padding:10px 12px;border-radius:8px;font-size:13.5px;}
+.dots{display:flex;gap:6px;justify-content:center;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--panel);border:1px solid var(--muted);}
+.dot.on{background:var(--accent);border-color:var(--accent);}
+.results{font-size:13px;color:var(--ok);min-height:18px;}
+.quizQ{font-size:14.5px;font-weight:600;color:var(--text);margin:2px 0;}
+#quizOptions button.correct{background:var(--ok);color:#fff;}
+#quizOptions button.wrong{background:var(--bad);color:#fff;}
+#quizTitle{text-align:center;margin:0 0 7px;font-size:clamp(11px,3.1vw,14.5px);font-weight:600;color:#ffe3e3;letter-spacing:.2px;
+ text-shadow:0 0 3px #ff4a4a,0 0 8px #ff2a2a,0 0 16px rgba(255,30,30,.7);}
+.step>button{align-self:center;width:min(100%,380px);}
+#introButtons{display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;justify-content:center;width:100%;}
+#introButtons button{flex:1 1 0;min-width:0;max-width:300px;padding:13px 8px;font-size:13.5px;}
+#gasChoices,#heatChoices{align-self:center;width:min(100%,460px);}
+#retryGasRow{display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;align-self:center;width:min(100%,460px);}
+#retryGasRow button{flex:1 1 0;min-width:0;padding:13px 6px;}
+#heatChoices{flex-direction:row;flex-wrap:nowrap;gap:8px;}
+#heatChoices button{flex:1 1 0;min-width:0;padding:13px 6px;font-size:13px;}
+#mixRow{width:100%;}
+#obs2,#obs3{position:absolute;left:10px;right:10px;bottom:10px;z-index:6;margin:0;padding:8px 12px;border:none;border-radius:10px;
+ background:rgba(10,14,20,.6);color:#ffe3e3;text-align:center;font-size:clamp(11px,3vw,14px);font-weight:600;line-height:1.3;pointer-events:none;
+ text-shadow:0 0 3px #ff4a4a,0 0 8px #ff2a2a,0 0 14px rgba(255,30,30,.6);}
+#bilanOverlay{position:absolute;inset:0;z-index:6;pointer-events:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:10px;padding:12px 10px 10px;background:rgba(8,12,18,.55);}
+#videoRow{display:flex;flex-wrap:nowrap;justify-content:center;gap:8px;width:100%;flex:1 1 0;min-height:0;}
+#videoRow figure{margin:0;flex:1 1 0;min-width:0;min-height:0;display:flex;flex-direction:column;justify-content:center;text-align:center;color:#fff;}
+#videoRow img{flex:0 1 auto;min-height:0;width:100%;height:auto;max-height:calc(100% - 24px);object-fit:contain;border-radius:10px;display:block;}
+#videoRow figcaption{margin-top:4px;font-weight:700;font-size:13px;}
+#bilanText{text-align:center;font-weight:700;margin:0;max-width:96%;flex:0 0 auto;color:#ffe3e3;font-size:clamp(13px,3.4vw,18px);line-height:1.35;
+ text-shadow:0 0 3px #ff4a4a,0 0 8px #ff2a2a,0 0 16px rgba(255,30,30,.6);}
+
+/* --- quiz bilan --- */
+#videoRow img{max-height:calc(100% - 58px) !important;}
+#videoRow .bilanBtn{pointer-events:auto;margin-top:6px;padding:7px 3px;font-size:clamp(9px,2.5vw,12px);line-height:1.15;font-weight:700;border-radius:9px;
+ background:rgba(15,20,28,.88);color:#fff;border:1px solid rgba(255,255,255,.45);width:100%;cursor:pointer;display:flex;flex-direction:column;gap:2px;align-items:center;}
+#videoRow .bilanBtn .f{font-size:clamp(12px,3.4vw,16px);}
+#videoRow .bilanBtn .n{font-weight:500;font-size:clamp(8.5px,2.3vw,11px);opacity:.9;}
+#videoRow .bilanBtn.correct{background:var(--ok);border-color:#9dffc8;color:#fff;}
+#videoRow .bilanBtn.wrong{background:var(--bad);border-color:#ffb0b0;color:#fff;}
+#videoRow .bilanBtn:disabled{opacity:1;}
+#videoRow .bilanBtn:disabled:not(.correct):not(.wrong){opacity:.45;}
+#faceOverlay{position:absolute;inset:0;z-index:9;display:none;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+ background:rgba(6,10,16,.72);pointer-events:auto;cursor:pointer;}
+#faceOverlay.show{display:flex;}
+#faceArt{height:80%;width:100%;display:flex;align-items:center;justify-content:center;}
+#faceOverlay svg{height:100%;width:auto;max-width:92%;overflow:visible;}
+#faceOverlay.ok svg{filter:drop-shadow(0 0 3px #39ff6a) drop-shadow(0 0 10px #39ff6a) drop-shadow(0 0 24px #1fff5a);animation:facePop .55s cubic-bezier(.3,1.6,.5,1) both,faceWiggle .5s ease-in-out .55s infinite alternate;}
+#faceOverlay.ko svg{filter:drop-shadow(0 0 3px #ff3b3b) drop-shadow(0 0 10px #ff3b3b) drop-shadow(0 0 24px #ff1f1f);animation:facePop .5s ease-out both,faceSway 1.6s ease-in-out .5s infinite alternate;}
+#faceCaption{font-weight:800;font-size:clamp(14px,4vw,22px);letter-spacing:.3px;}
+#faceOverlay.ok #faceCaption{color:#d8ffe6;text-shadow:0 0 4px #39ff6a,0 0 12px #39ff6a,0 0 24px #1fff5a;}
+#faceOverlay.ko #faceCaption{color:#ffe3e3;text-shadow:0 0 4px #ff3b3b,0 0 12px #ff3b3b,0 0 24px #ff1f1f;}
+@keyframes facePop{0%{transform:scale(.1) rotate(-25deg);opacity:0;}100%{transform:scale(1) rotate(0);opacity:1;}}
+@keyframes faceWiggle{0%{transform:rotate(-5deg) scale(1);}100%{transform:rotate(5deg) scale(1.05);}}
+@keyframes faceSway{0%{transform:translateY(0) rotate(-2deg);}100%{transform:translateY(6px) rotate(2deg);}}
+
+#bilanOverlay{background:radial-gradient(ellipse at 50% 30%,rgba(60,70,88,.98),rgba(14,20,28,.99) 75%) !important;justify-content:center !important;gap:22px !important;padding:14px 12px !important;}
+#videoRow{flex:0 1 auto !important;align-items:stretch !important;gap:10px !important;}
+#videoRow .bilanBtn{margin-top:0 !important;padding:20px 4px !important;width:auto !important;flex:1 1 0;justify-content:center;}
+#videoRow .bilanBtn .f{font-size:clamp(18px,5.5vw,28px) !important;}
+#videoRow .bilanBtn .n{font-size:clamp(10px,2.8vw,13px) !important;}
+#bilanText{font-size:clamp(14px,3.8vw,20px) !important;}
+#videoRow .bilanBtn .t{font-size:clamp(12px,3.4vw,16px);font-weight:700;line-height:1.25;}
+#videoRow .bilanBtn:has(.t){padding:13px 10px !important;}
+#faceSub{font-weight:600;font-size:clamp(10px,2.8vw,13px);color:#fff;text-align:center;max-width:90%;line-height:1.3;opacity:.95;}
+.tab{cursor:pointer;}
+#heatingRow,#heatingRowMix{position:absolute;top:10px;right:10px;z-index:6;gap:6px;pointer-events:none;}
+#heatingRow .pill,#heatingRowMix .pill{background:rgba(15,20,28,.82);color:#fff;border:1px solid rgba(255,255,255,.4);font-weight:600;}
+#mixRow input[type=range]{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:14px;border-radius:7px;outline:none;
+ background:linear-gradient(90deg,#1fd0c0 0,#1fd0c0 var(--p,50%),#ff5fa8 var(--p,50%),#ff5fa8 100%);}
+#mixRow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:3px solid #333;cursor:pointer;}
+#mixRow input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid #333;cursor:pointer;}
+#gasChoices{display:flex;flex-direction:row;flex-wrap:nowrap;gap:8px;}
+#gasChoices button{flex:1 1 0;min-width:0;padding:13px 4px;}
+</style>
+</head>
+<body>
+<div id="app">
+ <div id="tabs">
+  <div class="tab active" data-i="0">1 · Matériel</div>
+  <div class="tab" data-i="1">2 · Identification</div>
+  <div class="tab" data-i="2">3 · Bilan</div>
+  <div class="tab" data-i="3">4 · Bonus</div>
+ </div>
+ <div id="viewport"><div id="bgLayer"></div><div id="bilanOverlay" style="display:none"><p id="bilanText">Quel gaz permet de raviver les combustions ?</p>
+   <div id="videoRow"></div></div><div id="faceOverlay"><div id="faceArt"></div><div id="faceCaption"></div><div id="faceSub"></div></div><div class="obs" id="obs2" style="display:none"></div><div class="obs" id="obs3" style="display:none"></div><div class="row" id="heatingRow" style="display:none"><span class="pill">Chauffe…</span><span class="pill" id="heatPct2">0%</span></div><div class="row" id="heatingRowMix" style="display:none"><span class="pill">Chauffe…</span><span class="pill" id="heatPctMix">0%</span></div><div id="quizOverlay"><div id="quizTitle" style="display:none">C'est quoi ça ? (tu peux tourner et zoomer)</div><div id="quizOptions"></div></div></div>
+ <div id="panel">
+
+  <div class="step active" data-s="0">
+   <div id="introButtons">
+    <button id="startPresent">Présentation des objets</button>
+    <button id="toStep1" disabled>Passer à l'identification</button>
+   </div>
+   <div id="introPresent" style="display:none">
+    <div class="dots" id="dots"></div>
+    <div class="results" id="quizResult"></div>
+   </div>
+  </div>
+
+  <div class="step" data-s="1">
+   <p id="protoText" style="display:none"></p>
+   <div id="gasChoices">
+    <button id="fillH2" class="secondary">Mettre H₂</button>
+    <button id="fillCO2" class="secondary">Mettre CO₂</button>
+    <button id="fillO2">Mettre O₂</button>
+   </div>
+   <button id="btnClose2" style="display:none">Fermer le bocal</button>
+   <button id="btnIgniteBurner" style="display:none">Allumer le bec Bunsen</button>
+   <div id="heatChoices" style="display:none">
+    <button id="heatSplint">Chauffer la bûchette</button>
+    <button id="heatCharcoal" class="secondary">Chauffer le charbon de bois</button>
+   </div>
+   <button id="btnPlunge2" style="display:none">Mettre dans le bocal</button>
+   <button id="btnShake2" style="display:none">Refermer et agiter</button>
+   <div id="retryGasRow" style="display:none">
+    <button id="retryGasA"></button>
+    <button id="retryGasB"></button>
+   </div>
+   <button id="toStep2" disabled>Passer au bilan</button>
+  </div>
+
+  <div class="step" data-s="2">
+   <button id="toBonus">Passer au test amusant</button>
+   <button id="restartBtn" class="secondary">Recommencer l'expérience</button>
+  </div>
+
+  <div class="step" data-s="3">
+   <div class="row" id="mixRow"><span class="pill" id="o2mixval" style="border-color:#1fd0c0;color:#1fd0c0">O₂ 50%</span><input type="range" id="o2mix" min="0" max="100" value="50"><span class="pill" id="h2mixval" style="border-color:#ff5fa8;color:#ff5fa8">H₂ 50%</span></div>
+   <button id="fillMix">Remplir le bocal</button>
+   <button id="closeMix" style="display:none">Fermer le bocal</button>
+   <button id="igniteBurnerMix" style="display:none">Allumer le bec Bunsen</button>
+   <button id="heatSplintMix" style="display:none">Chauffer la bûchette</button>
+   <button id="plungeMix" style="display:none">Plonger la bûchette dans le bocal</button>
+   <button id="retryMix" class="secondary" style="display:none">Réessayer</button>
+  </div>
+
+ </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+var gen=0;
+(function(){var st=window.setTimeout.bind(window),si=window.setInterval.bind(window);
+ window.setTimeout=function(fn,ms){var g=gen;return st(function(){if(g===gen)fn();},ms);};
+ window.setInterval=function(fn,ms){var g=gen,id=si(function(){if(g!==gen){clearInterval(id);return;}fn();},ms);return id;};})();
+
+(function(){
+var vp=document.getElementById('viewport');
+var W=vp.clientWidth,H=vp.clientHeight;
+var scene=new THREE.Scene();
+var camera=new THREE.PerspectiveCamera(45,W/H,0.1,50);
+var renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setSize(W,H);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+vp.appendChild(renderer.domElement);
+
+var ambL=new THREE.AmbientLight(0x667788,0.55);scene.add(ambL);
+var hemiL=new THREE.HemisphereLight(0xaaccff,0x302518,0.4);scene.add(hemiL);
+var sun=new THREE.DirectionalLight(0xfff2e0,0.65);sun.position.set(3,5,2);scene.add(sun);
+var bgLayer=document.getElementById('bgLayer');
+var lightLv=1,lightGoal=1;
+function applyLight(){ambL.intensity=.55*lightLv;hemiL.intensity=.4*lightLv;sun.intensity=.65*lightLv;bgLayer.style.filter='brightness('+(.22+.78*lightLv).toFixed(3)+')';}
+function setLight(g){lightGoal=g;}
+// projecteur sur l'objet présenté (étape 1)
+var spot=new THREE.SpotLight(0xfff1dc,0,14,.24,.85,1);spot.position.set(0,5.2,3.6);spot.target.position.set(0,1.0,.3);
+scene.add(spot);scene.add(spot.target);
+var spotLv=0,spotGoal=0;
+var flameLight=new THREE.PointLight(0xff8a3d,0,4);scene.add(flameLight);
+var jarLight=new THREE.PointLight(0xffffff,0,5);scene.add(jarLight);
+
+function tableTex(){
+ var c=document.createElement('canvas');c.width=c.height=1024;var x=c.getContext('2d');
+ // base marble slab colour
+ var base=x.createLinearGradient(0,0,1024,1024);
+ base.addColorStop(0,'#efe9db');base.addColorStop(.5,'#e6dfcf');base.addColorStop(1,'#ddd5c2');
+ x.fillStyle=base;x.fillRect(0,0,1024,1024);
+ // strong fine grain noise
+ var id=x.getImageData(0,0,1024,1024),d=id.data;
+ for(var p=0;p<d.length;p+=4){
+  var n=(Math.random()-.5)*30;
+  d[p]+=n;d[p+1]+=n*.96;d[p+2]+=n*.9;
+ }
+ x.putImageData(id,0,0);
+ // scattered stone flecks (granite look)
+ for(var f=0;f<2600;f++){
+  var fx=Math.random()*1024,fy=Math.random()*1024,fr=.5+Math.random()*2.2;
+  var tone=Math.random();
+  x.fillStyle=tone<.5?'rgba(90,82,66,'+(0.08+Math.random()*.18)+')':'rgba(250,247,240,'+(0.1+Math.random()*.25)+')';
+  x.beginPath();x.arc(fx,fy,fr,0,Math.PI*2);x.fill();
+ }
+ // bold marble veins
+ for(var v=0;v<16;v++){
+  x.strokeStyle='rgba(110,98,78,'+(0.14+Math.random()*.22)+')';
+  x.lineWidth=1.5+Math.random()*4.5;
+  x.beginPath();
+  var sx=Math.random()*1024,sy=Math.random()*1024;
+  x.moveTo(sx,sy);
+  for(var seg=0;seg<6;seg++){
+   sx+=(Math.random()-.5)*260;sy+=(Math.random()-.5)*260;
+   x.lineTo(sx,sy);
+  }
+  x.stroke();
+  // thin bright highlight running alongside each vein
+  x.strokeStyle='rgba(255,252,244,'+(0.05+Math.random()*.08)+')';
+  x.lineWidth=.6;
+  x.stroke();
+ }
+ // soft vignette toward the edge of the bench
+ var vig=x.createRadialGradient(512,512,260,512,512,720);
+ vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(35,30,20,.22)');
+ x.fillStyle=vig;x.fillRect(0,0,1024,1024);
+ var t=new THREE.CanvasTexture(c);t.anisotropy=renderer.capabilities.getMaxAnisotropy?renderer.capabilities.getMaxAnisotropy():4;
+ return t;
+}
+var ground=new THREE.Mesh(new THREE.CircleGeometry(4,64),new THREE.MeshStandardMaterial({map:tableTex(),roughness:.55,metalness:0}));
+ground.rotation.x=-Math.PI/2;scene.add(ground);
+
+function glowTex(c1,c2){
+ var c=document.createElement('canvas');c.width=c.height=128;var x=c.getContext('2d');
+ var g=x.createRadialGradient(64,64,0,64,64,64);
+ g.addColorStop(0,c1);g.addColorStop(.5,c2);g.addColorStop(1,'rgba(0,0,0,0)');
+ x.fillStyle=g;x.fillRect(0,0,128,128);
+ return new THREE.CanvasTexture(c);
+}
+var flameTex=glowTex('rgba(255,190,90,1)','rgba(255,120,30,.6)');
+var sparkTex=glowTex('rgba(255,240,200,1)','rgba(255,160,40,.7)');
+var shadowTex=glowTex('rgba(0,0,0,.55)','rgba(0,0,0,.25)');
+var neutralTex=glowTex('rgba(255,255,255,1)','rgba(255,255,255,.55)');
+
+function woodTex(){
+ var c=document.createElement('canvas');c.width=32;c.height=256;var x=c.getContext('2d');
+ x.fillStyle='#8a5a2e';x.fillRect(0,0,32,256);
+ for(var i=0;i<10;i++){
+  x.strokeStyle='rgba(60,35,15,'+(0.15+Math.random()*.25)+')';x.lineWidth=1+Math.random()*1.5;
+  x.beginPath();var sx=Math.random()*32;x.moveTo(sx,0);
+  for(var y=0;y<256;y+=20){sx+=(Math.random()-.5)*4;x.lineTo(sx,y);}
+  x.stroke();
+ }
+ var t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function makeLabelTexture(formula,lines){
+ var c=document.createElement('canvas');c.width=320;c.height=480;var x=c.getContext('2d');
+ x.fillStyle='rgba(255,255,255,.96)';roundRect(x,4,4,312,472,24);x.fill();
+ x.strokeStyle='rgba(0,0,0,.3)';x.lineWidth=6;roundRect(x,4,4,312,472,24);x.stroke();
+ x.fillStyle='#111';x.textAlign='center';x.textBaseline='middle';
+ x.font='bold 120px sans-serif';x.fillText(formula,160,170);
+ x.font='bold 36px sans-serif';
+ var ly=330;lines.forEach(function(l){x.fillText(l,160,ly);ly+=46;});
+ return new THREE.CanvasTexture(c);
+}
+function shadowBlob(radius){
+ var m=new THREE.Sprite(new THREE.SpriteMaterial({map:shadowTex,transparent:true,depthWrite:false}));
+ m.scale.set(radius,radius*.4,1);m.position.y=.02;m.rotation.x=-Math.PI/2;return m;
+}
+
+var flames=[];
+for(var i=0;i<3;i++){
+ var s=new THREE.Sprite(new THREE.SpriteMaterial({map:flameTex,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0}));
+ s.scale.set(.5,.8,1);scene.add(s);flames.push(s);
+}
+function placeFlames(x,y,z){flames.forEach(function(f){f.position.set(x,y,z);});}
+
+// --- burner (bec Bunsen : base "soucoupe retournée" + longue tige métallique, taille du bocal) ---
+var burnerGroup=new THREE.Group();burnerGroup.userData.name='Bec Bunsen';
+var metalMat=new THREE.MeshStandardMaterial({color:0x767e87,metalness:.75,roughness:.3});
+var metalMatDark=new THREE.MeshStandardMaterial({color:0x3d434b,metalness:.7,roughness:.35});
+// base : dôme métallique (soucoupe retournée) posée sur la table
+var BURNER_R=.26;
+var burnerBase=new THREE.Mesh(new THREE.SphereGeometry(BURNER_R,28,16,0,Math.PI*2,0,Math.PI/2),metalMat);
+burnerBase.position.y=0;burnerGroup.add(burnerBase);
+var burnerRim=new THREE.Mesh(new THREE.TorusGeometry(BURNER_R,.015,8,28),metalMatDark);
+burnerRim.rotation.x=Math.PI/2;burnerRim.position.y=.01;burnerGroup.add(burnerRim);
+// petits trous d'air près de la base du tube
+var airCollar=new THREE.Mesh(new THREE.CylinderGeometry(.075,.08,.09,16),metalMatDark);
+airCollar.position.y=.16;burnerGroup.add(airCollar);
+// longue tige verticale (cheminée) — hauteur proche de celle du bocal
+var TUBE_BOTTOM=.2,TUBE_H=1.45;
+var tube=new THREE.Mesh(new THREE.CylinderGeometry(.052,.058,TUBE_H,16),metalMat);
+tube.position.y=TUBE_BOTTOM+TUBE_H/2;burnerGroup.add(tube);
+var TUBE_TOP=TUBE_BOTTOM+TUBE_H;
+var burnerCap=new THREE.Mesh(new THREE.CylinderGeometry(.06,.05,.05,16),metalMatDark);
+burnerCap.position.y=TUBE_TOP+.025;burnerGroup.add(burnerCap);
+var BURNER_FLAME_Y=TUBE_TOP+.05;
+// petit robinet latéral (arrivée du gaz)
+var burnerValveArm=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.18,8),metalMat);
+burnerValveArm.rotation.z=Math.PI/2;burnerValveArm.position.set(-.2,.12,0);burnerGroup.add(burnerValveArm);
+// blue camping gas canister
+var canister=new THREE.Group();
+var canBody=new THREE.Mesh(new THREE.CylinderGeometry(.13,.13,.42,18),new THREE.MeshStandardMaterial({color:0x1f5fa8,metalness:.35,roughness:.4}));
+canBody.position.y=.21;canister.add(canBody);
+var canTop=new THREE.Mesh(new THREE.CylinderGeometry(.085,.12,.08,18),new THREE.MeshStandardMaterial({color:0x37424c,metalness:.5,roughness:.4}));
+canTop.position.y=.46;canister.add(canTop);
+var canValve=new THREE.Mesh(new THREE.SphereGeometry(.035,10,10),new THREE.MeshStandardMaterial({color:0x1a1e22,metalness:.6,roughness:.3}));
+canValve.position.y=.52;canister.add(canValve);
+canister.add(shadowBlob(.22));
+canister.position.set(-.55,0,.28);
+burnerGroup.add(canister);
+// soft cream hose (tube) linking canister to burner base
+var hoseCurve=new THREE.CatmullRomCurve3([
+ new THREE.Vector3(-.55,.5,.28),new THREE.Vector3(-.45,.62,.16),
+ new THREE.Vector3(-.28,.5,.05),new THREE.Vector3(-.15,.28,-.02),new THREE.Vector3(-.29,.12,0)
+]);
+var hose=new THREE.Mesh(new THREE.TubeGeometry(hoseCurve,24,.028,8,false),new THREE.MeshStandardMaterial({color:0xfdf8ee,roughness:.7}));
+burnerGroup.add(hose);
+var hitB=new THREE.Mesh(new THREE.SphereGeometry(.7,8,8),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+hitB.position.set(-.1,.6,.1);burnerGroup.add(hitB);
+burnerGroup.add(shadowBlob(.75));
+scene.add(burnerGroup);
+
+// --- splint (bûchette de bois, sans boule) ---
+var splintGroup=new THREE.Group();splintGroup.userData.name='Bûchette de bois';
+var stickMat=new THREE.MeshStandardMaterial({map:woodTex(),roughness:.85});
+var stick=new THREE.Mesh(new THREE.CylinderGeometry(.05,.06,1.1,10),stickMat);
+stick.position.y=.55;splintGroup.add(stick);
+var tipMat=new THREE.MeshStandardMaterial({color:0x1a1a1a,emissive:0x000000,roughness:.7});
+var tip=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.14,10),tipMat);
+tip.position.y=1.17;splintGroup.add(tip);
+var emberGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:flameTex,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0}));
+emberGlow.scale.set(.01,.01,1);emberGlow.position.y=1.17;splintGroup.add(emberGlow);
+var splintGlows=[emberGlow];
+[.15,.4,.65,.9].forEach(function(gy){var gsp=new THREE.Sprite(new THREE.SpriteMaterial({map:flameTex,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0}));
+ gsp.scale.set(.01,.01,1);gsp.position.y=gy;splintGroup.add(gsp);splintGlows.push(gsp);});
+var hitS=new THREE.Mesh(new THREE.SphereGeometry(.35,8,8),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+hitS.position.y=.6;splintGroup.add(hitS);
+splintGroup.userData.shadow=shadowBlob(.35);splintGroup.add(splintGroup.userData.shadow);
+scene.add(splintGroup);
+
+// --- charbon de bois ---
+var charcoalGroup=new THREE.Group();charcoalGroup.userData.name='Charbon de bois';
+var charGeo=new THREE.IcosahedronGeometry(.17,0);
+var posAttr=charGeo.attributes.position;
+for(var vi=0;vi<posAttr.count;vi++){
+ posAttr.setXYZ(vi,posAttr.getX(vi)*(1+(Math.random()-.5)*.35),posAttr.getY(vi)*(1+(Math.random()-.5)*.35),posAttr.getZ(vi)*(1+(Math.random()-.5)*.35));
+}
+charGeo.computeVertexNormals();
+var charMat=new THREE.MeshStandardMaterial({color:0x232323,roughness:.95,emissive:0x000000});
+var charMesh=new THREE.Mesh(charGeo,charMat);charMesh.position.y=.2;charcoalGroup.add(charMesh);
+var charGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:flameTex,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0}));
+charGlow.scale.set(.01,.01,1);charGlow.position.y=.2;charcoalGroup.add(charGlow);
+charcoalGroup.userData.shadow=shadowBlob(.32);charcoalGroup.add(charcoalGroup.userData.shadow);
+scene.add(charcoalGroup);
+
+// --- gas bottles (plus hautes que le bocal) ---
+function makeNameTag(text){
+ var c=document.createElement('canvas');c.width=512;c.height=150;var x=c.getContext('2d');
+ x.fillStyle='rgba(16,22,30,.92)';roundRect(x,6,6,500,138,34);x.fill();
+ x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=6;roundRect(x,6,6,500,138,34);x.stroke();
+ var fs=74;x.font='bold '+fs+'px sans-serif';
+ while(x.measureText(text).width>450&&fs>20){fs-=3;x.font='bold '+fs+'px sans-serif';}
+ x.fillStyle='#fff';x.textAlign='center';x.textBaseline='middle';x.fillText(text,256,78);
+ var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+ sp.renderOrder=20;return sp;
+}
+var BTL_TIPH=2.09;
+function buildBottle(bodyColor,gasName){
+ var g=new THREE.Group();
+ var R=.3,BH=1.45,SH=.24,NH=.32;
+ var flip=new THREE.Group();flip.position.y=BTL_TIPH/2;g.add(flip);
+ var inner=new THREE.Group();inner.position.y=-BTL_TIPH/2;flip.add(inner);
+ var bodyMat=new THREE.MeshStandardMaterial({color:bodyColor,roughness:.4,metalness:.25});
+ var body=new THREE.Mesh(new THREE.CylinderGeometry(R,R*1.03,BH,28),bodyMat);body.position.y=BH/2;inner.add(body);
+ var shoulder=new THREE.Mesh(new THREE.CylinderGeometry(.11,R,SH,28),bodyMat);shoulder.position.y=BH+SH/2;inner.add(shoulder);
+ var neckMat=new THREE.MeshStandardMaterial({color:0x151515,metalness:.5,roughness:.45});
+ var neck=new THREE.Mesh(new THREE.CylinderGeometry(.08,.11,NH,16),neckMat);neck.position.y=BH+SH+NH/2;inner.add(neck);
+ var cap=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.1,16),neckMat);cap.position.y=BH+SH+NH+.05-.01;inner.add(cap);
+ var nozzle=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,.06,10),new THREE.MeshStandardMaterial({color:0x000000,roughness:.6}));nozzle.position.y=BTL_TIPH-.03;inner.add(nozzle);
+ var hit=new THREE.Mesh(new THREE.SphereGeometry(.7,8,8),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.position.y=1;inner.add(hit);
+ var sh=shadowBlob(.6);g.add(sh);
+ var tag=makeNameTag(gasName);g.add(tag);
+ g.userData.flip=flip;g.userData.tag=tag;g.userData.shadow=sh;
+ return g;
+}
+var o2BottleGroup=buildBottle(0xf1f0ea,'Dioxygène');o2BottleGroup.userData.name='Bouteille de dioxygène';scene.add(o2BottleGroup);
+var h2BottleGroup=buildBottle(0xb43a3a,'Dihydrogène');h2BottleGroup.userData.name='Bouteille de dihydrogène';scene.add(h2BottleGroup);
+var co2BottleGroup=buildBottle(0x8b9095,'Dioxyde de carbone');co2BottleGroup.userData.name='Bouteille de dioxyde de carbone';scene.add(co2BottleGroup);
+
+// --- équipements de protection ---
+var glovesGroup=new THREE.Group();
+var gloveMat=new THREE.MeshStandardMaterial({color:0x3f7fc4,roughness:.35,metalness:.05});
+function tubeFinger(pts,r0,r1){
+ var g=new THREE.Group();var cv=new THREE.CatmullRomCurve3(pts.map(function(p){return new THREE.Vector3(p[0],p[1],p[2]);}));
+ var seg=4;
+ for(var i=0;i<seg;i++){
+  var t0=i/seg,t1=(i+1)/seg;var a=cv.getPoint(t0),b=cv.getPoint(t1);
+  var ra=lerp(r0,r1,t0),rb=lerp(r0,r1,t1);
+  var len=a.distanceTo(b);var c=new THREE.Mesh(new THREE.CylinderGeometry(rb,ra,len,10),gloveMat);
+  c.position.copy(a).add(b).multiplyScalar(.5);
+  c.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),b.clone().sub(a).normalize());g.add(c);
+  var j=new THREE.Mesh(new THREE.SphereGeometry(ra,10,8),gloveMat);j.position.copy(a);g.add(j);
+ }
+ var tip=new THREE.Mesh(new THREE.SphereGeometry(r1,12,10),gloveMat);tip.position.copy(cv.getPoint(1));g.add(tip);
+ return g;
+}
+function makeGlove(sx){
+ var g=new THREE.Group();
+ // manchette évasée, bord roulé
+ var prof=[new THREE.Vector2(.135,0),new THREE.Vector2(.15,.07),new THREE.Vector2(.165,.15),new THREE.Vector2(.17,.2)];
+ var cuffMat=gloveMat.clone();cuffMat.side=THREE.DoubleSide;
+ var cuff=new THREE.Mesh(new THREE.LatheGeometry(prof,24),cuffMat);g.add(cuff);
+ // paume et dos de la main : ellipsoïde doux
+ var palm=new THREE.Mesh(new THREE.SphereGeometry(.2,24,18),gloveMat);palm.scale.set(1.0,1.15,.52);palm.position.y=.5;g.add(palm);
+ var wrist=new THREE.Mesh(new THREE.SphereGeometry(.17,18,14),gloveMat);wrist.scale.set(1,.9,.6);wrist.position.y=.34;g.add(wrist);
+ // doigts légèrement écartés et recourbés
+ var fx=[-.13,-.045,.045,.13],fl=[.21,.27,.28,.22],fa=[-.16,-.05,.05,.16];
+ for(var f=0;f<4;f++){
+  var x0=fx[f],y0=.62,L=fl[f],sp=fa[f];
+  g.add(tubeFinger([[x0,y0,0],[x0+sp*L*.5,y0+L*.5,.025],[x0+sp*L,y0+L*.85,.075],[x0+sp*L*1.15,y0+L*1.0,.12]],.043,.034));
+ }
+ // pouce côté intérieur
+ g.add(tubeFinger([[-sx*.15,.42,.02],[-sx*.25,.52,.06],[-sx*.31,.66,.1],[-sx*.32,.76,.13]],.05,.039));
+ g.position.x=sx*.32;g.rotation.z=sx*.04;return g;
+}
+glovesGroup.add(makeGlove(-1));glovesGroup.add(makeGlove(1));glovesGroup.add(shadowBlob(.7));scene.add(glovesGroup);
+
+var gogglesGroup=new THREE.Group();
+function rrShape(w,h,r){var sh=new THREE.Shape();var x=-w/2,y=-h/2;
+ sh.moveTo(x+r,y);sh.lineTo(x+w-r,y);sh.quadraticCurveTo(x+w,y,x+w,y+r);sh.lineTo(x+w,y+h-r);sh.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+ sh.lineTo(x+r,y+h);sh.quadraticCurveTo(x,y+h,x,y+h-r);sh.lineTo(x,y+r);sh.quadraticCurveTo(x,y,x+r,y);return sh;}
+var gLens=new THREE.MeshPhongMaterial({color:0xd8f2ff,transparent:true,opacity:.2,shininess:140,specular:0xffffff,side:THREE.DoubleSide,depthWrite:false});
+var gFrameMat=new THREE.MeshStandardMaterial({color:0x2f78c4,roughness:.45,metalness:.1,transparent:true,opacity:.82});
+var gEdge=new THREE.LineBasicMaterial({color:0xcfeaff,transparent:true,opacity:.7});
+var GY=.45;
+// monture frontale carrée (anneau extrudé) + verre transparent
+var gOuter=rrShape(1.0,.46,.07);gOuter.holes.push(rrShape(.9,.36,.04));
+var gFrontGeo=new THREE.ExtrudeGeometry(gOuter,{depth:.1,bevelEnabled:false});gFrontGeo.translate(0,0,-.05);
+var gFront=new THREE.Mesh(gFrontGeo,gFrameMat);gFront.position.set(0,GY,0);gogglesGroup.add(gFront);
+var gPane=new THREE.Mesh(new THREE.PlaneGeometry(.92,.38),gLens);gPane.position.set(0,GY,.0);gogglesGroup.add(gPane);
+// pont nasal : encoche carrée
+var gNose=new THREE.Mesh(new THREE.BoxGeometry(.12,.1,.1),gFrameMat);gNose.position.set(0,GY-.2,0);gogglesGroup.add(gNose);
+// côtés enveloppants transparents
+var PHI=.95;
+[-1,1].forEach(function(sx){
+ var cx=sx*(.5+.14*Math.cos(PHI)),cz=-.14*Math.sin(PHI);
+ var pane=new THREE.Mesh(new THREE.BoxGeometry(.28,.38,.012),gLens);pane.position.set(cx,GY,cz);pane.rotation.y=sx*PHI;gogglesGroup.add(pane);
+ var edge=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.28,.4,.03)),gEdge);edge.position.copy(pane.position);edge.rotation.y=pane.rotation.y;gogglesGroup.add(edge);
+ var rail1=new THREE.Mesh(new THREE.BoxGeometry(.28,.025,.035),gFrameMat);rail1.position.set(cx,GY+.2,cz);rail1.rotation.y=pane.rotation.y;gogglesGroup.add(rail1);
+ var rail2=rail1.clone();rail2.position.y=GY-.2;gogglesGroup.add(rail2);
+});
+// aérations indirectes sur le haut de la monture
+for(var va=0;va<4;va++){var vt=new THREE.Mesh(new THREE.BoxGeometry(.07,.03,.12),new THREE.MeshStandardMaterial({color:0x14324f,roughness:.6}));vt.position.set(-.33+va*.22,GY+.235,0);gogglesGroup.add(vt);}
+var strapCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(-.69,GY,-.23),new THREE.Vector3(-.62,GY,-.55),new THREE.Vector3(0,GY,-.9),new THREE.Vector3(.62,GY,-.55),new THREE.Vector3(.69,GY,-.23)]);
+gogglesGroup.add(new THREE.Mesh(new THREE.TubeGeometry(strapCurve,28,.03,8,false),new THREE.MeshStandardMaterial({color:0x1a1a1a,roughness:.8})));
+gogglesGroup.add(shadowBlob(.8));scene.add(gogglesGroup);
+
+var blouseGroup=new THREE.Group();
+var coatMat=new THREE.MeshStandardMaterial({color:0xf3f5f8,roughness:.95,side:THREE.DoubleSide});
+var coatShade=new THREE.MeshStandardMaterial({color:0xd5dce6,roughness:.95,side:THREE.DoubleSide});
+var coatDark=new THREE.MeshStandardMaterial({color:0x34507d,roughness:.9,side:THREE.DoubleSide});
+var seamMat=new THREE.MeshStandardMaterial({color:0xaab4c2,roughness:.9});
+var BPROF=[[.2,.56],[.45,.53],[.75,.47],[1.0,.43],[1.2,.43],[1.35,.39],[1.45,.3],[1.5,.22]];
+var BZ=.6;
+function bR(y){for(var i=0;i<BPROF.length-1;i++){var a=BPROF[i],b=BPROF[i+1];if(y>=a[0]&&y<=b[0])return lerp(a[1],b[1],(y-a[0])/(b[0]-a[0]));}return .22;}
+function bFront(y){return bR(y)*BZ;}
+// corps : A-line avec plis doux
+var bPts=[];for(var by=0;by<=1.0001;by+=.04){var yy=lerp(.2,1.5,by);bPts.push(new THREE.Vector2(bR(yy),yy));}
+var bGeo=new THREE.LatheGeometry(bPts,64);
+(function(){var pa=bGeo.attributes.position;for(var i=0;i<pa.count;i++){var x=pa.getX(i),y=pa.getY(i),z=pa.getZ(i);
+ var th=Math.atan2(x,z);var fold=1+.02*Math.sin(th*7)*(1.6-y)/1.4;pa.setXYZ(i,x*fold,y,z*fold*BZ);}
+ bGeo.computeVertexNormals();})();
+blouseGroup.add(new THREE.Mesh(bGeo,coatMat));
+// encolure en V avec t-shirt bleu
+var vs=new THREE.Shape();vs.moveTo(-.15,0);vs.lineTo(.15,0);vs.lineTo(0,-.38);vs.lineTo(-.15,0);
+var vneck=new THREE.Mesh(new THREE.ShapeGeometry(vs),coatDark);vneck.position.set(0,1.495,bFront(1.4)+.004);vneck.rotation.x=-.12;blouseGroup.add(vneck);
+// couture centrale + boutons
+var seamPts=[];for(var sy=1.12;sy>=.2;sy-=.08)seamPts.push(new THREE.Vector3(0,sy,bFront(sy)+.004));
+blouseGroup.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(seamPts),24,.006,6,false),seamMat));
+var buttonMat=new THREE.MeshStandardMaterial({color:0x8e98a8,roughness:.35,metalness:.2});
+[1.0,.82,.64,.46,.3].forEach(function(by2){var bt=new THREE.Mesh(new THREE.SphereGeometry(.028,12,10),buttonMat);bt.scale.z=.55;bt.position.set(.0,by2,bFront(by2)+.008);blouseGroup.add(bt);});
+// col rabattu + revers
+var colPts=[new THREE.Vector2(.2,0),new THREE.Vector2(.23,.05),new THREE.Vector2(.255,.1)];
+var colGeo=new THREE.LatheGeometry(colPts,36,0,Math.PI*2);
+var col=new THREE.Mesh(colGeo,coatShade);col.position.y=1.47;col.scale.z=BZ;blouseGroup.add(col);
+[-1,1].forEach(function(sx){
+ var ls=new THREE.Shape();ls.moveTo(0,0);ls.lineTo(sx*.2,.03);ls.lineTo(sx*.16,-.12);ls.lineTo(sx*.07,-.42);ls.lineTo(0,-.38);ls.lineTo(0,0);
+ var lap=new THREE.Mesh(new THREE.ExtrudeGeometry(ls,{depth:.012,bevelEnabled:true,bevelSize:.006,bevelThickness:.005,bevelSegments:2}),coatMat);
+ lap.position.set(sx*.01,1.5,bFront(1.42)+.02);lap.rotation.set(-.12,sx*.05,sx*-.03);blouseGroup.add(lap);
+ // poches basses à rabat
+ var ps=new THREE.Shape();var pw=.15,ph=.14,pr=.025;ps.moveTo(-pw+pr,-ph);ps.lineTo(pw-pr,-ph);ps.quadraticCurveTo(pw,-ph,pw,-ph+pr);ps.lineTo(pw,ph);ps.lineTo(-pw,ph);ps.lineTo(-pw,-ph+pr);ps.quadraticCurveTo(-pw,-ph,-pw+pr,-ph);
+ var pk=new THREE.Mesh(new THREE.ExtrudeGeometry(ps,{depth:.01,bevelEnabled:false}),coatShade);
+ var px=sx*.24;var pz=Math.sqrt(Math.max(0,bR(.6)*bR(.6)-px*px))*BZ;
+ pk.position.set(px,.58,pz+.003);pk.rotation.y=sx*.42;blouseGroup.add(pk);
+ var flap=new THREE.Mesh(new THREE.BoxGeometry(.31,.035,.018),coatMat);flap.position.set(px,.58+ph-.01,pz+.012);flap.rotation.y=sx*.42;blouseGroup.add(flap);
+});
+// poche poitrine avec stylo
+var cpx=-.24,cpy=1.1;var cpz=Math.sqrt(Math.max(0,bR(cpy)*bR(cpy)-cpx*cpx))*BZ;
+var cp=new THREE.Mesh(new THREE.BoxGeometry(.13,.14,.012),coatShade);cp.position.set(cpx,cpy,cpz+.004);cp.rotation.y=-.45;blouseGroup.add(cp);
+var pen=new THREE.Mesh(new THREE.CylinderGeometry(.009,.009,.16,8),new THREE.MeshStandardMaterial({color:0x2a6fd6,roughness:.4}));pen.position.set(cpx+.02,cpy+.1,cpz+.012);pen.rotation.y=-.45;blouseGroup.add(pen);
+// épaules + manches légèrement écartées
+function limb(p1,p2,r1,r2,mat){var a=new THREE.Vector3(p1[0],p1[1],p1[2]),b=new THREE.Vector3(p2[0],p2[1],p2[2]);
+ var m=new THREE.Mesh(new THREE.CylinderGeometry(r2,r1,a.distanceTo(b),18),mat);m.position.copy(a).add(b).multiplyScalar(.5);
+ m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),b.clone().sub(a).normalize());return m;}
+[-1,1].forEach(function(sx){
+ var sh=new THREE.Mesh(new THREE.SphereGeometry(.15,20,16),coatMat);sh.position.set(sx*.4,1.36,0);sh.scale.set(1,.9,.85);blouseGroup.add(sh);
+ blouseGroup.add(limb([sx*.4,1.36,0],[sx*.58,.95,.04],.14,.115,coatMat));
+ var el=new THREE.Mesh(new THREE.SphereGeometry(.115,16,12),coatMat);el.position.set(sx*.58,.95,.04);blouseGroup.add(el);
+ blouseGroup.add(limb([sx*.58,.95,.04],[sx*.66,.58,.1],.115,.1,coatMat));
+ var cf=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.06,18),coatShade);cf.position.set(sx*.66,.58,.1);
+ cf.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),new THREE.Vector3(sx*.08,.37,.06).normalize());blouseGroup.add(cf);
+});
+blouseGroup.add(shadowBlob(.9));scene.add(blouseGroup);
+
+// --- lid ---
+var lidGroup=new THREE.Group();lidGroup.userData.name='Couvercle';
+var lid=new THREE.Mesh(new THREE.CylinderGeometry(.87,.87,.14,24),new THREE.MeshStandardMaterial({color:0x6b5636,roughness:.9}));
+lidGroup.add(lid);
+var lidGrip=new THREE.Mesh(new THREE.SphereGeometry(.09,10,10),new THREE.MeshStandardMaterial({color:0x4a3b26,roughness:.8}));
+lidGrip.position.y=.15;lidGroup.add(lidGrip);
+var hitL=new THREE.Mesh(new THREE.SphereGeometry(.5,8,8),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+hitL.position.y=.05;lidGroup.add(hitL);
+scene.add(lidGroup);
+
+// --- jar ---
+var jarGroup=new THREE.Group();jarGroup.userData.name='Bocal en verre';
+var jarMat=new THREE.MeshPhongMaterial({color:0x9fd3e6,transparent:true,opacity:.22,side:THREE.DoubleSide,shininess:95,specular:0xffffff,depthWrite:false});
+var jar=new THREE.Mesh(new THREE.CylinderGeometry(.85,.85,1.8,28,1,true),jarMat);
+jar.position.y=1;jarGroup.add(jar);
+var jarRim=new THREE.Mesh(new THREE.TorusGeometry(.85,.02,8,28),new THREE.MeshPhongMaterial({color:0xdff2fa,transparent:true,opacity:.5,shininess:100,depthWrite:false}));
+jarRim.rotation.x=Math.PI/2;jarRim.position.y=1.9;jarGroup.add(jarRim);
+var jarBase=new THREE.Mesh(new THREE.CircleGeometry(.85,28),new THREE.MeshPhongMaterial({color:0x9fd3e6,transparent:true,opacity:.32,side:THREE.DoubleSide,depthWrite:false}));
+jarBase.rotation.x=-Math.PI/2;jarBase.position.y=.1;jarGroup.add(jarBase);
+// bocal cassé : paroi déchiquetée avec une large partie manquante côté caméra
+var brokenJar=(function(){
+ var N=40,R=.85,y0=.1,hs=[],pos=[],seed=7;
+ function rnd(){seed=(seed*9301+49297)%233280;return seed/233280;}
+ for(var i=0;i<=N;i++){
+  var th=i/N*Math.PI*2;var d=Math.abs(Math.atan2(Math.sin(th-.6),Math.cos(th-.6)));
+  var base=d<1.3?.2:(d<1.9?.2+(d-1.3)/.6*1.4:1.65);
+  var jag=d<1.3?(i%2?.06:0):(i%2?1:-.7)*(.1+rnd()*.35);
+  hs.push(Math.max(.18,Math.min(1.8,base+jag)));
+ }
+ hs[N]=hs[0];
+ for(var j=0;j<N;j++){
+  var t0=j/N*Math.PI*2,t1=(j+1)/N*Math.PI*2;
+  var x0=R*Math.sin(t0),z0=R*Math.cos(t0),x1=R*Math.sin(t1),z1=R*Math.cos(t1);
+  var h0=y0+hs[j],h1=y0+hs[j+1];
+  pos.push(x0,y0,z0, x1,y0,z1, x1,h1,z1,  x0,y0,z0, x1,h1,z1, x0,h0,z0);
+ }
+ var geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.computeVertexNormals();
+ var grp=new THREE.Group();
+ var m=new THREE.Mesh(geo,new THREE.MeshPhongMaterial({color:0xb8e4f2,transparent:true,opacity:.34,side:THREE.DoubleSide,shininess:110,specular:0xffffff,depthWrite:false}));
+ grp.add(m);
+ var line=[];for(var k=0;k<N;k++){var a0=k/N*Math.PI*2,a1=(k+1)/N*Math.PI*2;
+  line.push(R*Math.sin(a0),y0+hs[k],R*Math.cos(a0),R*Math.sin(a1),y0+hs[k+1],R*Math.cos(a1));}
+ var lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(line,3));
+ grp.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.95})));
+ grp.visible=false;jarGroup.add(grp);return grp;
+})();
+var tintMat=new THREE.MeshBasicMaterial({color:0xbfe3ff,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false});
+var tint=new THREE.Mesh(new THREE.CylinderGeometry(.78,.78,1.6,20,1,true),tintMat);
+tint.position.y=1;jarGroup.add(tint);
+var tint2Mat=new THREE.MeshBasicMaterial({color:0xff5fa8,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false});
+var tint2=new THREE.Mesh(new THREE.CylinderGeometry(.78,.78,1.6,20,1,true),tint2Mat);
+tint2.position.y=1;jarGroup.add(tint2);
+var GAS_OP=.17;
+// --- nuage de gaz : volutes + molécules qui se déplacent dans tout le bocal (remplace l'effet « niveau de liquide ») ---
+var GAS_N=70,GAS_M=46,gasPuffs=[],gasMols=[];
+var gasAmt=0,gasFrac=1,gasColA=new THREE.Color(0x7fe0ff),gasColB=new THREE.Color(0xff5fa8),gasT=0,gasHidden=true;
+(function(){
+ var seed=11;function rn(){seed=(seed*9301+49297)%233280;return seed/233280;}
+ for(var i=0;i<GAS_N;i++){
+  var r=Math.sqrt(rn())*.52,th=rn()*6.283,sc=.5+rn()*.5;
+  var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:neutralTex,color:0xffffff,transparent:true,depthWrite:false,opacity:0}));
+  sp.scale.set(sc,sc,1);sp.visible=false;jarGroup.add(sp);
+  gasPuffs.push({o:sp,r:r,th:th,y:.34+rn()*1.34,ph:rn()*6.283,s:.35+rn()*.6,sc:sc,u:rn()});
+ }
+ for(var j=0;j<GAS_M;j++){
+  var sm=new THREE.Sprite(new THREE.SpriteMaterial({map:neutralTex,color:0xffffff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0}));
+  sm.scale.set(.085,.085,1);sm.visible=false;jarGroup.add(sm);
+  var a=rn()*6.283,rr=Math.sqrt(rn())*.55,v=.25+rn()*.45,b=rn()*6.283;
+  gasMols.push({o:sm,x:rr*Math.cos(a),y:.35+rn()*1.3,z:rr*Math.sin(a),vx:Math.cos(b)*v,vy:(rn()-.5)*v*1.6,vz:Math.sin(b)*v});
+ }
+})();
+function gasReset(){gasAmt=0;gasFrac=1;gasHidden=false;}
+var _gc=new THREE.Color();
+function gasUpdate(dt){
+ gasT+=dt;
+ if(gasAmt<=0.0005){
+  if(!gasHidden){gasPuffs.forEach(function(p){p.o.visible=false;p.o.material.opacity=0;});gasMols.forEach(function(m){m.o.visible=false;m.o.material.opacity=0;});gasHidden=true;}
+  return;
+ }
+ gasHidden=false;
+ for(var i=0;i<GAS_N;i++){
+  var p=gasPuffs[i];
+  var w=Math.max(0,Math.min(1,(gasAmt*(GAS_N+8)-i)/8));
+  if(w<=0){p.o.visible=false;continue;}
+  p.o.visible=true;
+  var e=1-w;e=e*e; // la volute arrive par le haut puis se répand
+  var th=p.th+gasT*.18*p.s;
+  var bx=p.r*Math.cos(th),bz=p.r*Math.sin(th);
+  var by=p.y+Math.sin(gasT*p.s*1.3+p.ph)*.07;
+  p.o.position.set(bx*(1-e),by+(1.78-by)*e,bz*(1-e));
+  var pulse=1+.12*Math.sin(gasT*p.s*1.7+p.ph);
+  p.o.scale.set(p.sc*pulse*(.6+.4*w),p.sc*pulse*(.6+.4*w),1);
+  p.o.material.color.copy(p.u<gasFrac?gasColA:gasColB);
+  p.o.material.opacity=GAS_OP*w;
+ }
+ for(var j=0;j<GAS_M;j++){
+  var m=gasMols[j];
+  var wm=Math.max(0,Math.min(1,(gasAmt*(GAS_M+6)-j)/6));
+  if(wm<=0){m.o.visible=false;continue;}
+  m.o.visible=true;
+  m.x+=m.vx*dt;m.y+=m.vy*dt;m.z+=m.vz*dt;
+  var rr=Math.sqrt(m.x*m.x+m.z*m.z);
+  if(rr>.62){var nx=m.x/rr,nz=m.z/rr,dp=m.vx*nx+m.vz*nz;m.vx-=2*dp*nx;m.vz-=2*dp*nz;m.x=nx*.62;m.z=nz*.62;}
+  if(m.y<.32){m.y=.32;m.vy=Math.abs(m.vy);}
+  if(m.y>1.72){m.y=1.72;m.vy=-Math.abs(m.vy);}
+  m.o.position.set(m.x,m.y,m.z);
+  _gc.copy(j/GAS_M<gasFrac?gasColA:gasColB);
+  m.o.material.color.copy(_gc);
+  m.o.material.opacity=.95*wm;
+ }
+}
+
+var hitJ=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,2,16),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+hitJ.position.y=1;jarGroup.add(hitJ);
+jarGroup.add(shadowBlob(.9));
+scene.add(jarGroup);
+
+// --- layout ---
+var HOME={
+ burnerGroup:{x:-2.1,y:0,z:-.3},
+ splintGroup:{x:-1.55,y:0,z:.45},
+ charcoalGroup:{x:-1.15,y:0,z:.65},
+ jarGroup:{x:1.2,y:0,z:0},
+ lidGroup:{x:1.85,y:.05,z:.45},
+ o2BottleGroup:{x:-2.5,y:0,z:1.0},
+ h2BottleGroup:{x:-2.5,y:0,z:1.45},
+ co2BottleGroup:{x:-2.5,y:0,z:1.9}
+};
+var LID_ON={x:1.2,y:1.9,z:0};
+var objectsMeta=[
+ {group:burnerGroup,quizName:'Bec Bunsen'},
+ {group:splintGroup,quizName:'Bûchette de bois'},
+ {group:charcoalGroup,quizName:'Charbon de bois'},
+ {group:o2BottleGroup,quizName:'O₂ (gaz)'},
+ {group:h2BottleGroup,quizName:'H₂ (gaz)'},
+ {group:co2BottleGroup,quizName:'CO₂ (gaz)'},
+ {group:jarGroup,quizName:'Bocal en verre'},
+ {group:lidGroup,quizName:'Couvercle'},
+ {group:glovesGroup,quizName:'Gants de protection'},
+ {group:gogglesGroup,quizName:'Lunettes de protection'},
+ {group:blouseGroup,quizName:'Blouse de laboratoire'}
+];
+function scatterPositions(n,minDist){
+ var pts=[];
+ for(var tries=0;pts.length<n&&tries<6000;tries++){
+  var x=(Math.random()-.5)*6,z=(Math.random()-.5)*4;
+  if(Math.sqrt(x*x+z*z*1.6)>3.1)continue;
+  var ok=true;
+  for(var i=0;i<pts.length;i++){var dx=pts[i].x-x,dz=pts[i].z-z;if(Math.sqrt(dx*dx+dz*dz)<minDist){ok=false;break;}}
+  if(ok)pts.push({x:x,z:z});
+ }
+ while(pts.length<n)pts.push({x:(Math.random()-.5)*5,z:(Math.random()-.5)*3});
+ return pts;
+}
+var SHELF_POS=scatterPositions(objectsMeta.length,.95);
+objectsMeta.forEach(function(m,idx){m.group.position.set(SHELF_POS[idx].x,.15,SHELF_POS[idx].z);m.group.scale.setScalar(.55);m.group.rotation.y=Math.random()*6.28;m.shelfRot=m.group.rotation.y;});
+
+function lerp(a,b,t){return a+(b-a)*t;}
+function smooth(k){return k*k*(3-2*k);}
+function tweenTo(obj,pos,scale,dur,onDone){
+ obj.userData.tw={t:0,dur:dur,fp:obj.position.clone(),tp:new THREE.Vector3(pos.x,pos.y,pos.z),fs:obj.scale.x,ts:scale,onDone:onDone};
+}
+var tweenTargets=[burnerGroup,splintGroup,charcoalGroup,jarGroup,lidGroup,o2BottleGroup,h2BottleGroup,co2BottleGroup,glovesGroup,gogglesGroup,blouseGroup];
+
+// --- camera (dézoomée) ---
+var theta=.6,phi=1.18,radius=6.8,tx=0,ty=.9,tz=0;
+var camShake=null,camGoalY=.9;
+function updCam(){
+ camera.position.set(tx+radius*Math.sin(phi)*Math.sin(theta),ty+radius*Math.cos(phi),tz+radius*Math.sin(phi)*Math.cos(theta));
+ camera.lookAt(tx,ty,tz);
+}
+updCam();
+function shakeCam(amp,dur){camShake={amp:amp,dur:dur,t:0};}
+var dragging=false,lx=0,ly=0,downX=0,downY=0,downT=0,moved=false;
+var dom=renderer.domElement;
+dom.addEventListener('pointerdown',function(e){dragging=true;lx=downX=e.clientX;ly=downY=e.clientY;downT=Date.now();moved=false;});
+window.addEventListener('pointerup',function(){dragging=false;});
+window.addEventListener('pointermove',function(e){
+ if(!dragging)return;
+ var dx=e.clientX-lx,dy=e.clientY-ly;
+ if(Math.abs(e.clientX-downX)>6||Math.abs(e.clientY-downY)>6)moved=true;
+ theta-=dx*.006;phi-=dy*.006;phi=Math.max(.5,Math.min(1.5,phi));lx=e.clientX;ly=e.clientY;updCam();
+});
+dom.addEventListener('wheel',function(e){radius=Math.max(4,Math.min(10,radius+e.deltaY*.003));updCam();e.preventDefault();},{passive:false});
+function onResize(){W=vp.clientWidth;H=vp.clientHeight;camera.aspect=W/H;camera.updateProjectionMatrix();renderer.setSize(W,H);}
+window.addEventListener('resize',onResize);
+setTimeout(onResize,50);
+
+// --- intro presentation en quiz ---
+var introOrder=objectsMeta.map(function(m){return m.group;});
+var introIndex=-1;
+var dotsEl=document.getElementById('dots');
+introOrder.forEach(function(){var d=document.createElement('div');d.className='dot';dotsEl.appendChild(d);});
+var dotEls=dotsEl.children;
+function shuffle(a){return a.map(function(v){return [Math.random(),v];}).sort(function(x,y){return x[0]-y[0];}).map(function(p){return p[1];});}
+function returnToShelf(obj,idx){tweenTo(obj,{x:SHELF_POS[idx].x,y:.15,z:SHELF_POS[idx].z},.55,.7);}
+function buildQuiz(correct){
+ var wrong=shuffle(objectsMeta.filter(function(m){return m!==correct;})).slice(0,4);
+ var opts=shuffle([correct].concat(wrong));
+ var wrap=document.getElementById('quizOptions');wrap.innerHTML='';
+ document.getElementById('quizResult').textContent='';
+ var locked=false;
+ opts.forEach(function(m){
+  var b=document.createElement('button');b.className='secondary';b.textContent=m.quizName;
+  b.addEventListener('click',function(){
+   if(locked)return;
+   if(m===correct){
+    locked=true;b.classList.add('correct');
+    document.getElementById('quizResult').textContent='Bonne réponse : '+m.quizName;
+    setTimeout(advanceIntro,900);
+   } else {
+    b.classList.add('wrong');setTimeout(function(){b.classList.remove('wrong');},500);
+   }
+  });
+  wrap.appendChild(b);
+ });
+}
+function advanceIntro(){
+ if(step!==0)return;
+ if(introIndex>=0)returnToShelf(introOrder[introIndex],introIndex);
+ introIndex++;
+ for(var i=0;i<dotEls.length;i++)dotEls[i].classList.toggle('on',i<=introIndex&&introIndex<introOrder.length);
+ if(introIndex<introOrder.length){
+  var obj=introOrder[introIndex];
+  setLight(.14);spotGoal=2.6;
+  tweenTo(obj,{x:0,y:.95,z:.3},.85,.7,function(){buildQuiz(objectsMeta[introIndex]);});
+  document.getElementById('quizOptions').innerHTML='';
+  document.getElementById('quizResult').textContent='';
+ } else {
+  setLight(1);spotGoal=0;
+  document.getElementById('quizTitle').style.display='none';
+  document.getElementById('quizOptions').innerHTML='';
+  document.getElementById('quizResult').textContent='';
+  document.getElementById('toStep1').disabled=false;
+ }
+}
+document.getElementById('startPresent').addEventListener('click',function(){
+ document.getElementById('quizTitle').style.display='block';
+ this.style.display='none';
+ document.getElementById('introPresent').style.display='block';
+ advanceIntro();
+});
+
+// --- tabs / steps ---
+var step=0;
+var tabs=Array.prototype.slice.call(document.querySelectorAll('.tab'));
+var steps=Array.prototype.slice.call(document.querySelectorAll('.step'));
+var burnerOn=false;
+function settleRot(o,dur){
+ var r0=o.rotation.y%(Math.PI*2);if(r0<0)r0+=Math.PI*2;var r1=r0>Math.PI?Math.PI*2:0;
+ addAnim(dur,function(k){o.rotation.y=lerp(r0,r1,smooth(k));},function(){o.rotation.y=0;});
+}
+function resetAll(){
+ resetStep2();
+ jar.visible=true;jarRim.visible=true;jarBase.visible=true;brokenJar.visible=false;
+ lidGroup.visible=true;
+ shardsArr.forEach(function(sh){scene.remove(sh.o);});shardsArr=[];
+ o2mix.disabled=false;
+ document.getElementById('gasChoices').style.display='flex';
+ var pt=document.getElementById('protoText');pt.textContent='';pt.style.display='none';
+}
+function restoreShelf(){
+ objectsMeta.forEach(function(m,idx){var g=m.group;
+  g.position.set(SHELF_POS[idx].x,.15,SHELF_POS[idx].z);g.scale.setScalar(.55);g.rotation.set(0,m.shelfRot||0,0);
+  if(g.userData.flip)g.userData.flip.rotation.x=0;setShadow(g,true);});
+ introIndex=-1;
+ for(var d=0;d<dotEls.length;d++)dotEls[d].classList.remove('on');
+ document.getElementById('introPresent').style.display='none';
+ document.getElementById('startPresent').style.display='';
+ document.getElementById('quizResult').textContent='';
+}
+
+// --- Bilan : questions + visages ---
+var FACE1_OK='<svg viewBox="-10 -10 220 220" xmlns="http://www.w3.org/2000/svg"><path d="M48 70 L30 24 L66 46 L74 4 L100 40 L128 2 L134 46 L172 20 L152 72 Z" fill="#b455ff" stroke="#39ff6a" stroke-width="6" stroke-linejoin="round"/><path d="M100 38 L108 14 L118 40" fill="#ff5ccf" stroke="#39ff6a" stroke-width="4" stroke-linejoin="round"/><ellipse cx="100" cy="112" rx="68" ry="70" fill="#ffe45c" stroke="#39ff6a" stroke-width="7"/><circle cx="50" cy="126" r="10" fill="#ff8aa0" opacity=".65"/><circle cx="152" cy="128" r="10" fill="#ff8aa0" opacity=".65"/><circle cx="74" cy="94" r="21" fill="#fff" stroke="#222" stroke-width="3.5"/><circle cx="82" cy="86" r="8" fill="#111"/><circle cx="130" cy="100" r="13" fill="#fff" stroke="#222" stroke-width="3.5"/><circle cx="125" cy="104" r="5.5" fill="#111"/><path d="M50 66 Q72 48 98 68" fill="none" stroke="#222" stroke-width="5.5" stroke-linecap="round"/><path d="M112 80 Q130 62 152 76" fill="none" stroke="#222" stroke-width="5.5" stroke-linecap="round"/><circle cx="102" cy="116" r="6" fill="#ff9a3c" stroke="#222" stroke-width="2.5"/><path d="M56 130 Q100 196 148 126 Q102 142 56 130 Z" fill="#7a1230" stroke="#222" stroke-width="4" stroke-linejoin="round"/><path d="M64 132 Q102 146 142 128 L140 140 Q102 156 66 144 Z" fill="#fff" stroke="#222" stroke-width="2.5" stroke-linejoin="round"/><path d="M92 156 Q96 200 126 190 Q140 168 120 152 Z" fill="#ff5c8a" stroke="#222" stroke-width="4" stroke-linejoin="round"/><path d="M112 160 Q114 176 116 186" fill="none" stroke="#c23a63" stroke-width="3" stroke-linecap="round"/><text x="-4" y="40" font-size="30" fill="#39ff6a">★</text><text x="182" y="60" font-size="26" fill="#39ff6a">★</text><text x="180" y="170" font-size="30" fill="#39ff6a">✦</text><text x="-6" y="170" font-size="24" fill="#39ff6a">✦</text></svg>';
+var FACE1_KO='<svg viewBox="-10 -10 220 230" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="112" rx="66" ry="70" fill="#b9c7d9" stroke="#ff3b3b" stroke-width="7"/><path d="M36 96 Q34 36 100 34 Q166 36 164 96 Q150 62 100 64 Q50 62 36 96 Z" fill="#6a584a" stroke="#ff3b3b" stroke-width="5" stroke-linejoin="round"/><path d="M44 90 Q40 120 46 142 M156 90 Q160 120 154 142" fill="none" stroke="#6a584a" stroke-width="9" stroke-linecap="round"/><circle cx="74" cy="106" r="16" fill="#fff" stroke="#222" stroke-width="3.5"/><circle cx="76" cy="112" r="7" fill="#111"/><circle cx="128" cy="106" r="16" fill="#fff" stroke="#222" stroke-width="3.5"/><circle cx="126" cy="112" r="7" fill="#111"/><path d="M54 98 L92 80" stroke="#222" stroke-width="5.5" stroke-linecap="round"/><path d="M150 98 L110 80" stroke="#222" stroke-width="5.5" stroke-linecap="round"/><path d="M66 120 Q56 150 66 168 Q80 150 66 120 Z" fill="#5ec8ff" stroke="#1e7fb0" stroke-width="2.5"/><path d="M136 120 Q146 150 136 168 Q122 150 136 120 Z" fill="#5ec8ff" stroke="#1e7fb0" stroke-width="2.5"/><path d="M82 124 Q78 160 72 196" fill="none" stroke="#5ec8ff" stroke-width="6" stroke-linecap="round" opacity=".85"/><path d="M120 124 Q124 160 130 196" fill="none" stroke="#5ec8ff" stroke-width="6" stroke-linecap="round" opacity=".85"/><path d="M72 168 Q100 138 128 168" fill="none" stroke="#222" stroke-width="6" stroke-linecap="round"/><path d="M96 126 Q100 134 104 126" fill="none" stroke="#6b7a8c" stroke-width="3" stroke-linecap="round"/><text x="176" y="40" font-size="26" fill="#ff5a5a">✖</text><text x="-6" y="46" font-size="22" fill="#ff5a5a">✖</text></svg>';
+var FACE2_OK='<svg viewBox="-10 -10 220 220" xmlns="http://www.w3.org/2000/svg"><g stroke="#39ff6a" stroke-width="5" fill="#f6f6f6"><circle cx="40" cy="64" r="26"/><circle cx="70" cy="36" r="28"/><circle cx="104" cy="26" r="30"/><circle cx="138" cy="36" r="28"/><circle cx="166" cy="64" r="26"/><circle cx="26" cy="100" r="17"/><circle cx="174" cy="100" r="17"/></g><path d="M22 6 L40 6 L31 30 L45 30 L18 66 L27 38 L14 38 Z" fill="#ffe45c" stroke="#39ff6a" stroke-width="3.5" stroke-linejoin="round"/><path d="M178 2 L196 2 L187 26 L201 26 L174 62 L183 34 L170 34 Z" fill="#ffe45c" stroke="#39ff6a" stroke-width="3.5" stroke-linejoin="round"/><ellipse cx="100" cy="118" rx="58" ry="62" fill="#ffd9b0" stroke="#39ff6a" stroke-width="7"/><path d="M42 100 L158 100" stroke="#222" stroke-width="7"/><circle cx="73" cy="104" r="22" fill="#d9fff0" stroke="#222" stroke-width="5"/><circle cx="130" cy="104" r="26" fill="#d9fff0" stroke="#222" stroke-width="5"/><circle cx="80" cy="97" r="7" fill="#111"/><circle cx="122" cy="112" r="10" fill="#111"/><circle cx="125" cy="108" r="3" fill="#fff"/><path d="M48 70 L92 80" stroke="#222" stroke-width="9" stroke-linecap="round"/><path d="M108 74 L158 56" stroke="#222" stroke-width="9" stroke-linecap="round"/><ellipse cx="101" cy="130" rx="7" ry="9" fill="#ffb98a" stroke="#222" stroke-width="3"/><path d="M60 146 Q100 196 142 144 Q100 158 60 146 Z" fill="#7a1230" stroke="#222" stroke-width="4" stroke-linejoin="round"/><path d="M68 148 Q100 160 136 146 L134 156 Q100 170 70 158 Z" fill="#fff" stroke="#222" stroke-width="2.5" stroke-linejoin="round"/><text x="-6" y="150" font-size="26" fill="#39ff6a">✦</text><text x="178" y="160" font-size="30" fill="#39ff6a">★</text></svg>';
+var FACE2_KO='<svg viewBox="-10 -10 220 230" xmlns="http://www.w3.org/2000/svg"><path d="M34 196 L34 92 Q34 22 100 22 Q166 22 166 92 L166 196 Q150 176 134 196 Q117 176 100 196 Q83 176 66 196 Q50 176 34 196 Z" fill="#eef3ff" stroke="#ff3b3b" stroke-width="7" stroke-linejoin="round"/><ellipse cx="28" cy="132" rx="13" ry="20" fill="#eef3ff" stroke="#ff3b3b" stroke-width="5" transform="rotate(20 28 132)"/><ellipse cx="172" cy="132" rx="13" ry="20" fill="#eef3ff" stroke="#ff3b3b" stroke-width="5" transform="rotate(-20 172 132)"/><ellipse cx="72" cy="90" rx="14" ry="19" fill="#222"/><ellipse cx="128" cy="90" rx="14" ry="19" fill="#222"/><circle cx="68" cy="82" r="5" fill="#fff"/><circle cx="124" cy="82" r="5" fill="#fff"/><path d="M52 66 L90 56" stroke="#222" stroke-width="5.5" stroke-linecap="round"/><path d="M148 66 L110 56" stroke="#222" stroke-width="5.5" stroke-linecap="round"/><path d="M70 112 Q58 140 66 156 Q80 140 70 112 Z" fill="#5ec8ff" stroke="#1e7fb0" stroke-width="2.5"/><path d="M130 112 Q142 140 134 156 Q120 140 130 112 Z" fill="#5ec8ff" stroke="#1e7fb0" stroke-width="2.5"/><path d="M76 146 Q85 132 93 146 Q101 132 109 146 Q117 132 125 146" fill="none" stroke="#222" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="52" cy="112" r="8" fill="#9dc4ff" opacity=".6"/><circle cx="148" cy="112" r="8" fill="#9dc4ff" opacity=".6"/><text x="100" y="12" font-size="20" fill="#ff5a5a" text-anchor="middle">snif…</text></svg>';
+var BILAN_QS=[
+ {q:'Quel gaz permet de raviver les combustions ?',ok:'O2',order:['H2','O2','CO2'],okFace:FACE1_OK,koFace:FACE1_KO,
+  cap:'Bravo, c\'est le dioxygène !',concl:'O₂ est le seul gaz qui ravive les combustions. Ce test permet de l\'identifier.'},
+ {q:'Une bûchette incandescente plongée dans un bocal s\'éteint. Que peut-on conclure ?',ok:'B',stack:true,order:[
+   {k:'A',t:'Le bocal contient du dioxygène.'},
+   {k:'B',t:'Le bocal ne contient pas de dioxygène.'},
+   {k:'C',t:'Le bocal contient forcément du dihydrogène.'}],okFace:FACE2_OK,koFace:FACE2_KO,
+  cap:'Bravo, bien raisonné !',concl:'Si la bûchette ne se rallume pas, il n\'y a pas de dioxygène. Mais on ne peut pas dire de quel gaz il s\'agit : H₂, CO₂…'}
+];
+var GAS_BTN={H2:['H₂','dihydrogène'],O2:['O₂','dioxygène'],CO2:['CO₂','dioxyde de carbone']};
+var bilanIdx=0,faceTimer=null,faceCb=null;
+function hideFace(run){
+ var fo=document.getElementById('faceOverlay');fo.classList.remove('show','ok','ko');clearTimeout(faceTimer);
+ var cb=faceCb;faceCb=null;if(run===true&&cb)cb();
+}
+function showFace(ok,q,cb){
+ var fo=document.getElementById('faceOverlay');clearTimeout(faceTimer);
+ fo.classList.remove('show','ok','ko');
+ document.getElementById('faceArt').innerHTML=ok?q.okFace:q.koFace;
+ document.getElementById('faceCaption').textContent=ok?q.cap:'Raté… essaie encore !';
+ document.getElementById('faceSub').textContent=ok?q.concl:'';
+ faceCb=cb||null;
+ void fo.offsetWidth;
+ fo.classList.add('show',ok?'ok':'ko');
+ faceTimer=setTimeout(function(){hideFace(true);},ok?4200:2300);
+}
+document.getElementById('faceOverlay').addEventListener('click',function(){hideFace(true);});
+function renderBilanQ(){
+ var q=BILAN_QS[bilanIdx];
+ document.getElementById('bilanText').textContent='Question '+(bilanIdx+1)+'/'+BILAN_QS.length+' — '+q.q;
+ var row=document.getElementById('videoRow');row.innerHTML='';row.style.flexDirection=q.stack?'column':'row';row.style.width=q.stack?'min(100%,520px)':'';
+ q.order.forEach(function(g){
+  var key=(typeof g==='object')?g.k:g;
+  var b=document.createElement('button');b.className='bilanBtn';b.dataset.g=key;
+  b.innerHTML=(typeof g==='object')?'<span class="t">'+g.t+'</span>':'<span class="f">'+GAS_BTN[g][0]+'</span><span class="n">'+GAS_BTN[g][1]+'</span>';
+  b.addEventListener('click',function(){
+   if(b.disabled)return;
+   if(key===q.ok){
+    b.classList.add('correct');
+    Array.prototype.forEach.call(row.querySelectorAll('.bilanBtn'),function(o){o.disabled=true;});
+    showFace(true,q,function(){
+     if(bilanIdx<BILAN_QS.length-1){bilanIdx++;renderBilanQ();}
+     else document.getElementById('bilanText').textContent='Bilan terminé : '+q.concl;
+    });
+   } else {
+    b.classList.add('wrong');b.disabled=true;
+    showFace(false,q,null);
+   }
+  });
+  row.appendChild(b);
+ });
+}
+function resetBilan(){hideFace(false);bilanIdx=0;renderBilanQ();}
+function gotoStep(i){
+ var prev=step;
+ gen++;
+ anims.length=0;arcMoving.length=0;
+ if(crackle&&crackle.core)scene.remove(crackle.core);
+ tweenTargets.forEach(function(o){delete o.userData.tw;});
+ jarLight.intensity=0;spotGoal=0;
+ document.getElementById('quizTitle').style.display='none';
+ document.getElementById('quizOptions').innerHTML='';
+ step=i;
+ tabs.forEach(function(t,idx){t.classList.toggle('active',idx===i);});
+ steps.forEach(function(s,idx){s.classList.toggle('active',idx===i);});
+ if(prev!==0||i===0){resetAll();}
+ if(i===0)restoreShelf();
+ if(i>=1){
+  [burnerGroup,jarGroup,lidGroup,splintGroup].forEach(function(o){settleRot(o,.8);});
+  tweenTo(burnerGroup,HOME.burnerGroup,1,.8);
+  tweenTo(jarGroup,HOME.jarGroup,1,.8);
+  tweenTo(lidGroup,HOME.lidGroup,1,.8);
+  tweenTo(splintGroup,HOME.splintGroup,1,.8);
+ }
+ if(i===1){
+  settleRot(charcoalGroup,.8);
+  tweenTo(charcoalGroup,HOME.charcoalGroup,1,.8);
+ }
+ if(i===1||i===3){
+  [o2BottleGroup,h2BottleGroup,co2BottleGroup].forEach(function(b){settleRot(b,.8);});
+  tweenTo(o2BottleGroup,HOME.o2BottleGroup,1,.8);
+  tweenTo(h2BottleGroup,HOME.h2BottleGroup,1,.8);
+  tweenTo(co2BottleGroup,HOME.co2BottleGroup,1,.8);
+ }
+ glovesGroup.visible=gogglesGroup.visible=blouseGroup.visible=(i===0);
+ charcoalGroup.visible=(i===0||i===1);
+ o2BottleGroup.visible=(i<=1||i===3);
+ h2BottleGroup.visible=(i<=1||i===3);
+ co2BottleGroup.visible=(i<=1);
+ splintGroup.visible=(i!==2);
+ lidGroup.visible=(i!==2);
+ burnerOn=false;flameLight.intensity=0;
+ setLight(1);camGoalY=(i>=1)?1.3:.9;
+ ['obs2','obs3'].forEach(function(id){document.getElementById(id).style.display='none';});
+ document.getElementById('bilanOverlay').style.display=(i===2)?'flex':'none';
+ if(i===2)resetBilan();else hideFace();
+ if(i===3)resetMixTab();
+}
+tabs.forEach(function(t,idx){t.addEventListener('click',function(){if(idx!==step)gotoStep(idx);});});
+document.getElementById('toStep1').addEventListener('click',function(){gotoStep(1);});
+document.getElementById('toStep2').addEventListener('click',function(){gotoStep(2);});
+document.getElementById('toBonus').addEventListener('click',function(){gotoStep(3);});
+document.getElementById('restartBtn').addEventListener('click',function(){doneGases={};document.getElementById('toStep2').disabled=true;gotoStep(1);});
+
+// --- particle helpers ---
+var sparks=[],jets=[],smokes=[],burstSprites=[],shardsArr=[];
+function spawnSparksBurst(pos,count,intensity){
+ for(var i=0;i<count;i++){
+  var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:sparkTex,blending:THREE.AdditiveBlending,depthWrite:false,opacity:1}));
+  var sc=.09+Math.random()*.11*intensity+.05;sp.scale.set(sc,sc,1);
+  sp.position.set(pos.x,.9+Math.random()*.7,pos.z+(Math.random()-.5)*.1);
+  scene.add(sp);
+  sparks.push({o:sp,vx:(Math.random()-.5)*1.8*intensity,vy:Math.random()*2*intensity,vz:(Math.random()-.5)*1.8*intensity,life:1+Math.random()*.9,jx:pos.x,jz:pos.z});
+ }
+}
+function sparkStorm(pos,duration,intensity){
+ var elapsed=0;var iv=setInterval(function(){elapsed+=180;spawnSparksBurst(pos,5+Math.round(6*intensity),intensity);if(elapsed>=duration*1000)clearInterval(iv);},180);
+}
+function spawnGasJet(origin,target,colorHex,count){
+ for(var i=0;i<count;i++){
+  var m=new THREE.SpriteMaterial({map:neutralTex,color:colorHex,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:.9});
+  var sp=new THREE.Sprite(m);var sc=.08+Math.random()*.07;sp.scale.set(sc,sc,1);sp.position.copy(origin);
+  scene.add(sp);
+  var dx=target.x-origin.x,dy=target.y-origin.y,dz=target.z-origin.z;var dl=Math.max(.001,Math.sqrt(dx*dx+dy*dy+dz*dz));
+  jets.push({o:sp,vx:dx/dl*1.3+(Math.random()-.5)*.5,vy:dy/dl*1.3+(Math.random()-.5)*.35,vz:dz/dl*1.3+(Math.random()-.5)*.5,life:.85+Math.random()*.35});
+ }
+}
+function spawnSmoke(origin,count){
+ for(var i=0;i<count;i++){
+  var m=new THREE.SpriteMaterial({map:neutralTex,color:0x8a8a8a,transparent:true,opacity:.55,depthWrite:false});
+  var sp=new THREE.Sprite(m);sp.scale.set(.12,.12,1);sp.position.set(origin.x+(Math.random()-.5)*.15,origin.y,origin.z+(Math.random()-.5)*.15);
+  scene.add(sp);
+  smokes.push({o:sp,vx:(Math.random()-.5)*.25,vy:.35+Math.random()*.3,vz:(Math.random()-.5)*.25,life:1.4+Math.random()*.6,grow:.5+Math.random()*.4});
+ }
+}
+function bigFlash(pos,count){
+ for(var i=0;i<count;i++){
+  var m=new THREE.SpriteMaterial({map:flameTex,blending:THREE.AdditiveBlending,depthWrite:false,opacity:1,color:0xffe066});
+  var sp=new THREE.Sprite(m);var sc=.3+Math.random()*.35;sp.scale.set(sc,sc,1);
+  sp.position.set(pos.x+(Math.random()-.5)*.35,.85+Math.random()*.7,pos.z+(Math.random()-.5)*.35);
+  scene.add(sp);
+  burstSprites.push({o:sp,life:.55+Math.random()*.35,grow:2+Math.random()*1.5});
+ }
+}
+function spawnShards(pos,count){
+ for(var i=0;i<count;i++){
+  var big=i===0;
+  var geo=big?new THREE.CylinderGeometry(.3,.3,.05,14):new THREE.TetrahedronGeometry(.05+Math.random()*.09);
+  var mat=big?new THREE.MeshStandardMaterial({color:0x6b5636,roughness:.8}):new THREE.MeshPhongMaterial({color:0x9fd3e6,transparent:true,opacity:.55,shininess:90,side:THREE.DoubleSide});
+  var mesh=new THREE.Mesh(geo,mat);mesh.position.set(pos.x,1+Math.random()*.4,pos.z);
+  scene.add(mesh);
+  var ang=Math.random()*Math.PI*2,spd=1.5+Math.random()*2.5;
+  shardsArr.push({o:mesh,vx:Math.cos(ang)*spd,vy:1.5+Math.random()*2,vz:Math.sin(ang)*spd,ax:(Math.random()-.5)*6,ay:(Math.random()-.5)*6,az:(Math.random()-.5)*6,life:2.6});
+ }
+}
+
+// --- animations génériques ---
+var anims=[];
+function addAnim(dur,fn,onDone){anims.push({t:0,dur:dur,fn:fn,onDone:onDone});}
+function setShadow(o,v){if(o.userData.shadow)o.userData.shadow.visible=v;}
+var arcMoving=[];
+function arcMove(obj,from,to,dur,peak,onDone){
+ arcMoving.push({o:obj,from:new THREE.Vector3(from.x,from.y,from.z),to:new THREE.Vector3(to.x,to.y,to.z),t:0,dur:dur,peak:peak,onDone:onDone});
+}
+function setLayer(m,f0,f1){m.scale.y=Math.max(.001,f1-f0);m.position.y=.2+1.6*(f0+f1)/2;}
+function resetTints(){tintMat.opacity=0;tint2Mat.opacity=0;setLayer(tint,0,1);setLayer(tint2,0,1);gasReset();}
+resetTints();
+
+// flux de gaz qui sort du bouchon noir (bouteille retournée)
+function spawnStreamPuff(origin,colorHex){
+ var m=new THREE.SpriteMaterial({map:neutralTex,color:colorHex,transparent:true,depthWrite:false,opacity:.9});
+ var sp=new THREE.Sprite(m);var sc=.11+Math.random()*.1;sp.scale.set(sc,sc,1);
+ sp.position.set(origin.x+(Math.random()-.5)*.04,origin.y,origin.z+(Math.random()-.5)*.04);scene.add(sp);
+ jets.push({o:sp,vx:(Math.random()-.5)*.14,vy:-1.5-Math.random()*.3,vz:(Math.random()-.5)*.14,life:.9});
+}
+// la bouteille vient au-dessus du bocal, se retourne (tête en bas), verse par le bouchon noir, puis repart
+function pourBottle(bottle,home,streamColor,ox,dur,onFill,onDone){
+ var jp=HOME.jarGroup;var tgt=new THREE.Vector3(jp.x+ox,1.55,jp.z);
+ var from=bottle.position.clone();var flip=bottle.userData.flip;
+ setShadow(bottle,false);
+ addAnim(1.3,function(k){
+  var e=smooth(k);bottle.position.lerpVectors(from,tgt,e);bottle.position.y+=.9*4*k*(1-k);
+  flip.rotation.x=Math.PI*e;bottle.scale.setScalar(lerp(1,.8,e));
+ },function(){
+  bottle.position.copy(tgt);flip.rotation.x=Math.PI;
+  var acc=0;
+  addAnim(dur,function(k,dt){
+   acc+=dt;while(acc>.03){acc-=.03;spawnStreamPuff({x:bottle.position.x,y:bottle.position.y-.04,z:bottle.position.z},streamColor);}
+   onFill(k);
+  },function(){
+   onFill(1);
+   setTimeout(function(){
+    var from2=bottle.position.clone();var to=new THREE.Vector3(home.x,home.y,home.z);
+    addAnim(1.3,function(k){
+     var e=smooth(k);bottle.position.lerpVectors(from2,to,e);bottle.position.y+=.9*4*k*(1-k);
+     flip.rotation.x=Math.PI*(1-e);bottle.scale.setScalar(lerp(.8,1,e));
+    },function(){
+     bottle.position.copy(to);flip.rotation.x=0;bottle.scale.setScalar(1);setShadow(bottle,true);
+     onDone&&onDone();
+    });
+   },350);
+  });
+ });
+}
+
+var lockedGas=null;
+function fullGasName(k){return k==='O2'?'dioxygène':k==='H2'?'dihydrogène':'dioxyde de carbone';}
+var GAS_TINT={O2:{color:0x7fe0ff,op:.07,stream:0x7fe0ff},H2:{color:0xff9fcb,op:.06,stream:0xff8fc0},CO2:{color:0xc9ccd0,op:.08,stream:0xb5b9be}};
+var BOTTLE_OBJ={O2:o2BottleGroup,H2:h2BottleGroup,CO2:co2BottleGroup};
+
+function fillWithGas(gasKey){
+ lockedGas=gasKey;
+ var bottle=BOTTLE_OBJ[gasKey];var home=HOME[gasKey==='O2'?'o2BottleGroup':gasKey==='H2'?'h2BottleGroup':'co2BottleGroup'];
+ var gt=GAS_TINT[gasKey];
+ document.getElementById('gasChoices').style.display='none';
+ document.getElementById('protoText').textContent='La bouteille de '+fullGasName(gasKey)+' se place au-dessus du bocal et se retourne…';
+ gasReset();gasColA.setHex(gt.color);gasColB.setHex(gt.color);gasFrac=1;setLayer(tint,0,1);tintMat.color.setHex(gt.color);tintMat.opacity=0;
+ pourBottle(bottle,home,gt.stream,0,2.6,function(k){gasAmt=k;tintMat.opacity=gt.op*k;},function(){
+  document.getElementById('btnClose2').style.display='block';
+  document.getElementById('protoText').textContent='Le bocal contient du '+fullGasName(gasKey)+'. Ferme-le.';
+ });
+}
+// --- réessayer avec un autre gaz ---
+var GAS_LABEL={O2:'O₂',H2:'H₂',CO2:'CO₂'};
+var doneGases={};
+function showRetryGas(){
+ doneGases[lockedGas]=true;
+ var others=['O2','H2','CO2'].filter(function(k){return !doneGases[k];});
+ if(doneGases.O2&&doneGases.H2&&doneGases.CO2)document.getElementById('toStep2').disabled=false;
+ if(!others.length){document.getElementById('retryGasRow').style.display='none';return;}
+ var A=document.getElementById('retryGasA'),B=document.getElementById('retryGasB');
+ A.textContent='Essayer avec '+GAS_LABEL[others[0]];A.dataset.gas=others[0];
+ if(others[1]){B.style.display='block';B.textContent='Essayer avec '+GAS_LABEL[others[1]];B.dataset.gas=others[1];}else B.style.display='none';
+ document.getElementById('retryGasRow').style.display='flex';
+}
+function resetStep2(){
+ crackle=null;jarLight.intensity=0;setLight(1);spotGoal=0;
+ [splintGroup,charcoalGroup].forEach(function(o){if(o.parent===jarGroup)scene.attach(o);});
+ jarGroup.rotation.set(0,0,0);jarGroup.position.set(HOME.jarGroup.x,0,HOME.jarGroup.z);jarGroup.userData.shakeT=undefined;
+ lidGroup.rotation.set(0,0,0);lidGroup.position.set(HOME.lidGroup.x,HOME.lidGroup.y,HOME.lidGroup.z);
+ resetTints();burnerOn=false;
+ tipMat.color.setHex(0x1a1a1a);tipMat.emissive.setHex(0x000000);tipMat.emissiveIntensity=0;
+ stickMat.color.setHex(0xffffff);stickMat.emissive.setHex(0x000000);stickMat.emissiveIntensity=0;
+ charMat.color.setHex(0x232323);charMat.emissive.setHex(0x000000);charMat.emissiveIntensity=0;
+ splintGlows.concat([charGlow]).forEach(function(g){g.material.opacity=0;g.material.color.setHex(0xffffff);g.scale.set(.01,.01,1);});
+ splintGroup.rotation.set(0,0,0);splintGroup.position.set(HOME.splintGroup.x,HOME.splintGroup.y||0,HOME.splintGroup.z);setShadow(splintGroup,true);
+ charcoalGroup.rotation.set(0,0,0);charcoalGroup.position.set(HOME.charcoalGroup.x,HOME.charcoalGroup.y||0,HOME.charcoalGroup.z);setShadow(charcoalGroup,true);
+ [[o2BottleGroup,HOME.o2BottleGroup],[h2BottleGroup,HOME.h2BottleGroup],[co2BottleGroup,HOME.co2BottleGroup]].forEach(function(pr){
+  var b=pr[0],h=pr[1];b.userData.flip.rotation.x=0;b.scale.setScalar(1);b.position.set(h.x,h.y,h.z);setShadow(b,true);
+ });
+ ['btnClose2','btnIgniteBurner','heatChoices','heatingRow','btnPlunge2','obs2','btnShake2','retryGasRow'].forEach(function(id){document.getElementById(id).style.display='none';});
+ activeHeatObj=null;
+}
+['retryGasA','retryGasB'].forEach(function(id){
+ document.getElementById(id).addEventListener('click',function(){var g=this.dataset.gas;resetStep2();fillWithGas(g);});
+});
+document.getElementById('fillO2').addEventListener('click',function(){fillWithGas('O2');});
+document.getElementById('fillH2').addEventListener('click',function(){fillWithGas('H2');});
+document.getElementById('fillCO2').addEventListener('click',function(){fillWithGas('CO2');});
+
+document.getElementById('btnClose2').addEventListener('click',function(){
+ this.style.display='none';
+ tweenTo(lidGroup,LID_ON,1,.6,function(){
+  document.getElementById('btnIgniteBurner').style.display='block';
+  document.getElementById('protoText').textContent='Le bocal est fermé. Allume le bec Bunsen.';
+ });
+});
+document.getElementById('btnIgniteBurner').addEventListener('click',function(){
+ this.style.display='none';burnerOn=true;
+ placeFlames(HOME.burnerGroup.x,BURNER_FLAME_Y,HOME.burnerGroup.z);
+ document.getElementById('heatChoices').style.display='flex';
+ document.getElementById('protoText').textContent='Choisis ce que tu veux chauffer.';
+});
+
+var heatColor=function(h){
+ var r,g,b;
+ if(h<.5){var t=h/.5;r=lerp(0,0x33,t);g=0;b=0;}
+ else if(h<.8){var t2=(h-.5)/.3;r=lerp(0x33,0xff,t2);g=lerp(0,0x66,t2);b=0;}
+ else{var t3=(h-.8)/.2;r=0xff;g=lerp(0x66,0xe6,t3);b=lerp(0,0xa0,t3);}
+ return (Math.round(r)<<16)|(Math.round(g)<<8)|Math.round(b);
+};
+var activeHeatObj=null,activeHeatLabel='',activeMats=[],activeGlows=[];
+function heatObjectFlow(obj,label,mats,glows,scaleMul,progRowId,progPctId,btnAfterId,onIgnited){
+ activeHeatObj=obj;activeHeatLabel=label;activeMats=mats;activeGlows=glows;
+ setShadow(obj,false);
+ var isSplint=(obj===splintGroup);
+ // la bûchette pivote de 90° pour se coucher à l'horizontale dans la flamme
+ var tgt=isSplint?{x:HOME.burnerGroup.x+.62,y:BURNER_FLAME_Y+.07,z:HOME.burnerGroup.z}:{x:HOME.burnerGroup.x,y:BURNER_FLAME_Y-.18,z:HOME.burnerGroup.z};
+ if(isSplint)addAnim(.7,function(k){obj.rotation.z=(Math.PI/2)*smooth(k);});
+ tweenTo(obj,tgt,1,.7,function(){
+  document.getElementById(progRowId).style.display='flex';
+  var t=0;var iv=setInterval(function(){
+   t+=50;var h=Math.min(1,t/5000);var col=heatColor(h);
+   mats.forEach(function(m){m.emissive.setHex(col);m.emissiveIntensity=h;if(h>.15)m.color.setHex(col);});
+   glows.forEach(function(g,gi){var sc=.02+h*scaleMul*(gi===0?1:.6);g.scale.set(sc,sc,1);g.material.opacity=h*(gi===0?.9:.65);});
+   document.getElementById(progPctId).textContent=Math.round(h*100)+'%';
+   if(t>=5000){
+    clearInterval(iv);document.getElementById(progRowId).style.display='none';
+    var btn=document.getElementById(btnAfterId);btn.style.display='block';btn.textContent='Mettre '+label+' dans le bocal';
+    onIgnited&&onIgnited();
+   }
+  },50);
+ });
+}
+document.getElementById('heatSplint').addEventListener('click',function(){
+ document.getElementById('heatChoices').style.display='none';
+ heatObjectFlow(splintGroup,'la bûchette',[tipMat,stickMat],splintGlows,.7,'heatingRow','heatPct2','btnPlunge2',function(){
+  var pt=document.getElementById('protoText');pt.textContent='';pt.style.display='none';
+ });
+});
+document.getElementById('heatCharcoal').addEventListener('click',function(){
+ document.getElementById('heatChoices').style.display='none';
+ heatObjectFlow(charcoalGroup,'le charbon de bois',[charMat],[charGlow],.85,'heatingRow','heatPct2','btnPlunge2',function(){
+  var pt2=document.getElementById('protoText');pt2.textContent='';pt2.style.display='none';
+ });
+});
+
+// plonge l'objet incandescent dans le bocal (bûchette retournée, bout incandescent vers le bas)
+function plungeObject(obj,onDone){
+ var jp=HOME.jarGroup;var from=obj.position.clone();var isS=(obj===splintGroup);
+ var to=isS?new THREE.Vector3(jp.x,1.95,jp.z):new THREE.Vector3(jp.x,.5,jp.z);
+ addAnim(.95,function(k){
+  var e=smooth(k);obj.position.lerpVectors(from,to,e);obj.position.y+=(isS?.9:1.05)*4*k*(1-k);
+  if(isS)obj.rotation.z=lerp(Math.PI/2,Math.PI,e);
+ },function(){obj.position.copy(to);if(isS)obj.rotation.z=Math.PI;onDone();});
+}
+function objTip(){var jp=HOME.jarGroup;return new THREE.Vector3(jp.x,.76,jp.z);}
+
+// crépitement orangé/jaune/rouge très intense pendant 3 s, puis retour à la pénombre
+var crackle=null;
+var CR_COLS=[0xffe14d,0xffb020,0xff7a14,0xff3a10];
+function spawnCrackleSpark(tip,hex,jp){
+ var sp=new THREE.Sprite(new THREE.SpriteMaterial({map:sparkTex,color:hex,blending:THREE.AdditiveBlending,depthWrite:false,opacity:1}));
+ var sc=.05+Math.random()*.14;sp.scale.set(sc,sc,1);
+ sp.position.set(tip.x+(Math.random()-.5)*.08,tip.y+(Math.random()-.5)*.12,tip.z+(Math.random()-.5)*.08);scene.add(sp);
+ var a=Math.random()*6.283,v=.8+Math.random()*2.6;
+ sparks.push({o:sp,vx:Math.cos(a)*v,vy:(Math.random()-.25)*2.8,vz:Math.sin(a)*v,life:.35+Math.random()*.65,jx:jp.x,jz:jp.z});
+}
+function startCrackle(mats,glows,tip,dur,restore){
+ var core=new THREE.Sprite(new THREE.SpriteMaterial({map:flameTex,blending:THREE.AdditiveBlending,depthWrite:false,opacity:1,color:0xffc040}));
+ core.position.copy(tip);scene.add(core);
+ crackle={t:0,dur:dur,fade:.7,mats:mats,glows:glows,tip:tip,core:core,acc:0,restore:restore};
+}
+function updateCrackle(dt){
+ var cr=crackle;if(!cr)return;cr.t+=dt;
+ var jp=HOME.jarGroup;
+ var k=cr.t<cr.dur?1:Math.max(0,1-(cr.t-cr.dur)/cr.fade);
+ var fl=.6+Math.random()*.8;var hex=CR_COLS[(Math.random()*CR_COLS.length)|0];
+ jarLight.position.set(jp.x,1.0,jp.z);jarLight.distance=2.6;jarLight.color.setHex(hex);jarLight.intensity=8*fl*k;
+ cr.mats.forEach(function(m){m.emissive.setHex(hex);m.color.setHex(hex);m.emissiveIntensity=(.25+1.6*fl)*k+.25*(1-k);});
+ cr.glows.forEach(function(g,gi){var sc=(gi===0?1.5:.9)*(.7+fl*.6)*k+.05;g.scale.set(sc,sc,1);g.material.color.setHex(hex);g.material.opacity=Math.min(1,k*(.7+.3*fl))+.0;});
+ var cs=(1.0+1.8*fl)*k+.01;cr.core.scale.set(cs,cs,1);cr.core.material.color.setHex(hex);cr.core.material.opacity=k;
+ tintMat.color.setHex(hex);tintMat.opacity=(.1+.4*fl)*k+0;
+ cr.acc+=dt*110*k;
+ while(cr.acc>=1){cr.acc-=1;spawnCrackleSpark(cr.tip,CR_COLS[(Math.random()*CR_COLS.length)|0],jp);}
+ if(cr.t>=cr.dur+cr.fade){
+  jarLight.intensity=0;scene.remove(cr.core);
+  cr.mats.forEach(function(m){m.emissive.setHex(0xff3a10);m.emissiveIntensity=.25;});
+  cr.glows.forEach(function(g,gi){g.material.color.setHex(0xffffff);g.material.opacity=.2;var sc=gi===0?.35:.2;g.scale.set(sc,sc,1);});
+  if(cr.restore)cr.restore();else{tintMat.color.setHex(GAS_TINT.O2.color);tintMat.opacity=GAS_TINT.O2.op*.5;}
+  crackle=null;
+ }
+}
+
+document.getElementById('btnPlunge2').addEventListener('click',function(){
+ this.style.display='none';
+ tweenTo(lidGroup,HOME.lidGroup,1,.5);
+ var obj=activeHeatObj;var mats=activeMats,glows=activeGlows;
+ setLight(.1); // la pièce passe dans la pénombre : l'objet incandescent ressort
+ setTimeout(function(){
+  plungeObject(obj,function(){
+   var tip=objTip();var obs=document.getElementById('obs2');
+   if(lockedGas==='O2'){
+    startCrackle(mats,glows,tip,3);
+    obs.textContent='Observation : '+activeHeatLabel+' se rallume avec un éclat très intense et crépite pendant plusieurs secondes : c\'est le test caractéristique du dioxygène !';
+   } else {
+    var e0=mats.map(function(m){return m.emissiveIntensity;});
+    addAnim(.6,function(k){
+     mats.forEach(function(m,mi){m.emissiveIntensity=e0[mi]*(1-k);});
+     glows.forEach(function(g){g.material.opacity=Math.max(0,g.material.opacity*(1-k));});
+    },function(){
+     mats.forEach(function(m){m.emissiveIntensity=0;m.emissive.setHex(0x000000);});
+     tipMat.color.setHex(0x1a1a1a);charMat.color.setHex(0x232323);stickMat.color.setHex(0xb89a7a);
+     glows.forEach(function(g){g.material.opacity=0;});
+    });
+    spawnSmoke(new THREE.Vector3(tip.x,.95,tip.z),12);
+    obs.textContent='Observation : '+activeHeatLabel+' s\'éteint immédiatement, avec un peu de fumée. Ce gaz n\'entretient pas la combustion.';
+   }
+   obs.style.display='block';
+   document.getElementById('btnShake2').style.display='block';
+  });
+ },550);
+});
+
+document.getElementById('btnShake2').addEventListener('click',function(){
+ this.style.display='none';
+ var obj=activeHeatObj;
+ // l'objet reste dans le bocal et suit ses mouvements
+ if(obj===splintGroup)addAnim(.3,function(k){obj.position.y=lerp(1.95,1.78,k);});
+ tweenTo(lidGroup,LID_ON,1,.5,function(){
+  jarGroup.attach(obj);jarGroup.userData.carry=obj;
+  jarGroup.userData.shakeT=0;jarGroup.userData.shakeDur=5;jarGroup.userData.shakeAmp=.17;
+  if(lockedGas==='O2')sparkStorm(HOME.jarGroup,5,2.4);
+  else{var smk=0;var smI=setInterval(function(){smk+=130;spawnSmoke(new THREE.Vector3(HOME.jarGroup.x+(Math.random()-.5)*.5,.3+Math.random()*.3,HOME.jarGroup.z+(Math.random()-.5)*.5),2);if(smk>=5000)clearInterval(smI);},130);}
+  setTimeout(function(){setLight(1);showRetryGas();},5100);
+ });
+});
+
+// --- tab 3 : Explosif ---
+var o2mix=document.getElementById('o2mix'),o2mixval=document.getElementById('o2mixval'),h2mixval=document.getElementById('h2mixval');
+var h2mix={get value(){return 100-(+o2mix.value);},set disabled(v){o2mix.disabled=v;}};
+function updMixLabels(){o2mixval.textContent='O₂ '+o2mix.value+'%';h2mixval.textContent='H₂ '+(100-o2mix.value)+'%';o2mix.style.setProperty('--p',o2mix.value+'%');}
+o2mix.addEventListener('input',updMixLabels);updMixLabels();
+function resetMixTab(){
+ crackle=null;jarLight.intensity=0;setLight(1);
+ if(splintGroup.parent===jarGroup)scene.attach(splintGroup);
+ jarGroup.rotation.set(0,0,0);jarGroup.position.set(HOME.jarGroup.x,0,HOME.jarGroup.z);
+ jarGroup.visible=true;lidGroup.visible=true;lidGroup.rotation.set(0,0,0);
+ jar.visible=true;jarRim.visible=true;jarBase.visible=true;
+ tweenTo(lidGroup,HOME.lidGroup,1,.01);
+ resetTints();
+ [[o2BottleGroup,HOME.o2BottleGroup],[h2BottleGroup,HOME.h2BottleGroup]].forEach(function(pr){
+  var b=pr[0],h=pr[1];b.userData.flip.rotation.x=0;b.scale.setScalar(1);b.position.set(h.x,h.y,h.z);setShadow(b,true);
+ });
+ o2mix.disabled=false;brokenJar.visible=false;
+ document.getElementById('fillMix').style.display='block';
+ ['closeMix','igniteBurnerMix','heatSplintMix','heatingRowMix','plungeMix','obs3','retryMix'].forEach(function(id){document.getElementById(id).style.display='none';});
+ tipMat.color.setHex(0x1a1a1a);tipMat.emissive.setHex(0x000000);tipMat.emissiveIntensity=0;
+ stickMat.color.setHex(0xffffff);stickMat.emissive.setHex(0x000000);stickMat.emissiveIntensity=0;
+ splintGlows.forEach(function(g){g.material.opacity=0;g.material.color.setHex(0xffffff);g.scale.set(.01,.01,1);});
+ shardsArr.forEach(function(s){scene.remove(s.o);});shardsArr=[];
+ splintGroup.rotation.set(0,0,0);setShadow(splintGroup,true);
+ splintGroup.position.set(HOME.splintGroup.x,0,HOME.splintGroup.z);splintGroup.scale.setScalar(1);
+}
+var lastMixColor=new THREE.Color(0x8f98b5);
+document.getElementById('fillMix').addEventListener('click',function(){
+ lockedH2=+h2mix.value;var lockedO2=100-lockedH2;var a=lockedO2/100,bb=1-a;
+ o2mix.disabled=true;h2mix.disabled=true;this.style.display='none';
+ var c1=new THREE.Color(0x1fd0c0),c2=new THREE.Color(0xff5fa8);
+ var mix=c1.clone().lerpHSL(c2,lockedH2/100);lastMixColor=mix.clone();
+ gasReset();gasColA.copy(c1);gasColB.copy(c2);gasFrac=a;tintMat.opacity=0;tint2Mat.opacity=0;setLayer(tint,0,1);setLayer(tint2,0,1);tintMat.color.copy(c1);
+ var queue=[];
+ if(lockedO2>0)queue.push('o2');
+ if(lockedH2>0)queue.push('h2');
+ function afterAll(){
+  addAnim(.9,function(k){
+   gasColA.copy(c1).lerp(mix,k);gasColB.copy(c2).lerp(mix,k);gasAmt=1;
+   tintMat.color.copy(mix);tintMat.opacity=.07*k;tint2Mat.opacity=0;
+  },function(){
+   gasColA.copy(mix);gasColB.copy(mix);gasAmt=1;tintMat.color.copy(mix);tintMat.opacity=.07;tint2Mat.opacity=0;
+   document.getElementById('closeMix').style.display='block';
+  });
+ }
+ function next(i){
+  if(i>=queue.length){afterAll();return;}
+  if(queue[i]==='o2'){
+   pourBottle(o2BottleGroup,HOME.o2BottleGroup,0x7fe0ff,0,.6+2.2*a,function(k){gasAmt=a*k;},function(){next(i+1);});
+  } else {
+   pourBottle(h2BottleGroup,HOME.h2BottleGroup,0xff8fc0,0,.6+2.2*bb,function(k){gasAmt=a+bb*k;},function(){next(i+1);});
+  }
+ }
+ next(0);
+});
+document.getElementById('closeMix').addEventListener('click',function(){
+ this.style.display='none';
+ tweenTo(lidGroup,LID_ON,1,.6,function(){document.getElementById('igniteBurnerMix').style.display='block';});
+});
+document.getElementById('igniteBurnerMix').addEventListener('click',function(){
+ this.style.display='none';burnerOn=true;
+ placeFlames(HOME.burnerGroup.x,BURNER_FLAME_Y,HOME.burnerGroup.z);
+ document.getElementById('heatSplintMix').style.display='block';
+});
+document.getElementById('heatSplintMix').addEventListener('click',function(){
+ this.style.display='none';
+ heatObjectFlow(splintGroup,'la bûchette',[tipMat,stickMat],splintGlows,.7,'heatingRowMix','heatPctMix','plungeMix',function(){});
+});
+document.getElementById('plungeMix').addEventListener('click',function(){
+ this.style.display='none';
+ tweenTo(lidGroup,HOME.lidGroup,1,.5);
+ var o2rich=lockedH2<20;
+ if(o2rich)setLight(.1);
+ setTimeout(function(){
+  var jarPos=HOME.jarGroup;
+  plungeObject(splintGroup,function(){
+   var explosive=lockedH2>=20&&lockedH2<=75;
+   var obs=document.getElementById('obs3');
+   if(explosive){
+    bigFlash(jarPos,10);
+    jarLight.position.set(jarPos.x,1.1,0);jarLight.distance=5;jarLight.color.setHex(0xffdd66);jarLight.intensity=18;
+    var f=0;var fadeJ=setInterval(function(){f++;jarLight.intensity=Math.max(0,jarLight.intensity-18/20);if(f>=20)clearInterval(fadeJ);},30);
+    shakeCam(.5,1.1);
+    jar.visible=false;jarRim.visible=false;brokenJar.visible=true;lidGroup.visible=false;tintMat.opacity=0;tint2Mat.opacity=0;gasReset();
+    spawnShards(jarPos,16);
+    sparkStorm(jarPos,1.2,2.6);
+    obs.textContent='BOOM ! Dans cette zone de proportions, le mélange dihydrogène / dioxygène est explosif.';
+   } else if(o2rich){
+    startCrackle([tipMat,stickMat],splintGlows,objTip(),3,function(){tintMat.color.copy(lastMixColor);tintMat.opacity=.07;});
+    setTimeout(function(){setLight(1);},4300);
+    obs.textContent='Pas d\'explosion : le mélange est très riche en O₂, la bûchette se rallume avec un éclat intense.';
+   } else {
+    placeFlames(jarPos.x,.85,0);
+    flames.forEach(function(f){f.material.opacity=.6;});
+    var d=0;var dim=setInterval(function(){d++;flames.forEach(function(f){f.material.opacity=Math.max(0,f.material.opacity-.03);});if(d>25)clearInterval(dim);},16);
+    tipMat.emissiveIntensity=0;tipMat.color.setHex(0x1a1a1a);stickMat.emissiveIntensity=0;stickMat.color.setHex(0xb89a7a);splintGlows.forEach(function(g){g.material.opacity=0;});
+    obs.textContent='Pas d\'explosion : dans ces proportions, le mélange ne réagit pas violemment.';
+   }
+   obs.style.display='block';
+   document.getElementById('retryMix').style.display='block';
+  });
+ },550);
+});
+document.getElementById('retryMix').addEventListener('click',resetMixTab);
+
+// --- animation loop ---
+var lastT=Date.now();
+function animate(){
+ requestAnimationFrame(animate);
+ var now=Date.now();var dt=(now-lastT)/1000;lastT=now;
+
+ tweenTargets.forEach(function(o){
+  var tw=o.userData.tw;
+  if(tw){
+   tw.t+=dt;var k=Math.min(1,tw.t/tw.dur);var e=smooth(k);
+   o.position.lerpVectors(tw.fp,tw.tp,e);o.scale.setScalar(lerp(tw.fs,tw.ts,e));
+   if(k>=1){delete o.userData.tw;tw.onDone&&tw.onDone();}
+  }
+  if(step===0&&o===introOrder[introIndex]){o.rotation.y+=dt*1.6;}
+  else if(step===0){o.rotation.y+=dt*.25;}
+ });
+
+ for(var ai=arcMoving.length-1;ai>=0;ai--){
+  var a=arcMoving[ai];a.t+=dt;var k2=Math.min(1,a.t/a.dur);var e2=smooth(k2);
+  a.o.position.lerpVectors(a.from,a.to,e2);a.o.position.y+=a.peak*4*k2*(1-k2);
+  if(k2>=1){arcMoving.splice(ai,1);a.onDone&&a.onDone();}
+ }
+
+ if(jarGroup.userData.shakeT!==undefined&&jarGroup.userData.shakeT<jarGroup.userData.shakeDur){
+  jarGroup.userData.shakeT+=dt;
+  var done=jarGroup.userData.shakeT>=jarGroup.userData.shakeDur;
+  var ang=done?0:Math.sin(now*.03)*(jarGroup.userData.shakeAmp||.05);
+  var dxs=done?0:Math.sin(now*.047)*.06;
+  jarGroup.rotation.z=ang;jarGroup.position.x=HOME.jarGroup.x+dxs;
+  // le couvercle est solidaire du bocal
+  lidGroup.position.set(HOME.jarGroup.x+dxs-LID_ON.y*Math.sin(ang),LID_ON.y*Math.cos(ang),HOME.jarGroup.z);
+  lidGroup.rotation.z=ang;
+  if(done){
+   jarGroup.userData.shakeT=undefined;lidGroup.position.set(LID_ON.x,LID_ON.y,LID_ON.z);lidGroup.rotation.z=0;
+   jarGroup.updateMatrixWorld(true);
+   if(jarGroup.userData.carry){scene.attach(jarGroup.userData.carry);jarGroup.userData.carry=null;}
+  }
+ }
+
+ for(var i2=sparks.length-1;i2>=0;i2--){
+  var sp=sparks[i2];sp.life-=dt;sp.vy-=dt*1.2;
+  sp.o.position.x+=sp.vx*dt;sp.o.position.y+=sp.vy*dt;sp.o.position.z+=sp.vz*dt;
+  var rx=sp.o.position.x-sp.jx,rz=sp.o.position.z-sp.jz;var d2=Math.sqrt(rx*rx+rz*rz);
+  if(d2>.78){sp.vx*=-.5;sp.vz*=-.5;}
+  if(sp.o.position.y<.15){sp.o.position.y=.15;sp.vy*=-.4;}
+  if(sp.o.position.y>1.85){sp.o.position.y=1.85;sp.vy*=-.4;}
+  sp.o.material.opacity=Math.max(0,sp.life);
+  if(sp.life<=0){scene.remove(sp.o);sparks.splice(i2,1);}
+ }
+ for(var j=jets.length-1;j>=0;j--){
+  var je=jets[j];je.life-=dt;je.o.position.x+=je.vx*dt;je.o.position.y+=je.vy*dt;je.o.position.z+=je.vz*dt;je.o.material.opacity=Math.max(0,je.life);
+  if(je.life<=0){scene.remove(je.o);jets.splice(j,1);}
+ }
+ for(var sm=smokes.length-1;sm>=0;sm--){
+  var s2=smokes[sm];s2.life-=dt;s2.o.position.x+=s2.vx*dt;s2.o.position.y+=s2.vy*dt;s2.o.position.z+=s2.vz*dt;
+  var sc=s2.o.scale.x+s2.grow*dt;s2.o.scale.set(sc,sc,1);s2.o.material.opacity=Math.max(0,Math.min(.55,s2.life*.4));
+  if(s2.life<=0){scene.remove(s2.o);smokes.splice(sm,1);}
+ }
+ for(var b=burstSprites.length-1;b>=0;b--){
+  var bs=burstSprites[b];bs.life-=dt*1.4;var sc2=bs.o.scale.x*(1+bs.grow*dt);bs.o.scale.set(sc2,sc2,1);bs.o.material.opacity=Math.max(0,bs.life);
+  if(bs.life<=0){scene.remove(bs.o);burstSprites.splice(b,1);}
+ }
+ for(var sh=shardsArr.length-1;sh>=0;sh--){
+  var sd=shardsArr[sh];sd.life-=dt;sd.vy-=9*dt;
+  sd.o.position.x+=sd.vx*dt;sd.o.position.y+=sd.vy*dt;sd.o.position.z+=sd.vz*dt;
+  sd.o.rotation.x+=sd.ax*dt;sd.o.rotation.y+=sd.ay*dt;sd.o.rotation.z+=sd.az*dt;
+  if(sd.o.position.y<.05){sd.o.position.y=.05;sd.vy*=-.3;sd.vx*=.6;sd.vz*=.6;}
+  if(sd.life<.6&&sd.o.material.opacity!==undefined){sd.o.material.transparent=true;sd.o.material.opacity=Math.max(0,sd.life/.6*(sd.o.material.userData&&sd.o.material.userData.baseOp||1));}
+  if(sd.life<=0){scene.remove(sd.o);shardsArr.splice(sh,1);}
+ }
+
+ if(camShake){
+  camShake.t+=dt;var damp=Math.max(0,1-camShake.t/camShake.dur);
+  if(damp<=0){camShake=null;updCam();}
+  else{updCam();camera.position.x+=(Math.random()-.5)*camShake.amp*damp;camera.position.y+=(Math.random()-.5)*camShake.amp*damp*.6;}
+ }
+
+ if(step===1||step===3){
+  flames.forEach(function(f,i){f.material.opacity=burnerOn?(.55+Math.sin(now*.01+i)*.15):Math.max(0,f.material.opacity*.9);f.scale.set(.45+Math.sin(now*.02+i)*.08,.75+Math.sin(now*.015+i)*.1,1);});
+  flameLight.position.set(HOME.burnerGroup.x,BURNER_FLAME_Y,HOME.burnerGroup.z);
+  flameLight.intensity=burnerOn?1.2+Math.sin(now*.02)*.2:Math.max(0,flameLight.intensity*.9);
+ }
+ for(var an=anims.length-1;an>=0;an--){
+  var A=anims[an];A.t+=dt;var ak=Math.min(1,A.t/A.dur);A.fn(ak,dt);
+  if(ak>=1){anims.splice(an,1);A.onDone&&A.onDone();}
+ }
+ updateCrackle(dt);
+ gasUpdate(dt);
+ if(Math.abs(spotGoal-spotLv)>.01){spotLv+=(spotGoal-spotLv)*Math.min(1,dt*4);spot.intensity=spotLv;}
+ else if(spot.intensity!==spotGoal){spotLv=spotGoal;spot.intensity=spotGoal;}
+ if(Math.abs(lightGoal-lightLv)>.002){lightLv+=(lightGoal-lightLv)*Math.min(1,dt*4);applyLight();}
+ else if(lightLv!==lightGoal){lightLv=lightGoal;applyLight();}
+ if(Math.abs(camGoalY-ty)>.002&&!camShake){ty+=(camGoalY-ty)*Math.min(1,dt*3);updCam();}
+ [o2BottleGroup,h2BottleGroup,co2BottleGroup].forEach(function(bt){
+  var gs=Math.max(.05,bt.scale.x);var tg=bt.userData.tag;
+  var presented=(step===0&&introIndex>=0&&introIndex<introOrder.length&&introOrder[introIndex]===bt);
+  tg.material.opacity=(spotGoal>0&&!presented)?.2:1;
+  tg.scale.set(1.4/gs,.41/gs,1);tg.position.y=BTL_TIPH+.5/gs;
+ });
+ renderer.render(scene,camera);
+}
+animate();
+})();
+</script>
+</body>
+</html>
