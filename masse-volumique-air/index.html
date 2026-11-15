@@ -309,6 +309,12 @@ textarea{width:100%; min-height:90px; font-family:var(--font-body); font-size:.8
   background:#c23b2b; opacity:0; pointer-events:none; transition:opacity .15s ease;
 }
 .order-error-overlay.show{ opacity:1; pointer-events:auto; }
+.order-error-art{ display:none; width:min(76vmin,440px); height:auto; filter:drop-shadow(0 0 6px #ff2a2a) drop-shadow(0 0 16px #ff0000); }
+.order-error-overlay.neon{ flex-direction:column; gap:18px; background:#0b0708; }
+.order-error-overlay.neon .order-error-art{ display:block; }
+.order-error-overlay.neon .order-error-text{
+  color:#ffe6e6; padding:0 16px; text-shadow:0 0 4px rgba(255,40,40,.95), 0 0 10px rgba(255,20,20,.8), 0 0 22px rgba(255,0,0,.55);
+}
 .order-error-text{
   font-family:var(--font-display); font-weight:800; font-size:1.7rem; line-height:1.3; color:#fff;
   text-align:center; padding:20px 34px; text-shadow:0 2px 6px rgba(0,0,0,.35);
@@ -343,6 +349,17 @@ textarea{width:100%; min-height:90px; font-family:var(--font-body); font-size:.8
   text-shadow:0 0 4px rgba(255,40,40,.95), 0 0 10px rgba(255,20,20,.8), 0 0 22px rgba(255,0,0,.55);
 }
 .scene-neon-red.show{ opacity:1; }
+.notnow-overlay{
+  position:fixed; inset:0; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:18px; background:#0b0708; opacity:0; pointer-events:none; transition:opacity .15s ease;
+}
+.notnow-overlay.show{ opacity:1; pointer-events:auto; }
+.notnow-overlay svg{ width:min(84vmin,480px); height:auto; filter:drop-shadow(0 0 6px #ff2a2a) drop-shadow(0 0 16px #ff0000); }
+.notnow-text{
+  font-family:var(--font-body); font-weight:800; font-size:clamp(1.5rem,8vw,2.3rem); text-align:center; padding:0 16px;
+  color:#ffe6e6; text-shadow:0 0 4px rgba(255,40,40,.95), 0 0 10px rgba(255,20,20,.8), 0 0 22px rgba(255,0,0,.55);
+}
+#breakOverlay>div:not(.notnow-text){ display:flex; justify-content:center; width:100%; }
 .tabs.locked button{ opacity:.4; pointer-events:none; filter:grayscale(1); }
 .lockable.locked .icon-btn{ opacity:.4; pointer-events:none; filter:grayscale(1); }
 .stage-extra{ position:absolute; top:46px; right:8px; z-index:9; display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
@@ -410,7 +427,7 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
           <button class="icon-btn puzzle-btn" id="fillEauBtn1" disabled><span class="puzzle-num">2</span>Remplir bouteille</button>
           <button class="icon-btn puzzle-btn" id="plongerBtn1" disabled><span class="puzzle-num">6</span>Plonger ouverture sous eau</button>
           <button class="icon-btn puzzle-btn" id="boucherBtn1" disabled><span class="puzzle-num">4</span>Boucher bouteille</button>
-          <button class="icon-btn puzzle-btn" id="colorantBtn1"><span class="puzzle-num">3</span>Ajouter colorant</button>
+          <button class="icon-btn puzzle-btn" id="colorantBtn1" disabled><span class="puzzle-num">3</span>Ajouter colorant</button>
         </div>
         <div class="color-row" id="colorRow1" style="display:none;">
           <button class="swatch" data-color="#2f6fd6" style="background:#2f6fd6" title="Bleu" aria-label="Bleu"></button>
@@ -434,9 +451,9 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
       <div class="readout" id="readout2">Étape 1 : gonfle le ballon.</div>
       <div class="action-row">
         <div class="btn-row3">
+          <button class="main-action" id="weighBtn2">Poser le ballon</button>
           <button class="main-action" id="actionBtn2">Gonfler le ballon</button>
           <button class="main-action" id="turnOnBtn2">Allumer la balance</button>
-          <button class="main-action" id="weighBtn2" disabled>Peser le ballon</button>
         </div>
         
       </div>
@@ -571,7 +588,183 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
   </main>
 </div>
 <div class="screamer-overlay" id="screamerOverlay"></div>
-<div class="order-error-overlay" id="orderErrorOverlay"><div class="order-error-text">Fais les actions dans l'ordre</div></div>
+<div class="notnow-overlay" id="breakOverlay">
+  <div id="breakArt1" style="display:none"><svg viewBox="-10 -14 220 270" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
+  <!-- electrified frizzy hair -->
+  <g fill="#f2f2f2" stroke="#3a3a3a" stroke-width="2.5">
+    <path d="M40 60 L8 40 L34 34 L14 8 L50 22 L48 -8 L74 16 L90 -12 L102 14 L124 -10 L130 18 L158 0 L152 28 L186 14 L162 46 L194 56 L160 72 Z"/>
+  </g>
+  <g stroke="#ffd34d" stroke-width="3" fill="none"><path d="M0 20 l10 8 l-6 6 l10 8 M196 24 l-10 8 l6 6 l-10 8"/></g>
+  <!-- sooty face -->
+  <ellipse cx="100" cy="132" rx="68" ry="96" fill="#f0c19b" stroke="#3a3a3a" stroke-width="3"/>
+  <path d="M40 100 Q30 140 50 176 Q70 150 62 110 Z" fill="#3a3a3a" opacity=".55"/>
+  <path d="M160 100 Q172 140 150 176 Q130 150 138 110 Z" fill="#3a3a3a" opacity=".55"/>
+  <ellipse cx="100" cy="196" rx="44" ry="20" fill="#3a3a3a" opacity=".45"/>
+  <g fill="#2a2a2a" opacity=".5"><circle cx="70" cy="70" r="5"/><circle cx="134" cy="64" r="4"/><circle cx="108" cy="56" r="3"/></g>
+  <!-- goggles pushed up, cracked -->
+  <rect x="26" y="48" width="148" height="20" rx="10" fill="#6b4a2a" stroke="#2a1a0c" stroke-width="2.5"/>
+  <circle cx="68" cy="58" r="17" fill="#bfe6ff" fill-opacity=".8" stroke="#2a1a0c" stroke-width="4"/>
+  <circle cx="132" cy="58" r="17" fill="#bfe6ff" fill-opacity=".8" stroke="#2a1a0c" stroke-width="4"/>
+  <path d="M60 46 l8 12 l-6 6 M138 48 l-8 10 l6 8" stroke="#2a1a0c" stroke-width="1.6" fill="none"/>
+  <!-- eyebrows -->
+  <path d="M42 94 L90 108" stroke="#2f2f2f" stroke-width="8"/><path d="M158 94 L110 108" stroke="#2f2f2f" stroke-width="8"/>
+  <!-- huge bloodshot eyes -->
+  <circle cx="68" cy="124" r="23" fill="#fff" stroke="#3a3a3a" stroke-width="2.5"/>
+  <circle cx="132" cy="124" r="23" fill="#fff" stroke="#3a3a3a" stroke-width="2.5"/>
+  <g stroke="#d33" stroke-width="1.6" fill="none"><path d="M48 124 l12 0 M52 112 l10 6 M52 136 l10 -6 M152 124 l-12 0 M148 112 l-10 6 M148 136 l-10 -6"/></g>
+  <circle cx="72" cy="124" r="6" fill="#111"/><circle cx="128" cy="124" r="6" fill="#111"/>
+  <!-- nose -->
+  <path d="M100 128 Q88 160 84 172 Q100 182 116 172 Q112 158 100 128 Z" fill="#e5a07c" stroke="#3a3a3a" stroke-width="2.5"/>
+  <!-- yelling mouth -->
+  <path d="M56 190 Q100 176 144 190 Q150 232 100 236 Q50 232 56 190 Z" fill="#4a0e10" stroke="#3a3a3a" stroke-width="2.8"/>
+  <path d="M62 192 Q100 182 138 192 L136 204 Q100 196 64 204 Z" fill="#fffbe8"/>
+  <path d="M82 226 Q100 208 120 226 Q100 238 82 226 Z" fill="#e0586a"/>
+  <!-- smoke puffs -->
+  <g fill="#8c8c8c" stroke="#4a4a4a" stroke-width="2" opacity=".9"><circle cx="8" cy="170" r="12"/><circle cx="-2" cy="150" r="9"/><circle cx="196" cy="176" r="13"/><circle cx="206" cy="154" r="9"/></g>
+</svg>
+</div>
+  <div id="breakArt2" style="display:none"><svg viewBox="-10 -6 220 256" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
+  <!-- headscarf -->
+  <path d="M26 96 Q18 20 100 12 Q182 20 174 96 Q100 70 26 96 Z" fill="#2fa84f" stroke="#1b5e2e" stroke-width="3"/>
+  <g fill="#ffe14d"><circle cx="60" cy="44" r="5"/><circle cx="100" cy="32" r="5"/><circle cx="140" cy="44" r="5"/><circle cx="80" cy="62" r="4"/><circle cx="122" cy="62" r="4"/></g>
+  <path d="M170 60 q26 -8 28 18 q-20 -4 -32 14 Z" fill="#2fa84f" stroke="#1b5e2e" stroke-width="3"/>
+  <path d="M30 100 q-10 10 -4 24 M170 100 q10 10 4 24" stroke="#c0661a" stroke-width="9" fill="none"/>
+  <!-- face -->
+  <ellipse cx="100" cy="140" rx="66" ry="92" fill="#e8b48c" stroke="#4a2a1a" stroke-width="3"/>
+  <path d="M34 100 Q100 66 166 100 Q100 84 34 100 Z" fill="#2fa84f" stroke="#1b5e2e" stroke-width="2"/>
+  <ellipse cx="50" cy="160" rx="15" ry="10" fill="#ff7a8a" opacity=".6"/><ellipse cx="150" cy="160" rx="15" ry="10" fill="#ff7a8a" opacity=".6"/>
+  <!-- one flat brow, one very raised brow -->
+  <path d="M46 112 L88 114" stroke="#3b2a1a" stroke-width="6"/>
+  <path d="M112 100 Q134 72 160 98" stroke="#3b2a1a" stroke-width="6" fill="none"/>
+  <!-- half-lidded smug eyes -->
+  <ellipse cx="68" cy="128" rx="20" ry="14" fill="#fff" stroke="#4a2a1a" stroke-width="2.5"/>
+  <ellipse cx="134" cy="126" rx="20" ry="16" fill="#fff" stroke="#4a2a1a" stroke-width="2.5"/>
+  <circle cx="78" cy="130" r="7" fill="#7a4a1a"/><circle cx="78" cy="130" r="3.2" fill="#000"/>
+  <circle cx="144" cy="128" r="7.5" fill="#7a4a1a"/><circle cx="144" cy="128" r="3.4" fill="#000"/>
+  <path d="M46 126 Q68 106 90 124 L90 120 Q68 104 48 118 Z" fill="#e8b48c" stroke="#4a2a1a" stroke-width="2.5"/>
+  <path d="M46 126 Q68 112 90 126" fill="#cf9770" stroke="#4a2a1a" stroke-width="2.5"/>
+  <!-- nose -->
+  <path d="M100 130 Q92 156 88 164 Q100 172 114 164 Q108 152 100 130 Z" fill="#dc9a78" stroke="#4a2a1a" stroke-width="2.5"/>
+  <!-- evil lopsided grin -->
+  <path d="M56 190 Q104 214 150 182 Q146 232 100 232 Q58 230 56 190 Z" fill="#5a1418" stroke="#4a2a1a" stroke-width="2.8"/>
+  <path d="M64 196 Q104 214 146 188 L142 202 Q102 224 68 208 Z" fill="#fffbe8"/>
+  <path d="M150 182 q10 -4 14 -14" stroke="#4a2a1a" stroke-width="3" fill="none"/>
+  <!-- soggy sponge -->
+  <g transform="rotate(-18 160 214)" stroke="#a07a00" stroke-width="3">
+    <rect x="124" y="196" width="72" height="40" rx="9" fill="#ffd21a"/>
+    <rect x="124" y="226" width="72" height="10" rx="5" fill="#2fa84f" stroke="#1b5e2e"/>
+    <g fill="#e0b000" stroke="none"><circle cx="142" cy="208" r="4"/><circle cx="166" cy="212" r="5"/><circle cx="184" cy="204" r="3.5"/><circle cx="154" cy="220" r="3"/></g>
+  </g>
+  <path d="M140 246 q-4 8 0 12 M170 246 q-3 8 1 12" stroke="#7cc8ff" stroke-width="3" fill="none"/>
+  <g fill="#bfe9ff" stroke="#2b7aa8" stroke-width="2" opacity=".95"><circle cx="14" cy="200" r="11"/><circle cx="-2" cy="176" r="7"/><circle cx="24" cy="222" r="6"/><circle cx="190" cy="120" r="6"/></g>
+</svg>
+</div>
+  <div class="notnow-text" id="breakText"></div>
+</div>
+<div class="notnow-overlay" id="notNowOverlay">
+  <svg viewBox="0 -4 200 226" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
+    <!-- wild white hair tufts + ears -->
+    <g fill="#f4f1ea" stroke="#4a2a1a" stroke-width="2.5">
+      <path d="M30 70 Q8 62 14 44 Q2 34 20 26 Q16 10 36 18 Q40 4 54 22 Q50 46 40 74 Z"/>
+      <path d="M170 70 Q192 62 186 44 Q198 34 180 26 Q184 10 164 18 Q160 4 146 22 Q150 46 160 74 Z"/>
+      <path d="M70 26 Q66 8 82 16 Q90 2 100 18 Q112 2 120 16 Q136 8 130 28 Q100 20 70 26 Z"/>
+    </g>
+    <ellipse cx="22" cy="118" rx="14" ry="22" fill="#e0a07a" stroke="#4a2a1a" stroke-width="2.5"/>
+    <ellipse cx="178" cy="118" rx="14" ry="22" fill="#e0a07a" stroke="#4a2a1a" stroke-width="2.5"/>
+    <path d="M14 120 q-12 -4 -10 -12 M14 128 q-14 2 -12 10 M186 120 q12 -4 10 -12 M186 128 q14 2 12 10" fill="none" stroke="#f4f1ea" stroke-width="3.5"/>
+    <!-- face -->
+    <ellipse cx="100" cy="112" rx="78" ry="92" fill="#eab48b" stroke="#4a2a1a" stroke-width="3"/>
+    <ellipse cx="100" cy="52" rx="60" ry="26" fill="#f2c8a4" opacity=".7"/>
+    <path d="M52 40 q48 -14 96 0 M46 52 q54 -14 108 0 M56 64 q44 -10 88 0" fill="none" stroke="#c98a62" stroke-width="2.2"/>
+    <path d="M118 34 l-8 12 l8 6 l-8 14" fill="none" stroke="#c0281c" stroke-width="3.2"/>
+    <g fill="#b46a46" opacity=".75"><circle cx="58" cy="78" r="3"/><circle cx="146" cy="70" r="2.5"/><circle cx="150" cy="150" r="3.2"/><circle cx="48" cy="142" r="2.4"/></g>
+    <ellipse cx="46" cy="148" rx="16" ry="11" fill="#f08a80" opacity=".6"/>
+    <ellipse cx="154" cy="148" rx="16" ry="11" fill="#f08a80" opacity=".6"/>
+    <!-- bushy angry eyebrows -->
+    <g fill="#f4f1ea" stroke="#4a2a1a" stroke-width="2.5">
+      <path d="M38 76 Q44 52 94 78 Q86 90 74 80 Q60 90 50 82 Q42 92 38 76 Z"/>
+      <path d="M162 70 Q156 40 108 66 Q116 80 128 72 Q142 82 152 74 Q160 82 162 70 Z"/>
+    </g>
+    <!-- crooked glasses, mismatched googly eyes -->
+    <g transform="rotate(-6 100 100)">
+      <path d="M92 104 q8 -8 16 0" fill="none" stroke="#2b2118" stroke-width="3.5"/>
+      <circle cx="68" cy="106" r="27" fill="#d9f0ff" fill-opacity=".75" stroke="#2b2118" stroke-width="4.5"/>
+      <circle cx="134" cy="102" r="21" fill="#d9f0ff" fill-opacity=".75" stroke="#2b2118" stroke-width="4.5"/>
+      <path d="M41 100 L20 94 M155 100 L178 94" stroke="#2b2118" stroke-width="3.5" fill="none"/>
+    </g>
+    <circle cx="68" cy="104" r="19" fill="#fff" stroke="#4a2a1a" stroke-width="2"/>
+    <circle cx="134" cy="102" r="13" fill="#fff" stroke="#4a2a1a" stroke-width="2"/>
+    <circle cx="76" cy="98" r="7.5" fill="#1b4fd1"/><circle cx="76" cy="98" r="3.4" fill="#000"/><circle cx="73" cy="95" r="1.8" fill="#fff"/>
+    <circle cx="127" cy="106" r="5.5" fill="#1b9a3a"/><circle cx="127" cy="106" r="2.6" fill="#000"/>
+    <path d="M60 82 l-4 -6 M68 80 l0 -8 M76 82 l4 -6" stroke="#c0281c" stroke-width="2" fill="none"/>
+    <!-- big bulbous nose -->
+    <path d="M100 100 Q82 142 78 156 Q84 174 100 172 Q118 174 122 156 Q116 142 100 100 Z" fill="#e0836c" stroke="#4a2a1a" stroke-width="2.5"/>
+    <ellipse cx="90" cy="160" rx="4" ry="5.5" fill="#6b2a1c"/><ellipse cx="110" cy="160" rx="4" ry="5.5" fill="#6b2a1c"/>
+    <ellipse cx="94" cy="140" rx="5" ry="8" fill="#f4a999" opacity=".7"/>
+    <path d="M92 174 q-6 12 -2 16 M108 174 q6 12 2 16" stroke="#f4f1ea" stroke-width="3" fill="none"/>
+    <!-- grumpy shouting mouth, tooth and tongue -->
+    <path d="M60 192 Q100 168 140 192 Q132 208 100 208 Q68 208 60 192 Z" fill="#5a1410" stroke="#4a2a1a" stroke-width="2.5"/>
+    <path d="M86 182 h11 v13 h-11 Z" fill="#fffbe8" stroke="#4a2a1a" stroke-width="1.5"/>
+    <path d="M80 207 Q100 190 122 205 Q100 214 80 207 Z" fill="#e0586a"/>
+    <!-- huge curly moustache -->
+    <path d="M100 172 Q80 164 58 176 Q36 186 36 168 Q26 160 40 154 Q40 170 54 168 Q80 154 100 172 Z" fill="#f4f1ea" stroke="#4a2a1a" stroke-width="2.5"/>
+    <path d="M100 172 Q120 164 142 176 Q164 186 164 168 Q174 160 160 154 Q160 170 146 168 Q120 154 100 172 Z" fill="#f4f1ea" stroke="#4a2a1a" stroke-width="2.5"/>
+    <!-- sweat drops and steam -->
+    <path d="M186 60 q-8 14 0 18 q8 -4 0 -18 Z" fill="#7cc8ff" stroke="#2b6ea8" stroke-width="1.5"/>
+    <path d="M14 70 q-6 12 0 15 q6 -3 0 -15 Z" fill="#7cc8ff" stroke="#2b6ea8" stroke-width="1.5"/>
+  </svg>
+  <div class="notnow-text">pas tout de suite !</div>
+</div>
+<div class="order-error-overlay" id="orderErrorOverlay">
+<svg class="order-error-art" viewBox="0 -4 200 226" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
+  <!-- big curly hair + curlers -->
+  <g fill="#9a7bd1" stroke="#3b2459" stroke-width="2.5">
+    <circle cx="40" cy="62" r="26"/><circle cx="66" cy="32" r="28"/><circle cx="100" cy="22" r="28"/><circle cx="134" cy="32" r="28"/><circle cx="160" cy="62" r="26"/>
+    <circle cx="26" cy="104" r="20"/><circle cx="174" cy="104" r="20"/>
+  </g>
+  <g stroke="#3b2459" stroke-width="2.2">
+    <rect x="52" y="6" width="14" height="30" rx="7" fill="#ff7eb6" transform="rotate(-28 59 21)"/>
+    <rect x="116" y="2" width="14" height="30" rx="7" fill="#58d6c9" transform="rotate(20 123 17)"/>
+    <rect x="20" y="52" width="14" height="30" rx="7" fill="#ffd34d" transform="rotate(-60 27 67)"/>
+    <rect x="166" y="50" width="14" height="30" rx="7" fill="#ff7eb6" transform="rotate(62 173 65)"/>
+  </g>
+  <!-- face -->
+  <ellipse cx="100" cy="116" rx="70" ry="88" fill="#f3c6a2" stroke="#4a2a1a" stroke-width="3"/>
+  <path d="M60 60 q40 -12 80 0 M56 72 q44 -10 88 0" fill="none" stroke="#d29b78" stroke-width="2.2"/>
+  <ellipse cx="50" cy="150" rx="17" ry="12" fill="#ff6f91" opacity=".7"/>
+  <ellipse cx="150" cy="150" rx="17" ry="12" fill="#ff6f91" opacity=".7"/>
+  <!-- earrings -->
+  <circle cx="29" cy="140" r="9" fill="#ffd34d" stroke="#8a6410" stroke-width="2.5"/>
+  <circle cx="171" cy="140" r="9" fill="#ffd34d" stroke="#8a6410" stroke-width="2.5"/>
+  <!-- angry drawn-on eyebrows -->
+  <path d="M42 78 Q64 52 92 84" fill="none" stroke="#3b2459" stroke-width="5"/>
+  <path d="M158 78 Q136 52 108 84" fill="none" stroke="#3b2459" stroke-width="5"/>
+  <!-- cat-eye glasses, bulging crossed eyes -->
+  <path d="M30 92 L48 98 M170 92 L152 98 M92 106 q8 -7 16 0" stroke="#d6246e" stroke-width="4" fill="none"/>
+  <path d="M40 96 Q72 82 98 100 Q96 130 66 130 Q40 128 40 96 Z" fill="#fff4fa" fill-opacity=".8" stroke="#d6246e" stroke-width="4.5"/>
+  <path d="M160 96 Q128 82 102 100 Q104 130 134 130 Q160 128 160 96 Z" fill="#fff4fa" fill-opacity=".8" stroke="#d6246e" stroke-width="4.5"/>
+  <circle cx="68" cy="110" r="17" fill="#fff" stroke="#4a2a1a" stroke-width="2"/>
+  <circle cx="132" cy="110" r="17" fill="#fff" stroke="#4a2a1a" stroke-width="2"/>
+  <path d="M54 106 l8 3 M82 104 l-8 4 M146 106 l-8 3 M118 104 l8 4" stroke="#d64040" stroke-width="1.4"/>
+  <circle cx="78" cy="112" r="6.5" fill="#1e1e1e"/><circle cx="122" cy="112" r="6.5" fill="#1e1e1e"/>
+  <circle cx="76" cy="110" r="2" fill="#fff"/><circle cx="120" cy="110" r="2" fill="#fff"/>
+  <g fill="#fff" stroke="#d6246e" stroke-width="1"><circle cx="44" cy="90" r="3"/><circle cx="156" cy="90" r="3"/></g>
+  <!-- pointy nose with wart -->
+  <path d="M100 112 Q92 144 84 154 Q96 164 114 156 Q106 144 100 112 Z" fill="#eaa684" stroke="#4a2a1a" stroke-width="2.5"/>
+  <circle cx="108" cy="150" r="3.4" fill="#7a3d22"/>
+  <!-- huge smeared lipstick mouth, dentures, tongue -->
+  <path d="M52 176 Q60 164 100 176 Q140 164 150 178 Q158 204 100 214 Q44 204 52 176 Z" fill="#e0102a" stroke="#6b0010" stroke-width="2.5"/>
+  <path d="M64 182 Q100 172 138 182 Q132 204 100 208 Q70 204 64 182 Z" fill="#5a0c14"/>
+  <path d="M68 182 Q100 174 134 182 L132 192 Q100 186 70 192 Z" fill="#fffbe8" stroke="#4a2a1a" stroke-width="1.4"/>
+  <path d="M96 176 v14" stroke="#4a2a1a" stroke-width="1.4"/><path d="M84 178 v12 M110 178 v12 M122 180 v10" stroke="#4a2a1a" stroke-width="1"/>
+  <rect x="100" y="180" width="8" height="11" fill="#5a0c14"/>
+  <path d="M82 207 Q100 192 120 205 Q100 214 82 207 Z" fill="#ff5c7a"/>
+  <path d="M148 186 q10 6 6 14" stroke="#e0102a" stroke-width="5" fill="none"/>
+  <!-- anger mark + steam -->
+  <g fill="none" stroke="#d62d20" stroke-width="3.2"><path d="M150 28 q8 4 4 10 q-8 -2 -4 -10 M158 40 l8 -4 M154 46 l8 6"/></g>
+  <path d="M6 160 q-6 -8 0 -14 q6 -6 0 -14" stroke="#cfcfcf" stroke-width="3" fill="none"/>
+</svg>
+<div class="order-error-text">fais le dans l'ordre !</div></div>
 
 <script>
 /* ===================== shared experiment data ===================== */
@@ -670,9 +863,12 @@ function flashExplosion(overlayId){
 
 // Full-screen red reminder used in tab 1 whenever an action is attempted out of order.
 let orderErrorTimer = null;
-function showOrderError(){
+function showOrderError(msg){
   const overlay = document.getElementById('orderErrorOverlay');
   if(!overlay) return;
+  const txt = overlay.querySelector('.order-error-text');
+  if(txt) txt.textContent = msg || 'fais le dans l\'ordre !';
+  overlay.classList.toggle('neon', !msg);
   overlay.classList.add('show');
   if(orderErrorTimer) clearTimeout(orderErrorTimer);
   orderErrorTimer = setTimeout(()=> overlay.classList.remove('show'), 1600);
@@ -869,69 +1065,56 @@ function makeBottle(volumeL){
   const group = new THREE.Group();
   const H=1.3*factor, bodyH=1.02*factor, neckH=0.28*factor, bodyR=0.30*factor, neckR=0.11*factor, neckRbot=0.154*factor;
   const glassMat = new THREE.MeshStandardMaterial({color:0xEFF6EC, transparent:true, opacity:0.22, roughness:0.08, side:THREE.DoubleSide, depthWrite:false});
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.97,bodyR,bodyH,24,1,true), glassMat);
-  body.position.y = -H/2+bodyH/2; body.renderOrder=1; group.add(body);
+  // Rounded bottle profile: straight body -> smooth S-shaped rounded shoulder -> short tapered neck.
+  const yB = -H/2, yTopBody = -H/2+bodyH;
+  const yS0 = yTopBody-0.16*factor, yS1 = yTopBody+0.14*factor, yTop = H/2;
+  function profileR(y){
+    if(y<=yS0) return bodyR*(1-0.03*Math.max(0,(y-yB)/(yS0-yB)));
+    if(y<=yS1){ const u=(y-yS0)/(yS1-yS0), e=0.5-0.5*Math.cos(Math.PI*u); return bodyR*0.97+(neckRbot-bodyR*0.97)*e; }
+    return neckRbot+(neckR-neckRbot)*((y-yS1)/(yTop-yS1));
+  }
+  function lathePoints(y0,y1,k,capped){
+    const pts=[]; if(capped) pts.push(new THREE.Vector2(0.0001,y0));
+    const n=Math.max(2,Math.ceil(44*(y1-y0)/H));
+    for(let i=0;i<=n;i++){ const y=y0+(y1-y0)*i/n; pts.push(new THREE.Vector2(Math.max(0.0001,profileR(y)*k),y)); }
+    if(capped) pts.push(new THREE.Vector2(0.0001,y1));
+    return pts;
+  }
+  const body = new THREE.Mesh(new THREE.LatheGeometry(lathePoints(yB,yTop,1,false),32), glassMat);
+  body.renderOrder=1; group.add(body);
   const bodyBottom = new THREE.Mesh(new THREE.CircleGeometry(bodyR,24), glassMat);
   bodyBottom.rotation.x=Math.PI/2; bodyBottom.position.y=-H/2; bodyBottom.renderOrder=1; group.add(bodyBottom);
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(neckR,neckRbot,neckH,16,1,true), glassMat);
-  neck.position.y = H/2-neckH/2; neck.renderOrder=1; group.add(neck);
   const highlightMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.2, side:THREE.DoubleSide, depthWrite:false});
-  const highlight = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.98*1.01,bodyR*1.01,bodyH*0.85,16,1,true,0.2,0.45), highlightMat);
+  const highlight = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.98*1.01,bodyR*1.01,bodyH*0.7,16,1,true,0.2,0.45), highlightMat);
   highlight.position.y = -H/2+bodyH/2; highlight.renderOrder=1.5; group.add(highlight);
   // glass details: flat shoulder, thick base ring, moulded threads, polished lip, extra reflections
   const edgeMat = new THREE.MeshStandardMaterial({color:0xF4FFFB, transparent:true, opacity:0.5, roughness:0.05, metalness:0.2, depthWrite:false});
-  const shoulder = new THREE.Mesh(new THREE.RingGeometry(neckRbot, bodyR*0.97, 32), glassMat);
-  shoulder.rotation.x=-Math.PI/2; shoulder.position.y=-H/2+bodyH; shoulder.renderOrder=1; group.add(shoulder);
   const baseRing = new THREE.Mesh(new THREE.TorusGeometry(bodyR*0.97, 0.016*factor, 8, 32), edgeMat);
   baseRing.rotation.x=Math.PI/2; baseRing.position.y=-H/2+0.012*factor; baseRing.renderOrder=1.4; group.add(baseRing);
   const basePuck = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.95,bodyR*0.95,0.035*factor,32), new THREE.MeshStandardMaterial({color:0xDDEFEA, transparent:true, opacity:0.35, roughness:0.1, depthWrite:false}));
   basePuck.position.y=-H/2+0.018*factor; basePuck.renderOrder=1.2; group.add(basePuck);
-  const shoulderRing = new THREE.Mesh(new THREE.TorusGeometry((neckRbot+bodyR*0.97)/2, 0.01*factor, 6, 32), edgeMat);
-  shoulderRing.rotation.x=Math.PI/2; shoulderRing.position.y=-H/2+bodyH; shoulderRing.scale.set(1,1,1); shoulderRing.renderOrder=1.4; group.add(shoulderRing);
-  for(let k=0;k<3;k++){
-    const f = 0.2+k*0.28, r = neckRbot+(neckR-neckRbot)*f;
-    const th = new THREE.Mesh(new THREE.TorusGeometry(r*1.02, 0.009*factor, 6, 24), edgeMat);
-    th.rotation.x=Math.PI/2; th.position.y=-H/2+bodyH+neckH*f; th.renderOrder=1.4; group.add(th);
-  }
-  const lip = new THREE.Mesh(new THREE.TorusGeometry(neckR*1.04, 0.018*factor, 8, 24), edgeMat);
-  lip.rotation.x=Math.PI/2; lip.position.y=H/2; lip.renderOrder=1.4; group.add(lip);
   const streakMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.4, side:THREE.DoubleSide, depthWrite:false});
-  const streak1 = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.985,bodyR*1.005,bodyH*0.8,12,1,true,2.55,0.1), streakMat);
+  const streak1 = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.985,bodyR*1.005,bodyH*0.68,12,1,true,2.55,0.1), streakMat);
   streak1.position.y=-H/2+bodyH*0.5; streak1.renderOrder=1.6; group.add(streak1);
   const streak2 = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.985,bodyR*1.005,bodyH*0.5,12,1,true,3.9,0.05), streakMat);
   streak2.position.y=-H/2+bodyH*0.45; streak2.renderOrder=1.6; group.add(streak2);
-  const neckStreak = new THREE.Mesh(new THREE.CylinderGeometry(neckR*1.0,neckRbot*1.0,neckH*0.8,8,1,true,0.35,0.22), streakMat);
-  neckStreak.position.y=H/2-neckH/2; neckStreak.renderOrder=1.6; group.add(neckStreak);
   // water is split in two parts (body + neck) so it always respects the cone-shaped neck instead of overflowing it
   const waterBaseColor = 0xCFE9F0; // much clearer / paler water than before
   const waterMat = new THREE.MeshStandardMaterial({color:waterBaseColor, map:waterTex, bumpMap:waterTex, bumpScale:0.008, transparent:true, opacity:0.5, depthWrite:false});
-  const bodyWater = new THREE.Mesh(new THREE.CylinderGeometry(bodyR*0.92,bodyR*0.92,1,24), waterMat);
-  bodyWater.renderOrder=2; group.add(bodyWater);
-  const neckWater = new THREE.Mesh(new THREE.CylinderGeometry(neckR*0.85,neckRbot*0.85,1,16), waterMat);
-  neckWater.renderOrder=2; group.add(neckWater);
+  waterMat.side = THREE.DoubleSide;
+  const water = new THREE.Mesh(new THREE.BufferGeometry(), waterMat);
+  water.renderOrder=2; group.add(water);
+  function setWater(from,to){
+    if(to-from<0.004){ water.visible=false; return; }
+    water.visible=true;
+    water.geometry.dispose();
+    water.geometry = new THREE.LatheGeometry(lathePoints(from,to,0.92,true),32);
+  }
   group.traverse(o=>{ if(o.isMesh) o.castShadow=true; });
   const bodyBottomY=-H/2, bodyTopY=-H/2+bodyH, neckTopY=H/2;
-  function setBodyWater(from,to){ const h=Math.max(0.0001,to-from); bodyWater.scale.y=h; bodyWater.position.y=(from+to)/2; }
-  function setNeckWater(from,to){ const h=Math.max(0.0001,to-from); neckWater.scale.y=h; neckWater.position.y=(from+to)/2; }
   let curFill=0, curAir=0;
-  function applyFilling(f){ // fills from the bottom (base) upward, respecting body then neck shape
-    const totalH = f*H;
-    const bH = Math.min(totalH, bodyH);
-    const nH = Math.max(0, totalH-bodyH);
-    setBodyWater(bodyBottomY, bodyBottomY+bH);
-    setNeckWater(bodyTopY, bodyTopY+nH);
-  }
-  function applyVenting(a){ // air pocket grows from the closed base (top once flipped), water recedes toward the neck
-    const airH = a*H;
-    const interfaceY = -H/2+airH; // top of remaining water
-    if(interfaceY <= bodyTopY){
-      setBodyWater(interfaceY, bodyTopY);
-      setNeckWater(bodyTopY, neckTopY);
-    } else {
-      setBodyWater(bodyTopY, bodyTopY);
-      setNeckWater(Math.min(interfaceY,neckTopY), neckTopY);
-    }
-  }
+  function applyFilling(f){ setWater(bodyBottomY, bodyBottomY+Math.min(1,f)*H); } // fills from the base upward
+  function applyVenting(a){ setWater(Math.min(neckTopY, -H/2+a*H), neckTopY); } // air pocket grows from the closed base, water recedes toward the neck
   function setFilling(target){ const from=curFill; tween(350,p=>{ curFill=from+(target-from)*p; applyFilling(curFill); }); }
   function setVenting(target){ const from=curAir; tween(350,p=>{ curAir=from+(target-from)*p; applyVenting(curAir); }); }
   applyFilling(0); // the bottle must start empty
@@ -1472,35 +1655,50 @@ function SimpleOrbit(camera, dom){
   this.minRadius=2.6; this.maxRadius=10.5; this.minPhi=0.25; this.maxPhi=1.5;
   this._drag=false; this._lastX=0; this._lastY=0; this._pinchDist=null;
   dom.style.touchAction='none';
-  dom.addEventListener('pointerdown', e=>{ this._drag=true; this._lastX=e.clientX; this._lastY=e.clientY; dom.style.cursor='grabbing'; try{dom.setPointerCapture(e.pointerId);}catch(err){} });
-  dom.addEventListener('pointerup', ()=>{ this._drag=false; dom.style.cursor='grab'; });
-  dom.addEventListener('pointercancel', ()=>{ this._drag=false; dom.style.cursor='grab'; });
+  // Pointer events only (no separate touch handlers): one finger rotates, two fingers pinch-zoom.
+  // Each pointer is tracked by id, so a second finger can never make the rotation "jump".
+  const pts = new Map();
+  const self = this;
+  function pinchDist(){ const v=Array.from(pts.values()); return Math.hypot(v[0].x-v[1].x, v[0].y-v[1].y); }
+  dom.addEventListener('pointerdown', e=>{
+    pts.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    try{dom.setPointerCapture(e.pointerId);}catch(err){}
+    dom.style.cursor='grabbing';
+    self._pinchDist = pts.size===2 ? pinchDist() : null;
+  });
+  function endPointer(e){
+    pts.delete(e.pointerId);
+    try{dom.releasePointerCapture(e.pointerId);}catch(err){}
+    self._pinchDist = pts.size===2 ? pinchDist() : null;
+    if(pts.size===0) dom.style.cursor='grab';
+  }
+  dom.addEventListener('pointerup', endPointer);
+  dom.addEventListener('pointercancel', endPointer);
   dom.addEventListener('pointermove', e=>{
-    if(!this._drag) return;
-    const dx=e.clientX-this._lastX, dy=e.clientY-this._lastY;
-    this._lastX=e.clientX; this._lastY=e.clientY;
-    this.theta -= dx*0.008;
-    this.phi = Math.min(this.maxPhi, Math.max(this.minPhi, this.phi - dy*0.008));
-    this.update();
+    const p = pts.get(e.pointerId);
+    if(!p) return;
+    const dx=e.clientX-p.x, dy=e.clientY-p.y;
+    p.x=e.clientX; p.y=e.clientY;
+    if(pts.size===1){
+      this.theta -= dx*0.008;
+      this.phi = Math.min(this.maxPhi, Math.max(this.minPhi, this.phi - dy*0.008));
+      this.update();
+    } else if(pts.size===2){
+      const dist = pinchDist();
+      if(this._pinchDist){
+        // proportional zoom: fingers spreading = closer, pinching = farther
+        this.radius = Math.min(this.maxRadius, Math.max(this.minRadius, this.radius * (this._pinchDist/Math.max(dist,1))));
+        this.update();
+      }
+      this._pinchDist = dist;
+    }
   });
   dom.addEventListener('wheel', e=>{
     e.preventDefault();
     this.radius = Math.min(this.maxRadius, Math.max(this.minRadius, this.radius + e.deltaY*0.003));
     this.update();
   }, {passive:false});
-  dom.addEventListener('touchmove', e=>{
-    if(e.touches.length===2){
-      e.preventDefault();
-      const dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      if(this._pinchDist!=null){
-        this.radius = Math.min(this.maxRadius, Math.max(this.minRadius, this.radius + (this._pinchDist-dist)*0.01));
-        this.update();
-      }
-      this._pinchDist=dist;
-    }
-  }, {passive:false});
-  dom.addEventListener('touchend', e=>{ if(e.touches.length<2) this._pinchDist=null; });
+  dom.addEventListener('touchmove', e=>{ e.preventDefault(); }, {passive:false});
   this.update = function(){
     this.camera.position.set(
       this.target.x + this.radius*Math.sin(this.phi)*Math.sin(this.theta),
@@ -1662,13 +1860,14 @@ function buildScene1(){
   const colorRow = document.getElementById('colorRow1');
   // if the student keeps versant de l'eau après le ras bord, la bouteille finit par déborder puis éclater
   // (seuil aléatoire, comme pour le ballon de l'onglet 2)
-  function randomOverfillThreshold(){ return 2 + Math.floor(Math.random()*4); }
+  function randomOverfillThreshold(){ return 1; } // 9 clics remplissent la bouteille, le 10e la fait exploser
   let overfillBurstAt = randomOverfillThreshold();
   function explodeBottle1(){
     state.exploded = true;
     burstMsg1.innerHTML = '💥 <b>Boom !</b> Trop d\'eau : la bouteille a éclaté. Appuie sur « Recommencer ».';
     burstMsg1.classList.add('show');
     flashExplosion('explosionFlash1');
+    setTimeout(()=>{ if(state.exploded) showBreakSequence(); }, 1300);
     const center = bottleObj.getNeckWorld().add(new THREE.Vector3(0,-bottleObj.H*0.3,0));
     const shreds=[];
     for(let i=0;i<12;i++){
@@ -1690,7 +1889,7 @@ function buildScene1(){
     bottleObj.stopShimmer();
     bottleObj.group.visible = false;
     puzzleActionBtns.forEach(b=>b.disabled=true);
-    chooseBottleBtn.disabled = true;
+    chooseBottleBtn.disabled = true; colorantBtn.disabled = true;
   }
   // Ajouter un colorant est désormais l'étape 3, obligatoire : impossible d'ouvrir les pastilles
   // avant d'avoir rempli la bouteille, et impossible de passer au bouchon sans en avoir choisi une.
@@ -1833,6 +2032,7 @@ function buildScene1(){
     if(state.fillPresses>=9){
       readout.innerHTML = '<b>La bouteille est remplie à ras bord !</b> Ajoute maintenant un colorant.';
       nextStep = 2;
+      colorantBtn.disabled = false;
     } else {
       readout.innerHTML = 'Continue à remplir la bouteille ('+state.fillPresses+'/9).';
     }
@@ -1843,22 +2043,22 @@ function buildScene1(){
     if(nextStep!==3){ wrongOrder(); return; }
     bottleObj.cap.visible=true; bottleObj.cap.scale.set(0.001,0.001,0.001);
     tween(300,p=>{ const s=0.001+p*0.999; bottleObj.cap.scale.set(s,s,s); }, ()=>{ readout.innerHTML='Le bouchon ferme l\'ouverture : aucun liquide ne peut sortir.'; });
-    nextStep = 4;
+    nextStep = 4; boucherBtn.disabled = true;
   };
   retournerBtn.onclick = ()=>{
     if(nextStep!==4){ wrongOrder(); return; }
     const r0=bottleObj.group.rotation.x; tween(800,p=>{ bottleObj.group.rotation.x=r0+(Math.PI-r0)*p; }, ()=>{ readout.innerHTML='Bouteille retournée : le bouchon maintient toujours l\'ouverture fermée.'; });
-    nextStep = 5;
+    nextStep = 5; retournerBtn.disabled = true;
   };
   plongerBtn.onclick = ()=>{
     if(nextStep!==5){ wrongOrder(); return; }
     const startPos=bottleObj.group.position.clone(); tween(900,p=>{ bottleObj.group.position.lerpVectors(startPos,submergedPos,p); }, ()=>{ readout.innerHTML='L\'ouverture est maintenant immergée dans le cristallisoir.'; });
-    nextStep = 6;
+    nextStep = 6; plongerBtn.disabled = true;
   };
   deboucherBtn.onclick = ()=>{
     if(nextStep!==6){ wrongOrder(); return; }
     tween(300,p=>{ const s=1-0.999*p; bottleObj.cap.scale.set(s,s,s); }, ()=>{ bottleObj.cap.visible=false; readout.innerHTML='Aucun liquide ne s\'échappe : la pression atmosphérique le maintient en place.'; });
-    nextStep = 7;
+    nextStep = 7; deboucherBtn.disabled = true;
   };
   tuyauBtn.onclick = ()=>{
     if(nextStep!==7){ wrongOrder(); return; }
@@ -1867,9 +2067,10 @@ function buildScene1(){
     tween(700,p=>{ tubeGroup.children.forEach(c=>{ c.material.opacity=p; }); }, ()=>{
       readout.innerHTML='Le tuyau relie l\'ouverture immergée à l\'extérieur, sans traverser aucun verre.';
     });
-    nextStep = 8;
+    nextStep = 8; tuyauBtn.disabled = true;
   };
   soufflerBtn.onclick = ()=>{
+    if(nextStep===9){ showOrderError("t'as mis trop d'air !"); return; }
     if(nextStep!==8){ wrongOrder(); return; }
     if(state.air===0){ mouth.visible=true; mouth.position.copy(tubeOuterPos()).add(new THREE.Vector3(0.15,0,0.05)); tween(350,p=>{ const s=0.001+p*0.999; mouth.scale.set(s,s,s); }); }
     state.air = Math.min(100, state.air+16);
@@ -1888,8 +2089,8 @@ function buildScene1(){
     nextStep = 0;
     state.colorHex=null; state.bottleVolume=null; state.liquidType=null; state.fillPresses=0; state.air=0;
     state.overfillPresses=0; state.exploded=false; overfillBurstAt = randomOverfillThreshold();
-    burstMsg1.classList.remove('show');
-    clearWreck(); colorantBtn.disabled = false;
+    burstMsg1.classList.remove('show'); hideBreakSequence();
+    clearWreck(); colorantBtn.disabled = true;
     neonRed1.classList.remove('show'); if(neonRedTimer1){ clearTimeout(neonRedTimer1); neonRedTimer1=null; }
     if(bottleObj){ bottleObj.stopShimmer(); scene.remove(bottleObj.group); bottleObj=null; }
     candidates.forEach(c=>{ c.bottle.stopShimmer(); scene.remove(c.bottle.group); scene.remove(c.lbl); });
@@ -2002,20 +2203,20 @@ function buildScene2(){
       balance.setDisplay(currentMass().toFixed(1)+' g');
       readout.innerHTML='La masse affichée change avec la quantité d\'air : regarde l\'écran devant la balance.';
     } else {
-      readout.innerHTML = state.inflate>=99.9 ? '<b>Le ballon est bien gonflé.</b> Quand tu es prêt, allume la balance puis pèse-le.' : 'Continue à gonfler le ballon.';
+      readout.innerHTML = state.inflate>=99.9 ? '<b>Le ballon est bien gonflé.</b> Quand tu es prêt, allume la balance puis pose-le dessus.' : 'Continue à gonfler le ballon.';
     }
   };
   turnOnBtn.onclick = function(){
     if(state.exploded || state.balanceOn) return;
     state.balanceOn = true;
     balance.setDisplay('0.0 g');
-    weighBtn.disabled = false;
     readout.innerHTML = 'Balance allumée et tarée. Pose le ballon dessus pour le peser.';
   };
   weighBtn.onclick = function(){
-    if(state.exploded || !state.balanceOn) return;
+    if(state.exploded) return;
+    if(!state.balanceOn){ showNotNow(); return; }
     if(!state.onScale){
-      readout.innerHTML='Pesée en cours…';
+      readout.innerHTML='Le ballon est posé sur la balance…';
       const start = balloon.group.position.clone();
       tween(800, p=>{ balloon.group.position.lerpVectors(start, weighPos, p); }, ()=>{
         state.onScale = true;
@@ -2034,7 +2235,7 @@ function buildScene2(){
     state.inflate=0; state.onScale=false; state.balanceOn=false; state.pressCount=0; state.exploded=false;
     burstAt = randomBurstThreshold();
     balloon.group.position.copy(restPos); balloon.setPose(0.30, 0.035); balloon.group.visible=true;
-    inflateBtn.disabled=false; turnOnBtn.disabled=false; weighBtn.disabled=true;
+    inflateBtn.disabled=false; turnOnBtn.disabled=false; weighBtn.disabled=false;
     balance.setDisplay(null); experiment.massGonfle=null;
     sign2.visible=false;
     flyTo(trueDefaultCam2, 700);
@@ -2610,6 +2811,39 @@ function buildScene4(){
     onEnter(){ introLabel.showThenFade(5000); introBalance.showThenFade(2000); }
   };
 }
+
+/* ===================== "pas tout de suite !" (tab 2) ===================== */
+let notNowTimer = null;
+function showNotNow(){
+  const o = document.getElementById('notNowOverlay');
+  o.classList.add('show');
+  if(notNowTimer) clearTimeout(notNowTimer);
+  notNowTimer = setTimeout(()=> o.classList.remove('show'), 1800);
+}
+document.getElementById('notNowOverlay').addEventListener('click', ()=>{
+  document.getElementById('notNowOverlay').classList.remove('show');
+  if(notNowTimer){ clearTimeout(notNowTimer); notNowTimer=null; }
+});
+
+/* ===================== séquence "tout cassé" (onglet 1) : 2 dessins qui s'enchaînent ===================== */
+let breakTimers = [];
+function hideBreakSequence(){
+  breakTimers.forEach(t=>clearTimeout(t)); breakTimers = [];
+  document.getElementById('breakOverlay').classList.remove('show');
+}
+function showBreakSequence(){
+  const o = document.getElementById('breakOverlay');
+  const a1 = document.getElementById('breakArt1'), a2 = document.getElementById('breakArt2');
+  const txt = document.getElementById('breakText');
+  hideBreakSequence();
+  a1.style.display='flex'; a2.style.display='none'; txt.textContent = "arrête de tout casser !";
+  o.classList.add('show');
+  breakTimers.push(setTimeout(()=>{
+    a1.style.display='none'; a2.style.display='flex'; txt.textContent = "c'est toi qui nettoie";
+  }, 2300));
+  breakTimers.push(setTimeout(hideBreakSequence, 4800));
+}
+document.getElementById('breakOverlay').addEventListener('click', hideBreakSequence);
 
 /* ===================== tabs & cahier ===================== */
 let tab5LinesTimer = null;
