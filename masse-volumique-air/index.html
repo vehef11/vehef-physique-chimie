@@ -21,17 +21,17 @@ body{
   background-image:
     repeating-linear-gradient(var(--grid) 0 1px, transparent 1px 28px),
     repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 28px);
-  color:var(--ink); font-family:var(--font-body); min-height:100vh; padding:14px 10px 50px;
+  color:var(--ink); font-family:var(--font-body); min-height:100vh; padding:0 0 50px;
 }
-.app{max-width:640px;margin:0 auto;}
-.cover{max-width:460px; margin:0 auto; text-align:center; padding:6px 6px 4px;}
+.app{max-width:760px;margin:0 auto;}
+.cover{max-width:460px; margin:0 auto; box-sizing:border-box; text-align:center; padding:6px 6px 4px;}
 .cover .eyebrow{font-family:var(--font-mono); letter-spacing:.14em; text-transform:uppercase; font-size:.66rem; color:var(--ink-soft);}
 .cover h1{font-family:var(--font-display); font-weight:600; font-size:clamp(.68rem,3.9vw,1.05rem); white-space:nowrap; margin:.2em 0 .1em; line-height:1.15;}
 .cover .sub{font-size:.8rem; color:var(--ink-soft); margin-bottom:8px;}
 
 .tabs{
   display:flex; flex-wrap:nowrap; justify-content:stretch;
-  gap:2px; padding:0; margin:6px auto 0; width:100%; max-width:460px;
+  gap:2px; padding:0 8px; margin:6px auto 0; width:100%; max-width:460px;
 }
 .tabs button{
   flex:1 1 0; min-width:0; font-family:var(--font-mono); font-size:.6rem; font-weight:700;
@@ -42,7 +42,9 @@ body{
 }
 .tabs button.active{background:var(--panel); color:var(--ink); transform:translateY(0); box-shadow:0 -2px 0 inset var(--sage);}
 
-main{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 12px 18px;}
+main{background:transparent; border:none; border-radius:0; padding:10px 0 18px;}
+main .tab > *:not(.stage3d):not(.formula-modal){margin-left:12px; margin-right:12px;}
+main .tab > .stage3d{margin-left:0; margin-right:0;}
 .tab{display:none; animation:fadeIn .35s ease;}
 .tab.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
@@ -104,8 +106,8 @@ h2{font-family:var(--font-display); font-size:1.08rem; margin:0 0 8px; text-alig
 .prop-mix-readout{ text-align:center; font-family:var(--font-mono); font-size:.9rem; margin-top:10px; line-height:1.6; }
 
 .stage3d{
-  position:relative; width:100%; max-width:440px; aspect-ratio:1/1; margin:0 auto 10px;
-  background:#EDE8DC; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+  position:relative; width:100%; max-width:none; aspect-ratio:1/1; margin:0 auto 10px;
+  background:transparent; border:none; border-radius:0; overflow:hidden;
 }
 .stage3d canvas{width:100%; height:100%; display:block; cursor:grab; touch-action:none;}
 .orbit-hint{
@@ -271,7 +273,7 @@ textarea{width:100%; min-height:90px; font-family:var(--font-body); font-size:.8
 .swatch:active{transform:scale(.92);}
 .swatch.picked{outline:3px solid var(--ink); outline-offset:2px;}
 
-#ghostStage5{ aspect-ratio:unset; height:132px; max-width:460px; }
+#ghostStage5{ aspect-ratio:unset; height:132px; max-width:none; }
 .tab5-lines{
   position:absolute; inset:6px; display:flex; flex-direction:column; align-items:center; justify-content:center;
   gap:4px; z-index:4; pointer-events:none;
@@ -380,6 +382,55 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
 #tab-1 .stage3d{margin-bottom:6px;}
 #tab-1 h2{margin-bottom:4px;}
 #tab-1 .color-row{margin-top:6px;}
+
+/* tabs inside the animation frame, no titles */
+.app{position:relative;}
+main .tab > h2{display:none;}
+.tabs{position:absolute; top:0; left:0; right:0; z-index:20; max-width:none; margin:0; width:100%; padding:6px 6px 0; gap:3px; pointer-events:none;}
+.tabs button{pointer-events:auto; transform:none; border-bottom:1px solid var(--line); border-radius:9px; background:rgba(251,249,242,.82); backdrop-filter:blur(3px); padding:7px 2px 6px;}
+.tabs button.active{background:rgba(251,249,242,.96); transform:none; box-shadow:0 -3px 0 inset var(--sage);}
+main{padding-top:0;}
+.reset-overlay{top:44px;}
+.stage-extra{top:84px;}
+.stage-extra-btn{top:44px;}
+.scientist-face{top:44px;}
+.nap-moon.show{top:48px;}
+#ghostStage5{height:172px;}
+.tab5-lines{top:44px;}
+
+/* ===== onglet 4 : mauvais ordre -> sabre + tête coupée ===== */
+#slashOverlay{position:fixed; inset:0; z-index:10001; display:none; overflow:hidden; background:transparent;}
+#slashOverlay.show{display:block;}
+#slashDark{position:absolute; inset:0; background:#000; opacity:0; transition:opacity .9s ease-in;}
+#slashStain,#slashFx{position:absolute; inset:0; width:100%; height:100%;}
+#slashSword{position:absolute; left:0; top:0; width:64px; height:380px; opacity:0; transform-origin:50% 50%; will-change:transform,opacity; filter:drop-shadow(0 0 10px rgba(255,255,255,.55));}
+#slashSword svg{display:block; width:100%; height:100%;}
+#slashHead{position:absolute; left:0; top:0; width:150px; display:none; will-change:transform;}
+#slashHead svg{display:block; width:100%; height:auto; filter:drop-shadow(0 0 6px rgba(255,30,30,.5));}
+@keyframes slashShake{0%{transform:translate(0,0)}15%{transform:translate(-14px,9px)}30%{transform:translate(12px,-10px)}45%{transform:translate(-9px,-7px)}60%{transform:translate(8px,8px)}80%{transform:translate(-4px,3px)}100%{transform:translate(0,0)}}
+#slashOverlay.shake{animation:slashShake .38s linear;}
+
+/* fantôme de la sieste : il fonce vers l'écran (zoom animé) */
+.screamer-overlay{overflow:hidden;}
+.screamer-overlay.jump svg{max-width:none; width:62vmin; transform-origin:50% 55%; animation:ghostJump 1.05s cubic-bezier(.55,0,.9,.4) forwards;}
+@keyframes ghostJump{
+  0%{transform:scale(.03) translateY(8vmin) rotate(-8deg)}
+  55%{transform:scale(.95) translateY(0) rotate(4deg)}
+  70%{transform:scale(3.6) rotate(-3deg)}
+  78%{transform:scale(3.2) translate(-2vmin,1.4vmin) rotate(2.5deg)}
+  86%{transform:scale(3.7) translate(2vmin,-1.4vmin) rotate(-2.5deg)}
+  93%{transform:scale(3.3) translate(-1vmin,.8vmin) rotate(1.5deg)}
+  100%{transform:scale(3.5) rotate(0)}
+}
+
+/* bouton Surprise (onglet 4) : au milieu de l'écran, impossible à rater */
+.surprise-center{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:15;
+  font-family:var(--font-display); font-weight:800; font-size:1.15rem; line-height:1.25; padding:14px 24px; border-radius:26px;
+  max-width:84%; text-align:center; white-space:normal; border:3px solid #fff; background:#d62d20; color:#fff; cursor:pointer; box-shadow:0 6px 22px rgba(0,0,0,.45);
+  animation:surprisePulse 1.2s ease-in-out infinite; transition:opacity .25s;}
+.surprise-center:active{transform:translate(-50%,-50%) scale(.94);}
+.surprise-center:disabled{opacity:0; pointer-events:none; animation:none;}
+@keyframes surprisePulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
 </style>
 </head>
 <body>
@@ -516,8 +567,8 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
         <div class="orbit-hint">glisser : tourner · molette / pincer : zoomer</div>
         <div class="stage-extra">
           <button class="icon-btn" id="siesteBtn4">Faire une sieste</button>
-          <button class="icon-btn" id="surpriseBtn4" style="display:none;">Surprise</button>
         </div>
+        <button class="surprise-center" id="surpriseBtn4" style="display:none;">dézoome et regarde la SURPRISE</button>
         <div class="scientist-face" id="scientistFace4"></div>
         <div class="scene-dim" id="napDim4"></div>
         <div class="nap-moon" id="napMoon4">🌙</div>
@@ -590,179 +641,249 @@ footer{text-align:center; font-size:.7rem; color:var(--ink-soft); margin-top:14p
 <div class="screamer-overlay" id="screamerOverlay"></div>
 <div class="notnow-overlay" id="breakOverlay">
   <div id="breakArt1" style="display:none"><svg viewBox="-10 -14 220 270" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
-  <!-- electrified frizzy hair -->
-  <g fill="#f2f2f2" stroke="#3a3a3a" stroke-width="2.5">
-    <path d="M40 60 L8 40 L34 34 L14 8 L50 22 L48 -8 L74 16 L90 -12 L102 14 L124 -10 L130 18 L158 0 L152 28 L186 14 L162 46 L194 56 L160 72 Z"/>
-  </g>
-  <g stroke="#ffd34d" stroke-width="3" fill="none"><path d="M0 20 l10 8 l-6 6 l10 8 M196 24 l-10 8 l6 6 l-10 8"/></g>
-  <!-- sooty face -->
-  <ellipse cx="100" cy="132" rx="68" ry="96" fill="#f0c19b" stroke="#3a3a3a" stroke-width="3"/>
-  <path d="M40 100 Q30 140 50 176 Q70 150 62 110 Z" fill="#3a3a3a" opacity=".55"/>
-  <path d="M160 100 Q172 140 150 176 Q130 150 138 110 Z" fill="#3a3a3a" opacity=".55"/>
-  <ellipse cx="100" cy="196" rx="44" ry="20" fill="#3a3a3a" opacity=".45"/>
-  <g fill="#2a2a2a" opacity=".5"><circle cx="70" cy="70" r="5"/><circle cx="134" cy="64" r="4"/><circle cx="108" cy="56" r="3"/></g>
-  <!-- goggles pushed up, cracked -->
-  <rect x="26" y="48" width="148" height="20" rx="10" fill="#6b4a2a" stroke="#2a1a0c" stroke-width="2.5"/>
-  <circle cx="68" cy="58" r="17" fill="#bfe6ff" fill-opacity=".8" stroke="#2a1a0c" stroke-width="4"/>
-  <circle cx="132" cy="58" r="17" fill="#bfe6ff" fill-opacity=".8" stroke="#2a1a0c" stroke-width="4"/>
-  <path d="M60 46 l8 12 l-6 6 M138 48 l-8 10 l6 8" stroke="#2a1a0c" stroke-width="1.6" fill="none"/>
-  <!-- eyebrows -->
-  <path d="M42 94 L90 108" stroke="#2f2f2f" stroke-width="8"/><path d="M158 94 L110 108" stroke="#2f2f2f" stroke-width="8"/>
-  <!-- huge bloodshot eyes -->
-  <circle cx="68" cy="124" r="23" fill="#fff" stroke="#3a3a3a" stroke-width="2.5"/>
-  <circle cx="132" cy="124" r="23" fill="#fff" stroke="#3a3a3a" stroke-width="2.5"/>
-  <g stroke="#d33" stroke-width="1.6" fill="none"><path d="M48 124 l12 0 M52 112 l10 6 M52 136 l10 -6 M152 124 l-12 0 M148 112 l-10 6 M148 136 l-10 -6"/></g>
-  <circle cx="72" cy="124" r="6" fill="#111"/><circle cx="128" cy="124" r="6" fill="#111"/>
-  <!-- nose -->
-  <path d="M100 128 Q88 160 84 172 Q100 182 116 172 Q112 158 100 128 Z" fill="#e5a07c" stroke="#3a3a3a" stroke-width="2.5"/>
-  <!-- yelling mouth -->
-  <path d="M56 190 Q100 176 144 190 Q150 232 100 236 Q50 232 56 190 Z" fill="#4a0e10" stroke="#3a3a3a" stroke-width="2.8"/>
-  <path d="M62 192 Q100 182 138 192 L136 204 Q100 196 64 204 Z" fill="#fffbe8"/>
-  <path d="M82 226 Q100 208 120 226 Q100 238 82 226 Z" fill="#e0586a"/>
-  <!-- smoke puffs -->
-  <g fill="#8c8c8c" stroke="#4a4a4a" stroke-width="2" opacity=".9"><circle cx="8" cy="170" r="12"/><circle cx="-2" cy="150" r="9"/><circle cx="196" cy="176" r="13"/><circle cx="206" cy="154" r="9"/></g>
+  <!-- horn-like ear tufts -->
+  <path d="M38 78 L12 -6 L82 46 Z" fill="#6e4a24" stroke="#1a1008" stroke-width="3"/>
+  <path d="M162 78 L188 -6 L118 46 Z" fill="#6e4a24" stroke="#1a1008" stroke-width="3"/>
+  <!-- body -->
+  <ellipse cx="100" cy="152" rx="76" ry="92" fill="#8f6a3c" stroke="#1a1008" stroke-width="3"/>
+  <ellipse cx="100" cy="196" rx="46" ry="50" fill="#d9c08c" stroke="#1a1008" stroke-width="2.5"/>
+  <g stroke="#6b4a24" stroke-width="3" fill="none"><path d="M76 176 l10 8 l10 -8 M104 176 l10 8 l10 -8 M88 200 l10 8 l10 -8 M66 206 l10 8 l10 -8 M114 206 l10 8 l10 -8"/></g>
+  <!-- scratches -->
+  <path d="M40 92 L66 168 M50 88 L76 160" stroke="#3a0d0d" stroke-width="3" fill="none"/>
+  <!-- glaring eyes -->
+  <circle cx="66" cy="132" r="28" fill="#ffd21a" stroke="#1a1008" stroke-width="3"/>
+  <circle cx="134" cy="132" r="28" fill="#ffd21a" stroke="#1a1008" stroke-width="3"/>
+  <circle cx="66" cy="132" r="28" fill="none" stroke="#d62d20" stroke-width="4" opacity=".6"/>
+  <circle cx="134" cy="132" r="28" fill="none" stroke="#d62d20" stroke-width="4" opacity=".6"/>
+  <ellipse cx="70" cy="136" rx="4.5" ry="20" fill="#0a0a0a"/><ellipse cx="130" cy="136" rx="4.5" ry="20" fill="#0a0a0a"/>
+  <g stroke="#d62d20" stroke-width="1.6" fill="none"><path d="M42 134 l12 0 M46 120 l10 6 M154 134 l-12 0 M154 120 l-10 6"/></g>
+  <!-- furious slanted brows -->
+  <path d="M30 92 L98 134 L98 116 L36 76 Z" fill="#1a1008" stroke="#1a1008" stroke-width="3"/>
+  <path d="M170 92 L102 134 L102 116 L164 76 Z" fill="#1a1008" stroke="#1a1008" stroke-width="3"/>
+  <!-- hooked beak + snarl with fangs -->
+  <path d="M84 150 Q100 140 116 150 L108 182 Q100 194 92 182 Z" fill="#f0a21a" stroke="#1a1008" stroke-width="3"/>
+  <path d="M60 190 Q100 172 140 190 Q136 232 100 236 Q64 232 60 190 Z" fill="#3a0608" stroke="#1a1008" stroke-width="3"/>
+  <path d="M64 190 L74 208 L84 190 L94 210 L104 190 L114 210 L124 190 L134 208 L138 190 Q100 176 64 190 Z" fill="#fffbe8" stroke="#1a1008" stroke-width="2"/>
+  <path d="M76 228 L84 214 L92 232 M108 232 L116 214 L124 228" fill="#fffbe8" stroke="#1a1008" stroke-width="2"/>
+  <!-- knife in the talon -->
+  <g transform="translate(184 160) rotate(18)"><g stroke="#2a2a2e" stroke-width="2.5"><rect x="-6" y="2" width="12" height="28" rx="4" fill="#4a2c18"/><rect x="-11" y="-4" width="22" height="7" rx="3" fill="#8a8a92"/><path d="M-8 -4 L-8 -56 Q-6 -74 9 -84 L9 -4 Z" fill="#e6ecf2"/><path d="M-2 -10 L-2 -58" stroke="#fff" stroke-width="2.5" fill="none"/></g></g>
+  <ellipse cx="182" cy="164" rx="14" ry="12" fill="#8f6a3c" stroke="#1a1008" stroke-width="3"/>
+  <path d="M174 174 l-4 10 M182 176 l0 12 M190 174 l5 10" stroke="#f0a21a" stroke-width="4" fill="none"/>
+  <!-- anger veins + smoke -->
+  <g fill="none" stroke="#d62d20" stroke-width="3.2"><path d="M12 112 l10 -5 l-4 10 l10 -2 M178 34 q8 4 4 10 q-8 -2 -4 -10 M186 46 l8 -4 M182 52 l8 6"/></g>
+  <g fill="#6a6a6a" stroke="#333" stroke-width="2" opacity=".85"><circle cx="6" cy="190" r="10"/><circle cx="-2" cy="172" r="7"/></g>
 </svg>
 </div>
   <div id="breakArt2" style="display:none"><svg viewBox="-10 -6 220 256" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
-  <!-- headscarf -->
-  <path d="M26 96 Q18 20 100 12 Q182 20 174 96 Q100 70 26 96 Z" fill="#2fa84f" stroke="#1b5e2e" stroke-width="3"/>
-  <g fill="#ffe14d"><circle cx="60" cy="44" r="5"/><circle cx="100" cy="32" r="5"/><circle cx="140" cy="44" r="5"/><circle cx="80" cy="62" r="4"/><circle cx="122" cy="62" r="4"/></g>
-  <path d="M170 60 q26 -8 28 18 q-20 -4 -32 14 Z" fill="#2fa84f" stroke="#1b5e2e" stroke-width="3"/>
-  <path d="M30 100 q-10 10 -4 24 M170 100 q10 10 4 24" stroke="#c0661a" stroke-width="9" fill="none"/>
-  <!-- face -->
-  <ellipse cx="100" cy="140" rx="66" ry="92" fill="#e8b48c" stroke="#4a2a1a" stroke-width="3"/>
-  <path d="M34 100 Q100 66 166 100 Q100 84 34 100 Z" fill="#2fa84f" stroke="#1b5e2e" stroke-width="2"/>
-  <ellipse cx="50" cy="160" rx="15" ry="10" fill="#ff7a8a" opacity=".6"/><ellipse cx="150" cy="160" rx="15" ry="10" fill="#ff7a8a" opacity=".6"/>
-  <!-- one flat brow, one very raised brow -->
-  <path d="M46 112 L88 114" stroke="#3b2a1a" stroke-width="6"/>
-  <path d="M112 100 Q134 72 160 98" stroke="#3b2a1a" stroke-width="6" fill="none"/>
-  <!-- half-lidded smug eyes -->
-  <ellipse cx="68" cy="128" rx="20" ry="14" fill="#fff" stroke="#4a2a1a" stroke-width="2.5"/>
-  <ellipse cx="134" cy="126" rx="20" ry="16" fill="#fff" stroke="#4a2a1a" stroke-width="2.5"/>
-  <circle cx="78" cy="130" r="7" fill="#7a4a1a"/><circle cx="78" cy="130" r="3.2" fill="#000"/>
-  <circle cx="144" cy="128" r="7.5" fill="#7a4a1a"/><circle cx="144" cy="128" r="3.4" fill="#000"/>
-  <path d="M46 126 Q68 106 90 124 L90 120 Q68 104 48 118 Z" fill="#e8b48c" stroke="#4a2a1a" stroke-width="2.5"/>
-  <path d="M46 126 Q68 112 90 126" fill="#cf9770" stroke="#4a2a1a" stroke-width="2.5"/>
-  <!-- nose -->
-  <path d="M100 130 Q92 156 88 164 Q100 172 114 164 Q108 152 100 130 Z" fill="#dc9a78" stroke="#4a2a1a" stroke-width="2.5"/>
-  <!-- evil lopsided grin -->
-  <path d="M56 190 Q104 214 150 182 Q146 232 100 232 Q58 230 56 190 Z" fill="#5a1418" stroke="#4a2a1a" stroke-width="2.8"/>
-  <path d="M64 196 Q104 214 146 188 L142 202 Q102 224 68 208 Z" fill="#fffbe8"/>
-  <path d="M150 182 q10 -4 14 -14" stroke="#4a2a1a" stroke-width="3" fill="none"/>
-  <!-- soggy sponge -->
-  <g transform="rotate(-18 160 214)" stroke="#a07a00" stroke-width="3">
-    <rect x="124" y="196" width="72" height="40" rx="9" fill="#ffd21a"/>
-    <rect x="124" y="226" width="72" height="10" rx="5" fill="#2fa84f" stroke="#1b5e2e"/>
-    <g fill="#e0b000" stroke="none"><circle cx="142" cy="208" r="4"/><circle cx="166" cy="212" r="5"/><circle cx="184" cy="204" r="3.5"/><circle cx="154" cy="220" r="3"/></g>
-  </g>
-  <path d="M140 246 q-4 8 0 12 M170 246 q-3 8 1 12" stroke="#7cc8ff" stroke-width="3" fill="none"/>
-  <g fill="#bfe9ff" stroke="#2b7aa8" stroke-width="2" opacity=".95"><circle cx="14" cy="200" r="11"/><circle cx="-2" cy="176" r="7"/><circle cx="24" cy="222" r="6"/><circle cx="190" cy="120" r="6"/></g>
+  <ellipse cx="100" cy="150" rx="86" ry="80" fill="#4fa83c" stroke="#10331a" stroke-width="3"/>
+  <ellipse cx="100" cy="196" rx="58" ry="34" fill="#b5d98a" opacity=".6"/>
+  <circle cx="52" cy="68" r="38" fill="#4fa83c" stroke="#10331a" stroke-width="3"/>
+  <circle cx="148" cy="68" r="38" fill="#4fa83c" stroke="#10331a" stroke-width="3"/>
+  <g fill="#2e7a2a"><circle cx="86" cy="126" r="4"/><circle cx="116" cy="124" r="3.5"/><circle cx="100" cy="138" r="3"/><circle cx="30" cy="140" r="4"/><circle cx="172" cy="142" r="4"/></g>
+  <!-- glowing red slit eyes -->
+  <circle cx="52" cy="74" r="27" fill="#ff4a1f" stroke="#10331a" stroke-width="3"/>
+  <circle cx="148" cy="74" r="27" fill="#ff4a1f" stroke="#10331a" stroke-width="3"/>
+  <circle cx="52" cy="74" r="18" fill="#ffd21a" opacity=".55"/><circle cx="148" cy="74" r="18" fill="#ffd21a" opacity=".55"/>
+  <ellipse cx="54" cy="78" rx="4.5" ry="20" fill="#0a0a0a"/><ellipse cx="146" cy="78" rx="4.5" ry="20" fill="#0a0a0a"/>
+  <!-- heavy furious brow lids -->
+  <path d="M12 56 L82 90 L84 66 L20 36 Z" fill="#2e7a2a" stroke="#10331a" stroke-width="3"/>
+  <path d="M188 56 L118 90 L116 66 L180 36 Z" fill="#2e7a2a" stroke="#10331a" stroke-width="3"/>
+  <path d="M26 60 L74 82 M174 60 L126 82" stroke="#10331a" stroke-width="5" fill="none"/>
+  <circle cx="90" cy="116" r="3" fill="#10331a"/><circle cx="110" cy="116" r="3" fill="#10331a"/>
+  <!-- huge snarl, fangs, scar -->
+  <path d="M22 160 Q100 190 178 160 Q176 232 100 236 Q24 232 22 160 Z" fill="#3a0608" stroke="#10331a" stroke-width="3"/>
+  <path d="M26 162 L38 190 L50 170 L62 196 L76 174 L90 198 L104 176 L118 198 L132 174 L146 196 L156 170 L168 190 L176 162 Q100 186 26 162 Z" fill="#fffbe8" stroke="#10331a" stroke-width="2"/>
+  <path d="M60 232 L70 212 L80 236 M120 236 L130 212 L140 232" fill="#fffbe8" stroke="#10331a" stroke-width="2"/>
+  <path d="M84 216 Q100 200 118 216 Q100 232 84 216 Z" fill="#c8283c"/>
+  <path d="M130 100 L158 150" stroke="#3a0d0d" stroke-width="3.5" fill="none"/><path d="M138 100 l-4 8 M144 112 l-4 8 M150 124 l-4 8" stroke="#3a0d0d" stroke-width="2"/>
+  <!-- knife in the hand -->
+  <g transform="translate(178 208) rotate(-14)"><g stroke="#2a2a2e" stroke-width="2.5"><rect x="-6" y="2" width="12" height="28" rx="4" fill="#4a2c18"/><rect x="-11" y="-4" width="22" height="7" rx="3" fill="#8a8a92"/><path d="M-8 -4 L-8 -56 Q-6 -74 9 -84 L9 -4 Z" fill="#e6ecf2"/><path d="M-2 -10 L-2 -58" stroke="#fff" stroke-width="2.5" fill="none"/></g></g>
+  <ellipse cx="178" cy="212" rx="15" ry="13" fill="#4fa83c" stroke="#10331a" stroke-width="3"/>
+  <path d="M168 220 l-3 9 M178 224 l0 10 M188 220 l4 9" stroke="#10331a" stroke-width="3.5" fill="none"/>
+  <g fill="none" stroke="#d62d20" stroke-width="3.2"><path d="M4 120 l10 -5 l-4 10 l10 -2"/></g>
 </svg>
 </div>
   <div class="notnow-text" id="breakText"></div>
 </div>
 <div class="notnow-overlay" id="notNowOverlay">
   <svg viewBox="0 -4 200 226" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
-    <!-- wild white hair tufts + ears -->
-    <g fill="#f4f1ea" stroke="#4a2a1a" stroke-width="2.5">
-      <path d="M30 70 Q8 62 14 44 Q2 34 20 26 Q16 10 36 18 Q40 4 54 22 Q50 46 40 74 Z"/>
-      <path d="M170 70 Q192 62 186 44 Q198 34 180 26 Q184 10 164 18 Q160 4 146 22 Q150 46 160 74 Z"/>
-      <path d="M70 26 Q66 8 82 16 Q90 2 100 18 Q112 2 120 16 Q136 8 130 28 Q100 20 70 26 Z"/>
-    </g>
-    <ellipse cx="22" cy="118" rx="14" ry="22" fill="#e0a07a" stroke="#4a2a1a" stroke-width="2.5"/>
-    <ellipse cx="178" cy="118" rx="14" ry="22" fill="#e0a07a" stroke="#4a2a1a" stroke-width="2.5"/>
-    <path d="M14 120 q-12 -4 -10 -12 M14 128 q-14 2 -12 10 M186 120 q12 -4 10 -12 M186 128 q14 2 12 10" fill="none" stroke="#f4f1ea" stroke-width="3.5"/>
-    <!-- face -->
-    <ellipse cx="100" cy="112" rx="78" ry="92" fill="#eab48b" stroke="#4a2a1a" stroke-width="3"/>
-    <ellipse cx="100" cy="52" rx="60" ry="26" fill="#f2c8a4" opacity=".7"/>
-    <path d="M52 40 q48 -14 96 0 M46 52 q54 -14 108 0 M56 64 q44 -10 88 0" fill="none" stroke="#c98a62" stroke-width="2.2"/>
-    <path d="M118 34 l-8 12 l8 6 l-8 14" fill="none" stroke="#c0281c" stroke-width="3.2"/>
-    <g fill="#b46a46" opacity=".75"><circle cx="58" cy="78" r="3"/><circle cx="146" cy="70" r="2.5"/><circle cx="150" cy="150" r="3.2"/><circle cx="48" cy="142" r="2.4"/></g>
-    <ellipse cx="46" cy="148" rx="16" ry="11" fill="#f08a80" opacity=".6"/>
-    <ellipse cx="154" cy="148" rx="16" ry="11" fill="#f08a80" opacity=".6"/>
-    <!-- bushy angry eyebrows -->
-    <g fill="#f4f1ea" stroke="#4a2a1a" stroke-width="2.5">
-      <path d="M38 76 Q44 52 94 78 Q86 90 74 80 Q60 90 50 82 Q42 92 38 76 Z"/>
-      <path d="M162 70 Q156 40 108 66 Q116 80 128 72 Q142 82 152 74 Q160 82 162 70 Z"/>
-    </g>
-    <!-- crooked glasses, mismatched googly eyes -->
-    <g transform="rotate(-6 100 100)">
-      <path d="M92 104 q8 -8 16 0" fill="none" stroke="#2b2118" stroke-width="3.5"/>
-      <circle cx="68" cy="106" r="27" fill="#d9f0ff" fill-opacity=".75" stroke="#2b2118" stroke-width="4.5"/>
-      <circle cx="134" cy="102" r="21" fill="#d9f0ff" fill-opacity=".75" stroke="#2b2118" stroke-width="4.5"/>
-      <path d="M41 100 L20 94 M155 100 L178 94" stroke="#2b2118" stroke-width="3.5" fill="none"/>
-    </g>
-    <circle cx="68" cy="104" r="19" fill="#fff" stroke="#4a2a1a" stroke-width="2"/>
-    <circle cx="134" cy="102" r="13" fill="#fff" stroke="#4a2a1a" stroke-width="2"/>
-    <circle cx="76" cy="98" r="7.5" fill="#1b4fd1"/><circle cx="76" cy="98" r="3.4" fill="#000"/><circle cx="73" cy="95" r="1.8" fill="#fff"/>
-    <circle cx="127" cy="106" r="5.5" fill="#1b9a3a"/><circle cx="127" cy="106" r="2.6" fill="#000"/>
-    <path d="M60 82 l-4 -6 M68 80 l0 -8 M76 82 l4 -6" stroke="#c0281c" stroke-width="2" fill="none"/>
-    <!-- big bulbous nose -->
-    <path d="M100 100 Q82 142 78 156 Q84 174 100 172 Q118 174 122 156 Q116 142 100 100 Z" fill="#e0836c" stroke="#4a2a1a" stroke-width="2.5"/>
-    <ellipse cx="90" cy="160" rx="4" ry="5.5" fill="#6b2a1c"/><ellipse cx="110" cy="160" rx="4" ry="5.5" fill="#6b2a1c"/>
-    <ellipse cx="94" cy="140" rx="5" ry="8" fill="#f4a999" opacity=".7"/>
-    <path d="M92 174 q-6 12 -2 16 M108 174 q6 12 2 16" stroke="#f4f1ea" stroke-width="3" fill="none"/>
-    <!-- grumpy shouting mouth, tooth and tongue -->
-    <path d="M60 192 Q100 168 140 192 Q132 208 100 208 Q68 208 60 192 Z" fill="#5a1410" stroke="#4a2a1a" stroke-width="2.5"/>
-    <path d="M86 182 h11 v13 h-11 Z" fill="#fffbe8" stroke="#4a2a1a" stroke-width="1.5"/>
-    <path d="M80 207 Q100 190 122 205 Q100 214 80 207 Z" fill="#e0586a"/>
-    <!-- huge curly moustache -->
-    <path d="M100 172 Q80 164 58 176 Q36 186 36 168 Q26 160 40 154 Q40 170 54 168 Q80 154 100 172 Z" fill="#f4f1ea" stroke="#4a2a1a" stroke-width="2.5"/>
-    <path d="M100 172 Q120 164 142 176 Q164 186 164 168 Q174 160 160 154 Q160 170 146 168 Q120 154 100 172 Z" fill="#f4f1ea" stroke="#4a2a1a" stroke-width="2.5"/>
-    <!-- sweat drops and steam -->
-    <path d="M186 60 q-8 14 0 18 q8 -4 0 -18 Z" fill="#7cc8ff" stroke="#2b6ea8" stroke-width="1.5"/>
-    <path d="M14 70 q-6 12 0 15 q6 -3 0 -15 Z" fill="#7cc8ff" stroke="#2b6ea8" stroke-width="1.5"/>
-  </svg>
+  <!-- viking helmet horns -->
+  <path d="M30 50 Q4 40 8 6 Q22 24 40 30 Z" fill="#f1e8cf" stroke="#2a1a10" stroke-width="3"/>
+  <path d="M170 50 Q196 40 192 6 Q178 24 160 30 Z" fill="#f1e8cf" stroke="#2a1a10" stroke-width="3"/>
+  <ellipse cx="100" cy="116" rx="84" ry="94" fill="#8a6a50" stroke="#2a1a10" stroke-width="3"/>
+  <path d="M22 62 Q100 -14 178 62 L170 76 Q100 34 30 76 Z" fill="#7d838c" stroke="#2a1a10" stroke-width="3"/>
+  <path d="M96 20 L100 52 L104 20 Z" fill="#9aa0a8" stroke="#2a1a10" stroke-width="2"/>
+  <g fill="#5a3f2c" opacity=".7"><circle cx="54" cy="96" r="3"/><circle cx="148" cy="90" r="2.5"/><circle cx="154" cy="150" r="3.2"/><circle cx="46" cy="142" r="2.4"/></g>
+  <!-- scar -->
+  <path d="M138 80 L162 140" stroke="#3a0d0d" stroke-width="3.5" fill="none"/><path d="M144 86 l-6 3 M150 100 l-6 3 M156 114 l-6 3 M160 128 l-6 3" stroke="#3a0d0d" stroke-width="2"/>
+  <!-- tiny furious eyes under giant brows -->
+  <circle cx="62" cy="112" r="17" fill="#fff6d8" stroke="#2a1a10" stroke-width="2.5"/>
+  <circle cx="138" cy="112" r="17" fill="#fff6d8" stroke="#2a1a10" stroke-width="2.5"/>
+  <circle cx="66" cy="116" r="8" fill="#d62d20"/><circle cx="134" cy="116" r="8" fill="#d62d20"/>
+  <ellipse cx="67" cy="117" rx="2.5" ry="6.5" fill="#000"/><ellipse cx="133" cy="117" rx="2.5" ry="6.5" fill="#000"/>
+  <g stroke="#d62d20" stroke-width="1.4"><path d="M46 112 l7 0 M50 102 l7 5 M154 112 l-7 0 M150 102 l-7 5"/></g>
+  <g fill="#e9e2d0" stroke="#2a1a10" stroke-width="3">
+    <path d="M30 104 Q34 74 96 112 Q90 124 76 114 Q60 122 48 112 Q36 118 30 104 Z"/>
+    <path d="M170 104 Q166 74 104 112 Q110 124 124 114 Q140 122 152 112 Q164 118 170 104 Z"/>
+  </g>
+  <!-- snout + nostrils -->
+  <ellipse cx="100" cy="158" rx="50" ry="32" fill="#a98466" stroke="#2a1a10" stroke-width="2.5"/>
+  <ellipse cx="90" cy="140" rx="5" ry="7" fill="#1a0e08"/><ellipse cx="110" cy="140" rx="5" ry="7" fill="#1a0e08"/>
+  <!-- snarling mouth with teeth -->
+  <path d="M66 178 Q100 164 134 178 Q128 212 100 214 Q72 212 66 178 Z" fill="#3a0608" stroke="#2a1a10" stroke-width="2.8"/>
+  <path d="M70 178 L78 192 L86 176 L94 194 L100 176 L106 194 L114 176 L122 192 L130 178 Q100 168 70 178 Z" fill="#fffbe8" stroke="#2a1a10" stroke-width="1.8"/>
+  <path d="M84 208 Q100 196 118 208 Q100 216 84 208 Z" fill="#c8283c"/>
+  <!-- big tusks -->
+  <path d="M62 170 q-10 30 0 50 q12 -8 12 -46 Z M138 170 q10 30 0 50 q-12 -8 -12 -46 Z" fill="#fffbe8" stroke="#2a1a10" stroke-width="3"/>
+  <!-- moustache -->
+  <path d="M100 168 Q80 160 58 172 Q36 182 36 164 Q26 156 40 150 Q40 166 54 164 Q80 150 100 168 Z" fill="#e9e2d0" stroke="#2a1a10" stroke-width="2.5"/>
+  <path d="M100 168 Q120 160 142 172 Q164 182 164 164 Q174 156 160 150 Q160 166 146 164 Q120 150 100 168 Z" fill="#e9e2d0" stroke="#2a1a10" stroke-width="2.5"/>
+  <g fill="none" stroke="#d62d20" stroke-width="3.2"><path d="M20 124 q8 4 4 10 q-8 -2 -4 -10 M28 136 l8 -4"/></g>
+</svg>
   <div class="notnow-text">pas tout de suite !</div>
+</div>
+<div class="notnow-overlay" id="burstOrcOverlay">
+  <svg viewBox="0 0 320 250" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
+    <!-- ears -->
+    <path d="M50 96 L4 62 L54 66 Z" fill="#5a8a36" stroke="#142208" stroke-width="3"/>
+    <path d="M170 96 L216 62 L166 66 Z" fill="#5a8a36" stroke="#142208" stroke-width="3"/>
+    <!-- mohawk -->
+    <path d="M66 52 L76 12 L92 40 L104 2 L118 40 L134 8 L144 50 Z" fill="#1b1b1b" stroke="#000" stroke-width="2.5"/>
+    <!-- head -->
+    <ellipse cx="110" cy="104" rx="68" ry="72" fill="#6aa03f" stroke="#142208" stroke-width="3"/>
+    <path d="M46 98 Q110 56 174 98 Q110 76 46 98 Z" fill="#3f6a24" opacity=".7"/>
+    <!-- scar -->
+    <path d="M60 64 L96 126" stroke="#2a0a0a" stroke-width="4" fill="none"/><path d="M66 66 l-7 4 M74 82 l-7 4 M82 98 l-7 4 M90 114 l-7 4" stroke="#2a0a0a" stroke-width="2.2"/>
+    <!-- glowing red eyes -->
+    <circle cx="82" cy="100" r="14" fill="#ff3a1f" stroke="#142208" stroke-width="2.5"/>
+    <circle cx="138" cy="100" r="14" fill="#ff3a1f" stroke="#142208" stroke-width="2.5"/>
+    <ellipse cx="83" cy="102" rx="3" ry="11" fill="#000"/><ellipse cx="137" cy="102" rx="3" ry="11" fill="#000"/>
+    <path d="M56 76 L104 104 L104 90 L62 62 Z" fill="#1b1b1b" stroke="#000" stroke-width="3"/>
+    <path d="M164 76 L116 104 L116 90 L158 62 Z" fill="#1b1b1b" stroke="#000" stroke-width="3"/>
+    <!-- flat nose -->
+    <path d="M96 118 Q110 112 124 118 Q124 132 110 132 Q96 132 96 118 Z" fill="#4f7e2e" stroke="#142208" stroke-width="2.5"/>
+    <circle cx="104" cy="124" r="3" fill="#142208"/><circle cx="116" cy="124" r="3" fill="#142208"/>
+    <!-- mouth + teeth + tusks -->
+    <path d="M52 142 Q110 126 168 142 Q164 184 110 186 Q56 184 52 142 Z" fill="#3a0608" stroke="#142208" stroke-width="3"/>
+    <path d="M56 144 L66 160 L76 142 L86 162 L96 142 L106 162 L116 142 L126 162 L136 142 L146 160 L156 144 Q110 132 56 144 Z" fill="#fffbe8" stroke="#142208" stroke-width="2"/>
+    <path d="M62 170 L52 118 L88 164 Z M158 170 L168 118 L132 164 Z" fill="#fffbe8" stroke="#142208" stroke-width="3"/>
+    <path d="M90 178 Q110 162 132 178 Q110 190 90 178 Z" fill="#c8283c"/>
+    <!-- blood: splatter + drips -->
+    <g fill="#c0101f" stroke="#6b0010" stroke-width="1.5">
+      <circle cx="132" cy="64" r="6"/><circle cx="148" cy="76" r="4"/><circle cx="70" cy="88" r="3.5"/><circle cx="152" cy="132" r="5"/><circle cx="48" cy="130" r="4"/><circle cx="102" cy="52" r="3.5"/>
+      <path d="M124 70 q-8 22 -2 40 q8 -4 6 -18 q4 -10 -4 -22 Z"/>
+      <path d="M60 138 q-6 18 0 30 q8 -6 4 -18 Z"/>
+      <path d="M92 184 q-6 20 0 32 q8 -10 4 -32 Z"/>
+      <path d="M126 184 q-4 14 0 22 q6 -8 2 -22 Z"/>
+      <path d="M64 168 q-3 10 1 14 q4 -6 1 -14 Z"/><path d="M156 168 q-3 10 1 14 q4 -6 1 -14 Z"/>
+    </g>
+    <!-- blood pool -->
+    <ellipse cx="190" cy="236" rx="86" ry="12" fill="#8a0a18" stroke="#4a0008" stroke-width="2"/>
+    <ellipse cx="170" cy="234" rx="36" ry="6" fill="#c0101f" opacity=".8"/>
+    <!-- rat body lying down -->
+    <path d="M304 222 Q322 210 314 188" stroke="#e8a0a8" stroke-width="5" fill="none"/>
+    <ellipse cx="254" cy="216" rx="54" ry="19" fill="#8e8a86" stroke="#2a2420" stroke-width="3"/>
+    <ellipse cx="254" cy="224" rx="40" ry="10" fill="#d9cdc2" opacity=".8"/>
+    <path d="M236 232 l-3 8 M262 233 l3 8 M286 230 l5 7 M222 230 l-5 8" stroke="#e8a0a8" stroke-width="4"/>
+    <ellipse cx="203" cy="216" rx="8" ry="14" fill="#c0101f" stroke="#6b0010" stroke-width="2.5"/>
+    <path d="M196 224 q-8 10 -4 18 q8 -4 10 -16 Z" fill="#c0101f"/>
+    <!-- severed rat head -->
+    <g transform="translate(168 218) rotate(-18)">
+      <circle cx="-12" cy="-12" r="9" fill="#e8a0a8" stroke="#2a2420" stroke-width="2.5"/>
+      <circle cx="10" cy="-14" r="9" fill="#e8a0a8" stroke="#2a2420" stroke-width="2.5"/>
+      <ellipse cx="0" cy="0" rx="22" ry="15" fill="#8e8a86" stroke="#2a2420" stroke-width="2.8"/>
+      <path d="M-20 4 L-34 6 M-20 9 L-32 14" stroke="#2a2420" stroke-width="1.8"/>
+      <circle cx="-30" cy="4" r="4" fill="#e8708a" stroke="#2a2420" stroke-width="1.5"/>
+      <path d="M-4 -8 l8 8 M4 -8 l-8 8" stroke="#2a2420" stroke-width="2.6"/>
+      <path d="M-18 10 L-14 16 L-10 10" fill="#fffbe8" stroke="#2a2420" stroke-width="1.4"/>
+      <path d="M16 -4 q10 4 8 16 q-6 4 -14 -2 Z" fill="#c0101f" stroke="#6b0010" stroke-width="2"/>
+    </g>
+    <path d="M150 232 q-6 8 -2 12 M182 232 q4 8 0 12" stroke="#c0101f" stroke-width="3" fill="none"/>
+  </svg>
+  <div class="notnow-text">tu as trop gonflé !</div>
+</div>
+<div id="slashOverlay">
+  <div id="slashDark"></div>
+  <canvas id="slashStain"></canvas>
+  <canvas id="slashFx"></canvas>
+  <div id="slashSword"><svg viewBox="0 0 64 380" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M32 0 Q52 40 46 130 L46 296 L18 296 L18 130 Q14 44 32 0 Z" fill="#e9eef3" stroke="#222831" stroke-width="3"/>
+  <path d="M32 6 Q42 50 38 130 L38 292" fill="none" stroke="#ffffff" stroke-width="3" opacity=".9"/>
+  <path d="M26 40 L26 290" stroke="#9aa6b2" stroke-width="2" fill="none"/>
+  <rect x="2" y="296" width="60" height="12" rx="5" fill="#b8892b" stroke="#222831" stroke-width="3"/>
+  <rect x="24" y="308" width="16" height="56" rx="6" fill="#4a1f16" stroke="#222831" stroke-width="3"/>
+  <path d="M24 322 L40 316 M24 336 L40 330 M24 350 L40 344" stroke="#8a4a30" stroke-width="2.5"/>
+  <circle cx="32" cy="372" r="8" fill="#b8892b" stroke="#222831" stroke-width="3"/>
+</svg></div>
+  <div id="slashHead"><svg viewBox="-6 -4 212 236" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
+  <!-- viking helmet horns -->
+  <path d="M30 50 Q4 40 8 6 Q22 24 40 30 Z" fill="#f1e8cf" stroke="#2a1a10" stroke-width="3"/>
+  <path d="M170 50 Q196 40 192 6 Q178 24 160 30 Z" fill="#f1e8cf" stroke="#2a1a10" stroke-width="3"/>
+  <ellipse cx="100" cy="116" rx="84" ry="94" fill="#8a6a50" stroke="#2a1a10" stroke-width="3"/>
+  <path d="M22 62 Q100 -14 178 62 L170 76 Q100 34 30 76 Z" fill="#7d838c" stroke="#2a1a10" stroke-width="3"/>
+  <path d="M96 20 L100 52 L104 20 Z" fill="#9aa0a8" stroke="#2a1a10" stroke-width="2"/>
+  <g fill="#5a3f2c" opacity=".7"><circle cx="54" cy="96" r="3"/><circle cx="148" cy="90" r="2.5"/><circle cx="154" cy="150" r="3.2"/><circle cx="46" cy="142" r="2.4"/></g>
+  <!-- scar -->
+  <path d="M138 80 L162 140" stroke="#3a0d0d" stroke-width="3.5" fill="none"/><path d="M144 86 l-6 3 M150 100 l-6 3 M156 114 l-6 3 M160 128 l-6 3" stroke="#3a0d0d" stroke-width="2"/>
+  <!-- tiny furious eyes under giant brows -->
+  <circle cx="62" cy="112" r="17" fill="#fff6d8" stroke="#2a1a10" stroke-width="2.5"/>
+  <circle cx="138" cy="112" r="17" fill="#fff6d8" stroke="#2a1a10" stroke-width="2.5"/>
+  <circle cx="66" cy="116" r="8" fill="#d62d20"/><circle cx="134" cy="116" r="8" fill="#d62d20"/>
+  <ellipse cx="67" cy="117" rx="2.5" ry="6.5" fill="#000"/><ellipse cx="133" cy="117" rx="2.5" ry="6.5" fill="#000"/>
+  <g stroke="#d62d20" stroke-width="1.4"><path d="M46 112 l7 0 M50 102 l7 5 M154 112 l-7 0 M150 102 l-7 5"/></g>
+  <g fill="#e9e2d0" stroke="#2a1a10" stroke-width="3">
+    <path d="M30 104 Q34 74 96 112 Q90 124 76 114 Q60 122 48 112 Q36 118 30 104 Z"/>
+    <path d="M170 104 Q166 74 104 112 Q110 124 124 114 Q140 122 152 112 Q164 118 170 104 Z"/>
+  </g>
+  <!-- snout + nostrils -->
+  <ellipse cx="100" cy="158" rx="50" ry="32" fill="#a98466" stroke="#2a1a10" stroke-width="2.5"/>
+  <ellipse cx="90" cy="140" rx="5" ry="7" fill="#1a0e08"/><ellipse cx="110" cy="140" rx="5" ry="7" fill="#1a0e08"/>
+  <!-- snarling mouth with teeth -->
+  <path d="M66 178 Q100 164 134 178 Q128 212 100 214 Q72 212 66 178 Z" fill="#3a0608" stroke="#2a1a10" stroke-width="2.8"/>
+  <path d="M70 178 L78 192 L86 176 L94 194 L100 176 L106 194 L114 176 L122 192 L130 178 Q100 168 70 178 Z" fill="#fffbe8" stroke="#2a1a10" stroke-width="1.8"/>
+  <path d="M84 208 Q100 196 118 208 Q100 216 84 208 Z" fill="#c8283c"/>
+  <!-- big tusks -->
+  <path d="M62 170 q-10 30 0 50 q12 -8 12 -46 Z M138 170 q10 30 0 50 q-12 -8 -12 -46 Z" fill="#fffbe8" stroke="#2a1a10" stroke-width="3"/>
+  <!-- moustache -->
+  <path d="M100 168 Q80 160 58 172 Q36 182 36 164 Q26 156 40 150 Q40 166 54 164 Q80 150 100 168 Z" fill="#e9e2d0" stroke="#2a1a10" stroke-width="2.5"/>
+  <path d="M100 168 Q120 160 142 172 Q164 182 164 164 Q174 156 160 150 Q160 166 146 164 Q120 150 100 168 Z" fill="#e9e2d0" stroke="#2a1a10" stroke-width="2.5"/>
+  <g fill="none" stroke="#d62d20" stroke-width="3.2"><path d="M20 124 q8 4 4 10 q-8 -2 -4 -10 M28 136 l8 -4"/></g>
+<ellipse cx="100" cy="214" rx="48" ry="13" fill="#b0081a" stroke="#5a0008" stroke-width="3"/>
+  <ellipse cx="100" cy="214" rx="26" ry="6" fill="#e8c4b0"/>
+  <path d="M60 216 q-5 14 -1 20 q6 -6 4 -20 Z M96 222 q-5 14 0 20 q6 -6 3 -20 Z M138 216 q-5 12 0 18 q5 -6 2 -18 Z" fill="#b0081a"/>
+</svg></div>
 </div>
 <div class="order-error-overlay" id="orderErrorOverlay">
 <svg class="order-error-art" viewBox="0 -4 200 226" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">
-  <!-- big curly hair + curlers -->
-  <g fill="#9a7bd1" stroke="#3b2459" stroke-width="2.5">
-    <circle cx="40" cy="62" r="26"/><circle cx="66" cy="32" r="28"/><circle cx="100" cy="22" r="28"/><circle cx="134" cy="32" r="28"/><circle cx="160" cy="62" r="26"/>
-    <circle cx="26" cy="104" r="20"/><circle cx="174" cy="104" r="20"/>
+  <!-- tentacles with knives -->
+  <g fill="#7a55c0" stroke="#2a1648" stroke-width="2.8">
+    <path d="M46 150 Q8 150 14 112 Q18 96 26 100 Q24 124 52 132 Z"/>
+    <path d="M154 150 Q192 150 186 112 Q182 96 174 100 Q176 124 148 132 Z"/>
+    <path d="M52 182 Q36 206 54 218 Q74 224 72 204 Q70 194 78 186 Z"/>
+    <path d="M148 182 Q164 206 146 218 Q126 224 128 204 Q130 194 122 186 Z"/>
   </g>
-  <g stroke="#3b2459" stroke-width="2.2">
-    <rect x="52" y="6" width="14" height="30" rx="7" fill="#ff7eb6" transform="rotate(-28 59 21)"/>
-    <rect x="116" y="2" width="14" height="30" rx="7" fill="#58d6c9" transform="rotate(20 123 17)"/>
-    <rect x="20" y="52" width="14" height="30" rx="7" fill="#ffd34d" transform="rotate(-60 27 67)"/>
-    <rect x="166" y="50" width="14" height="30" rx="7" fill="#ff7eb6" transform="rotate(62 173 65)"/>
-  </g>
-  <!-- face -->
-  <ellipse cx="100" cy="116" rx="70" ry="88" fill="#f3c6a2" stroke="#4a2a1a" stroke-width="3"/>
-  <path d="M60 60 q40 -12 80 0 M56 72 q44 -10 88 0" fill="none" stroke="#d29b78" stroke-width="2.2"/>
-  <ellipse cx="50" cy="150" rx="17" ry="12" fill="#ff6f91" opacity=".7"/>
-  <ellipse cx="150" cy="150" rx="17" ry="12" fill="#ff6f91" opacity=".7"/>
-  <!-- earrings -->
-  <circle cx="29" cy="140" r="9" fill="#ffd34d" stroke="#8a6410" stroke-width="2.5"/>
-  <circle cx="171" cy="140" r="9" fill="#ffd34d" stroke="#8a6410" stroke-width="2.5"/>
-  <!-- angry drawn-on eyebrows -->
-  <path d="M42 78 Q64 52 92 84" fill="none" stroke="#3b2459" stroke-width="5"/>
-  <path d="M158 78 Q136 52 108 84" fill="none" stroke="#3b2459" stroke-width="5"/>
-  <!-- cat-eye glasses, bulging crossed eyes -->
-  <path d="M30 92 L48 98 M170 92 L152 98 M92 106 q8 -7 16 0" stroke="#d6246e" stroke-width="4" fill="none"/>
-  <path d="M40 96 Q72 82 98 100 Q96 130 66 130 Q40 128 40 96 Z" fill="#fff4fa" fill-opacity=".8" stroke="#d6246e" stroke-width="4.5"/>
-  <path d="M160 96 Q128 82 102 100 Q104 130 134 130 Q160 128 160 96 Z" fill="#fff4fa" fill-opacity=".8" stroke="#d6246e" stroke-width="4.5"/>
-  <circle cx="68" cy="110" r="17" fill="#fff" stroke="#4a2a1a" stroke-width="2"/>
-  <circle cx="132" cy="110" r="17" fill="#fff" stroke="#4a2a1a" stroke-width="2"/>
-  <path d="M54 106 l8 3 M82 104 l-8 4 M146 106 l-8 3 M118 104 l8 4" stroke="#d64040" stroke-width="1.4"/>
-  <circle cx="78" cy="112" r="6.5" fill="#1e1e1e"/><circle cx="122" cy="112" r="6.5" fill="#1e1e1e"/>
-  <circle cx="76" cy="110" r="2" fill="#fff"/><circle cx="120" cy="110" r="2" fill="#fff"/>
-  <g fill="#fff" stroke="#d6246e" stroke-width="1"><circle cx="44" cy="90" r="3"/><circle cx="156" cy="90" r="3"/></g>
-  <!-- pointy nose with wart -->
-  <path d="M100 112 Q92 144 84 154 Q96 164 114 156 Q106 144 100 112 Z" fill="#eaa684" stroke="#4a2a1a" stroke-width="2.5"/>
-  <circle cx="108" cy="150" r="3.4" fill="#7a3d22"/>
-  <!-- huge smeared lipstick mouth, dentures, tongue -->
-  <path d="M52 176 Q60 164 100 176 Q140 164 150 178 Q158 204 100 214 Q44 204 52 176 Z" fill="#e0102a" stroke="#6b0010" stroke-width="2.5"/>
-  <path d="M64 182 Q100 172 138 182 Q132 204 100 208 Q70 204 64 182 Z" fill="#5a0c14"/>
-  <path d="M68 182 Q100 174 134 182 L132 192 Q100 186 70 192 Z" fill="#fffbe8" stroke="#4a2a1a" stroke-width="1.4"/>
-  <path d="M96 176 v14" stroke="#4a2a1a" stroke-width="1.4"/><path d="M84 178 v12 M110 178 v12 M122 180 v10" stroke="#4a2a1a" stroke-width="1"/>
-  <rect x="100" y="180" width="8" height="11" fill="#5a0c14"/>
-  <path d="M82 207 Q100 192 120 205 Q100 214 82 207 Z" fill="#ff5c7a"/>
-  <path d="M148 186 q10 6 6 14" stroke="#e0102a" stroke-width="5" fill="none"/>
-  <!-- anger mark + steam -->
-  <g fill="none" stroke="#d62d20" stroke-width="3.2"><path d="M150 28 q8 4 4 10 q-8 -2 -4 -10 M158 40 l8 -4 M154 46 l8 6"/></g>
-  <path d="M6 160 q-6 -8 0 -14 q6 -6 0 -14" stroke="#cfcfcf" stroke-width="3" fill="none"/>
+  <g transform="translate(20 100) rotate(-14) scale(.9)"><g stroke="#2a2a2e" stroke-width="2.5"><rect x="-6" y="2" width="12" height="28" rx="4" fill="#4a2c18"/><rect x="-11" y="-4" width="22" height="7" rx="3" fill="#8a8a92"/><path d="M-8 -4 L-8 -56 Q-6 -74 9 -84 L9 -4 Z" fill="#e6ecf2"/><path d="M-2 -10 L-2 -58" stroke="#fff" stroke-width="2.5" fill="none"/></g></g>
+  <g transform="translate(180 100) rotate(14) scale(.9)"><g stroke="#2a2a2e" stroke-width="2.5"><rect x="-6" y="2" width="12" height="28" rx="4" fill="#4a2c18"/><rect x="-11" y="-4" width="22" height="7" rx="3" fill="#8a8a92"/><path d="M-8 -4 L-8 -56 Q-6 -74 9 -84 L9 -4 Z" fill="#e6ecf2"/><path d="M-2 -10 L-2 -58" stroke="#fff" stroke-width="2.5" fill="none"/></g></g>
+  <ellipse cx="22" cy="104" rx="12" ry="10" fill="#7a55c0" stroke="#2a1648" stroke-width="2.8"/>
+  <ellipse cx="178" cy="104" rx="12" ry="10" fill="#7a55c0" stroke="#2a1648" stroke-width="2.8"/>
+  <!-- head dome -->
+  <ellipse cx="100" cy="100" rx="76" ry="88" fill="#7a55c0" stroke="#2a1648" stroke-width="3"/>
+  <g fill="#5a3a9a" opacity=".7"><circle cx="62" cy="40" r="6"/><circle cx="88" cy="28" r="5"/><circle cx="122" cy="30" r="6"/><circle cx="146" cy="46" r="5"/></g>
+  <!-- glaring eyes, huge slanted brows -->
+  <ellipse cx="66" cy="108" rx="24" ry="22" fill="#ffd21a" stroke="#2a1648" stroke-width="3"/>
+  <ellipse cx="134" cy="108" rx="24" ry="22" fill="#ffd21a" stroke="#2a1648" stroke-width="3"/>
+  <ellipse cx="68" cy="112" rx="4.5" ry="17" fill="#0a0a0a"/><ellipse cx="132" cy="112" rx="4.5" ry="17" fill="#0a0a0a"/>
+  <g stroke="#d62d20" stroke-width="1.6"><path d="M46 108 l9 0 M50 98 l9 5 M154 108 l-9 0 M150 98 l-9 5"/></g>
+  <path d="M34 86 L96 118 L96 98 L40 66 Z" fill="#1a0e30" stroke="#1a0e30" stroke-width="3"/>
+  <path d="M166 86 L104 118 L104 98 L160 66 Z" fill="#1a0e30" stroke="#1a0e30" stroke-width="3"/>
+  <!-- scar -->
+  <path d="M120 58 L146 150" stroke="#2a0a20" stroke-width="3.5" fill="none"/><path d="M126 64 l-6 3 M131 80 l-6 3 M136 96 l-6 3 M141 112 l-6 3" stroke="#2a0a20" stroke-width="2"/>
+  <!-- snarl with fangs -->
+  <path d="M56 160 Q100 138 144 160 Q138 202 100 206 Q62 202 56 160 Z" fill="#3a0608" stroke="#2a1648" stroke-width="3"/>
+  <path d="M60 162 L70 182 L80 160 L90 184 L100 158 L110 184 L120 160 L130 182 L140 162 Q100 146 60 162 Z" fill="#fffbe8" stroke="#2a1648" stroke-width="2"/>
+  <path d="M76 198 L84 184 L92 202 M108 202 L116 184 L124 198" fill="#fffbe8" stroke="#2a1648" stroke-width="2"/>
+  <g fill="none" stroke="#ff3a2a" stroke-width="3.4"><path d="M152 24 q8 4 4 10 q-8 -2 -4 -10 M160 36 l8 -4 M156 42 l8 6"/></g>
+  <g fill="#1a1030" opacity=".8"><circle cx="4" cy="150" r="6"/><circle cx="196" cy="156" r="6"/></g>
 </svg>
 <div class="order-error-text">fais le dans l'ordre !</div></div>
 
@@ -2164,6 +2285,7 @@ function buildScene2(){
     state.exploded = true;
     burstMsg.innerHTML = '💥 <b>Boom !</b> Il y avait trop d\'air à l\'intérieur : le ballon a éclaté. Appuie sur « Recommencer ».';
     burstMsg.classList.add('show');
+    setTimeout(()=>{ if(state.exploded) showBurstOrc(); }, 900);
     const center = balloon.group.position.clone();
     const flashMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.9});
     const flash = new THREE.Mesh(new THREE.SphereGeometry(0.06,12,10), flashMat);
@@ -2516,37 +2638,9 @@ function buildScene3(){
 // mood: 'angry' (default, flushed face + converging eyebrows + forehead vein + shouting mouth) or 'happy'.
 function scientistFaceSVG(mood){
   if(mood==='happy'){
-    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
-      + '<circle cx="50" cy="56" r="33" fill="#eab98c"/>'
-      + '<path d="M18 44 Q12 12 42 14 Q34 2 58 6 Q80 4 84 28 Q94 36 82 42 Q85 16 58 14 Q38 10 32 26 Q20 22 18 44 Z" fill="#cfcfcf"/>'
-      + '<path d="M26 47 Q36 40 46 46" stroke="#5a5a5a" stroke-width="4" fill="none" stroke-linecap="round"/>'
-      + '<path d="M74 47 Q64 40 54 46" stroke="#5a5a5a" stroke-width="4" fill="none" stroke-linecap="round"/>'
-      + '<circle cx="38" cy="57" r="4.4" fill="#241f1a"/>'
-      + '<circle cx="62" cy="57" r="4.4" fill="#241f1a"/>'
-      + '<circle cx="39.6" cy="55.4" r="1.3" fill="#fff"/>'
-      + '<circle cx="63.6" cy="55.4" r="1.3" fill="#fff"/>'
-      + '<ellipse cx="28" cy="68" rx="6.5" ry="4" fill="#f0a08a" opacity="0.7"/>'
-      + '<ellipse cx="72" cy="68" rx="6.5" ry="4" fill="#f0a08a" opacity="0.7"/>'
-      + '<path d="M33 73 Q50 78 67 73 Q50 82 33 73 Z" fill="#8a8a8a"/>'
-      + '<path d="M37 78 Q50 92 63 78 Q50 86 37 78 Z" fill="#7a3325"/>'
-      + '<path d="M40 79 Q50 88 60 79" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>'
-      + '</svg>';
-  }
-  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">'
-    + '<circle cx="50" cy="56" r="33" fill="#c73a24"/>'
-    + '<path d="M18 40 Q12 10 42 12 Q34 0 58 4 Q80 2 84 26 Q94 34 82 38 Q85 14 58 12 Q38 8 32 24 Q20 20 18 40 Z" fill="#cfcfcf"/>'
-    + '<path d="M10 46 Q4 40 9 33 Q3 28 8 21" stroke="#f6f6f6" stroke-width="3.4" fill="none" stroke-linecap="round" opacity="0.85"/>'
-    + '<path d="M90 46 Q96 40 91 33 Q97 28 92 21" stroke="#f6f6f6" stroke-width="3.4" fill="none" stroke-linecap="round" opacity="0.85"/>'
-    + '<path d="M40 26 Q42 30 40 34 M50 24 L50 32 M60 26 Q58 30 60 34" stroke="#7a1f12" stroke-width="2.2" fill="none" stroke-linecap="round"/>'
-    + '<path d="M14 36 L49 55 L42 63 L12 44 Z" fill="#160f0b"/>'
-    + '<path d="M86 36 L51 55 L58 63 L88 44 Z" fill="#160f0b"/>'
-    + '<ellipse cx="36" cy="61" rx="3.4" ry="2.4" fill="#160f0b"/>'
-    + '<ellipse cx="64" cy="61" rx="3.4" ry="2.4" fill="#160f0b"/>'
-    + '<path d="M76 28 L83 35 M83 28 L76 35" stroke="#8a1c11" stroke-width="2.4" stroke-linecap="round"/>'
-    + '<path d="M28 76 L72 76 L67 97 L33 97 Z" fill="#3a0f08"/>'
-    + '<path d="M31 78.5 L69 78.5 L66 84 L34 84 Z" fill="#fff"/>'
-    + '<path d="M35 89 L65 89 L63 93.5 L37 93.5 Z" fill="#fff"/>'
-    + '</svg>';
+    return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">' + '<g fill="#5a1208" stroke="#2a0804" stroke-width="2"><path d="M50 6 L60 24 L40 24 Z"/><path d="M80 16 L82 36 L66 30 Z"/><path d="M96 46 L82 60 L78 44 Z"/><path d="M20 16 L34 30 L18 36 Z"/><path d="M4 46 L22 44 L16 60 Z"/><path d="M84 82 L70 78 L78 64 Z"/><path d="M16 82 L24 64 L30 78 Z"/></g>' + '<circle cx="50" cy="56" r="38" fill="#d9381a" stroke="#2a0804" stroke-width="3"/>' + '<circle cx="34" cy="58" r="10" fill="#ffd21a" stroke="#2a0804" stroke-width="2.5"/>' + '<circle cx="66" cy="58" r="10" fill="#ffd21a" stroke="#2a0804" stroke-width="2.5"/>' + '<ellipse cx="35" cy="60" rx="2.2" ry="8" fill="#000"/><ellipse cx="65" cy="60" rx="2.2" ry="8" fill="#000"/>' + '<path d="M12 36 L48 56 L48 46 L16 28 Z M88 36 L52 56 L52 46 L84 28 Z" fill="#1a0502" stroke="#1a0502" stroke-width="2"/>' + '<path d="M28 76 Q50 66 72 76 Q68 96 50 96 Q32 96 28 76 Z" fill="#2a0504" stroke="#2a0804" stroke-width="2"/>' + '<path d="M30 77 L36 88 L42 74 L50 90 L58 74 L64 88 L70 77 Q50 70 30 77 Z" fill="#fff" stroke="#2a0804" stroke-width="1.2"/>' + '</svg>';
+}
+  return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" stroke-linecap="round" stroke-linejoin="round">' + '<g fill="#7a1f12" stroke="#3a0f08" stroke-width="2"><path d="M50 10 L58 24 L42 24 Z"/><path d="M78 20 L80 36 L66 30 Z"/><path d="M92 46 L82 58 L78 44 Z"/><path d="M22 20 L34 30 L20 36 Z"/><path d="M8 46 L22 44 L18 58 Z"/><path d="M82 80 L70 78 L76 66 Z"/><path d="M18 80 L24 66 L30 78 Z"/></g>' + '<circle cx="50" cy="56" r="38" fill="#e04a2c" stroke="#3a0f08" stroke-width="3"/>' + '<path d="M30 80 Q50 66 70 80 Q50 94 30 80 Z" fill="#ffb199" opacity=".6"/>' + '<path d="M18 38 L46 52 M82 38 L54 52" stroke="#2a0a05" stroke-width="7"/>' + '<circle cx="34" cy="58" r="10" fill="#fff" stroke="#3a0f08" stroke-width="2.5"/>' + '<circle cx="66" cy="58" r="10" fill="#fff" stroke="#3a0f08" stroke-width="2.5"/>' + '<circle cx="36" cy="60" r="4.5" fill="#111"/><circle cx="64" cy="60" r="4.5" fill="#111"/>' + '<g stroke="#d33" stroke-width="1.3"><path d="M26 56 l5 0 M74 56 l-5 0"/></g>' + '<path d="M32 76 L68 76 L64 94 L36 94 Z" fill="#3a0f08"/>' + '<path d="M35 78.5 L65 78.5 L63 84 L37 84 Z" fill="#fff"/>' + '<path d="M39 89 L61 89 L60 92.5 L40 92.5 Z" fill="#fff"/>' + '<path d="M76 26 L83 33 M83 26 L76 33" stroke="#fff" stroke-width="2.4"/>' + '</svg>';
 }
 
 /* ===================== TAB 4 : peser le ballon dégonflé ===================== */
@@ -2582,6 +2676,7 @@ function buildScene4(){
   const question4Box = document.getElementById('question4Box');
   const question4Close = document.getElementById('question4Close');
   let question4Timer = null;
+  let surpriseShowTimer = null;
   question4Close.onclick = ()=> question4Box.classList.remove('show');
   let critters = [];
   let critterTimers = [];
@@ -2665,28 +2760,123 @@ function buildScene4(){
     scientistFace.style.display = 'block';
     faceTimer = setTimeout(hideScientistFace, 2400);
   }
+  function explodeCatBlood(pos, noScreen){
+    const geo = new THREE.SphereGeometry(0.045,8,6);
+    const drops=[];
+    for(let i=0;i<80;i++){
+      const mat = new THREE.MeshBasicMaterial({color:(i%3===0)?0x7a0610:0xc0101f, transparent:true, opacity:1});
+      const m = new THREE.Mesh(geo, mat);
+      const sc = 0.5+Math.random()*1.6; m.scale.set(sc,sc,sc);
+      m.position.copy(pos); m.position.y += 0.1; scene.add(m);
+      const v = new THREE.Vector3(Math.random()*2-1, Math.random()*1.4+0.2, Math.random()*2-1).normalize().multiplyScalar(0.5+Math.random()*1.5);
+      drops.push({m,v,sc});
+    }
+    const fm = new THREE.MeshBasicMaterial({color:0xff2a1a, transparent:true, opacity:0.9});
+    const flash = new THREE.Mesh(new THREE.SphereGeometry(0.1,14,10), fm);
+    flash.position.copy(pos); flash.position.y += 0.15; scene.add(flash);
+    tween(260, q=>{ const k=0.1+q*1.6; flash.scale.set(k,k,k); fm.opacity=0.9*(1-q); }, ()=>scene.remove(flash));
+    tween(1200, q=>{
+      drops.forEach(d=>{
+        d.m.position.set(pos.x+d.v.x*q, Math.max(0.03, pos.y+0.1+d.v.y*q - q*q*0.9), pos.z+d.v.z*q);
+        d.m.material.opacity = 1 - q*q;
+      });
+    }, ()=>{ drops.forEach(d=>{ scene.remove(d.m); d.m.material.dispose(); }); geo.dispose(); });
+    if(!noScreen) screenBloodSplash();
+  }
+  function faceCamera(obj, ms){
+    const ang = Math.atan2(-(camera.position.z-obj.position.z), camera.position.x-obj.position.x);
+    const from = obj.rotation.y;
+    tween(ms, q=>{ obj.rotation.y = from + (ang-from)*q; });
+  }
+  // blast a critter into pieces: its parts are flung far to the left / right, bouncing on the floor
+  function shatterCritter(c, centerX, pieces){
+    const parts = c.children.slice();
+    c.updateMatrixWorld(true);
+    parts.forEach(m=>{
+      scene.attach(m);
+      let sign = m.position.x < centerX ? -1 : 1;
+      if(Math.random()<0.2) sign = -sign;
+      const v = new THREE.Vector3(sign*(4+Math.random()*5), 3+Math.random()*4.5, (Math.random()-.5)*2.4);
+      const spin = new THREE.Vector3((Math.random()-.5)*20, (Math.random()-.5)*20, (Math.random()-.5)*20);
+      pieces.push({m, v, spin});
+    });
+    scene.remove(c);
+  }
+  function flingPieces(pieces, ms){
+    let last = performance.now();
+    tween(ms, ()=>{
+      const now = performance.now(), dt = Math.min(0.05,(now-last)/1000); last = now;
+      pieces.forEach(pc=>{
+        pc.v.y -= 9.5*dt;
+        pc.m.position.addScaledVector(pc.v, dt);
+        pc.m.rotation.x += pc.spin.x*dt; pc.m.rotation.y += pc.spin.y*dt; pc.m.rotation.z += pc.spin.z*dt;
+        if(pc.m.position.y < 0.03){ pc.m.position.y = 0.03; pc.v.y *= -0.35; pc.v.x *= 0.7; pc.v.z *= 0.7; pc.spin.multiplyScalar(0.6); }
+      });
+    });
+  }
+  // 2nd press: the cat chases the mouse, both stop mid-screen and stare at the camera,
+  // then the dino drops from the top and squashes them both in a burst of blood.
   function runChaseOnFloor(){
     const z = balance.group.position.z + 1.3;
-    const startX = -3.6, endX = 3.6;
-    const order = [['mouse',0], ['cat',380], ['dino',760]];
+    const startX = -3.6, mouseEnd = 0.1, catEnd = -0.35, dinoX = -0.2;
+    const mouse = makeCritter('mouse'), cat = makeCritter('cat'), dino = makeCritter('dino');
+    mouse.position.set(startX, 0, z); cat.position.set(startX, 0, z);
+    scene.add(mouse); scene.add(cat); critters.push(mouse, cat);
     let ballHit = false;
-    order.forEach(([kind,delay], idx)=>{
-      const isLast = idx===order.length-1;
-      const t = setTimeout(()=>{
-        const c = makeCritter(kind);
-        c.position.set(startX, 0, z);
-        scene.add(c); critters.push(c);
-        tween(1800, p=>{
-          c.position.x = startX + (endX-startX)*p;
-          c.position.y = Math.abs(Math.sin(p*Math.PI*7))*0.05;
-          if(isLast && !ballHit && Math.abs(c.position.x-balloon.group.position.x)<0.4 && Math.abs(c.position.z-balloon.group.position.z)<1.0){
-            ballHit = true;
-            bounceBalloonBackToScale();
-          }
-        }, ()=>{ scene.remove(c); critters = critters.filter(cc=>cc!==c); });
-      }, delay);
-      critterTimers.push(t);
-    });
+    const pieces = [];
+    const T = (fn, ms)=>{ critterTimers.push(setTimeout(fn, ms)); };
+
+    // chase (mouse first, cat close behind)
+    tween(1400, p=>{
+      mouse.position.x = startX + (mouseEnd-startX)*p;
+      mouse.position.y = Math.abs(Math.sin(p*Math.PI*9))*0.04;
+    }, ()=>{ mouse.position.y = 0; faceCamera(mouse, 260); });
+    T(()=>{
+      tween(1400, p=>{
+        cat.position.x = startX + (catEnd-startX)*p;
+        cat.position.y = Math.abs(Math.sin(p*Math.PI*8))*0.05;
+      }, ()=>{ cat.position.y = 0; faceCamera(cat, 260); });
+    }, 350);
+
+    // they freeze and stare at the camera (~0.8 s), then the dino drops from above
+    T(()=>{
+      dino.position.set(dinoX, 6, z);
+      scene.add(dino); critters.push(dino);
+      tween(430, p=>{ dino.position.y = 6*(1-p*p); }, ()=>{
+        dino.position.y = 0;
+        shakeCamera();
+        // squash both
+        const mp = mouse.position.clone(), cp = cat.position.clone();
+        shatterCritter(mouse, dinoX, pieces); shatterCritter(cat, dinoX, pieces);
+        pieces.forEach(pc=> critters.push(pc.m));
+        flingPieces(pieces, 2800);
+        explodeCatBlood(mp, true);
+        explodeCatBlood(cp, false);
+        [mp, cp].forEach(pt=>{
+          const pud = new THREE.Mesh(new THREE.CircleGeometry(0.28+Math.random()*0.12, 24),
+            new THREE.MeshBasicMaterial({color:0x8a0a14, transparent:true, opacity:0.92}));
+          pud.rotation.x = -Math.PI/2; pud.position.set(pt.x, 0.012, pt.z); scene.add(pud); critters.push(pud);
+        });
+        // little bounce of the dino on impact
+        tween(220, r=>{ dino.position.y = Math.sin(r*Math.PI)*0.08; }, ()=>{ dino.position.y = 0; });
+        // after a beat the dino walks off to the left, clipping the fallen balloon on the way
+        T(()=>{
+          tween(250, q=>{ dino.rotation.y = Math.PI*q; });
+          tween(1500, q=>{
+            dino.position.x = dinoX + (-3.7-dinoX)*q;
+            dino.position.y = Math.abs(Math.sin(q*Math.PI*6))*0.05;
+            if(!ballHit && Math.abs(dino.position.x-balloon.group.position.x)<0.45 && Math.abs(dino.position.z-balloon.group.position.z)<1.0){
+              ballHit = true; bounceBalloonBackToScale();
+            }
+          }, ()=>{ scene.remove(dino); critters = critters.filter(cc=>cc!==dino); });
+        }, 900);
+        // clean up the squashed remains
+        T(()=>{ [mouse, cat].forEach(c=>{ scene.remove(c); critters = critters.filter(cc=>cc!==c); });
+                pieces.forEach(pc=>{ scene.remove(pc.m); critters = critters.filter(cc=>cc!==pc.m); });
+                critters.filter(o=>o.geometry && o.geometry.type==='CircleGeometry').forEach(o=>scene.remove(o));
+                critters = critters.filter(o=>!(o.geometry && o.geometry.type==='CircleGeometry')); }, 4200);
+      });
+    }, 2900);
   }
   let surpriseRunning = false;
   let balloonOnFloor = false;
@@ -2700,7 +2890,7 @@ function buildScene4(){
     } else {
       runChaseOnFloor();
       balloonOnFloor = false;
-      setTimeout(()=>{ surpriseRunning=false; surpriseBtn.disabled=false; }, 2700);
+      setTimeout(()=>{ surpriseRunning=false; surpriseBtn.disabled=false; }, 8000);
     }
   };
 
@@ -2720,7 +2910,6 @@ function buildScene4(){
     let shown=0;
     const id=setInterval(()=>{ shown=Math.min(mass, shown+mass/12); balance.setDisplay(shown.toFixed(1)+' g'); if(shown>=mass) clearInterval(id); }, 60);
     readout.innerHTML='Lis la masse affichée sur la balance et note-la sur ton cahier. Passe ensuite à l\'onglet 5.';
-    surpriseBtn.style.display='inline-block';
   }
 
   allumerBtn.onclick = function(){
@@ -2728,6 +2917,7 @@ function buildScene4(){
     balanceOn = true;
     balance.setDisplay('0.0 g');
     if(onScale){
+      runSlashScare();
       // the balloon was already on the plate before the balance was switched on: a real scale
       // tares to zero at power-on no matter what's already sitting on it, so it reads 0 g here —
       // it never captured the balloon's actual mass. This order also doesn't unlock the surprise.
@@ -2744,7 +2934,11 @@ function buildScene4(){
     }
     readout.innerHTML = 'Le ballon est posé sur le plateau…';
     if(question4Timer) clearTimeout(question4Timer);
-    question4Timer = setTimeout(()=>{ question4Box.classList.add('show'); }, 3000);
+    question4Timer = setTimeout(()=>{
+      question4Box.classList.add('show');
+      if(surpriseShowTimer) clearTimeout(surpriseShowTimer);
+      surpriseShowTimer = setTimeout(()=>{ surpriseBtn.style.display='inline-block'; }, 6000);
+    }, 3000);
     const start = balloon.group.position.clone();
     tween(800, p=>{ balloon.group.position.lerpVectors(start, weighPos, p); }, ()=>{
       onScale = true;
@@ -2785,8 +2979,8 @@ function buildScene4(){
       napTimer = null;
       const screamer = document.getElementById('screamerOverlay');
       screamer.innerHTML = ghostSVG('scream');
-      screamer.classList.add('show');
-      setTimeout(()=>{ screamer.classList.remove('show'); screamer.innerHTML=''; }, 260);
+      screamer.classList.add('show','jump');
+      setTimeout(()=>{ screamer.classList.remove('show','jump'); screamer.innerHTML=''; }, 1300);
     }, 4200);
   };
 
@@ -2802,6 +2996,7 @@ function buildScene4(){
     siesteBtn.disabled = false;
     surpriseBtn.style.display='none';
     if(question4Timer){ clearTimeout(question4Timer); question4Timer=null; }
+    if(surpriseShowTimer){ clearTimeout(surpriseShowTimer); surpriseShowTimer=null; }
     question4Box.classList.remove('show');
     flyTo(trueDefaultCam4, 700);
     readout.innerHTML='Pose le ballon et allume la balance, dans l\'ordre de ton choix.';
@@ -2812,6 +3007,211 @@ function buildScene4(){
   };
 }
 
+
+/* ===== onglet 4 : mauvais ordre -> la nuit tombe, un sabre tranche l'écran, une tête coupée roule ===== */
+let slashRunning = false;
+function runSlashScare(onDone){
+  if(slashRunning) return;
+  slashRunning = true;
+  const ov = document.getElementById('slashOverlay');
+  const dark = document.getElementById('slashDark');
+  const stain = document.getElementById('slashStain'), fx = document.getElementById('slashFx');
+  const sw = document.getElementById('slashSword'), head = document.getElementById('slashHead');
+  const W = window.innerWidth, H = window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio||1, 2);
+  [stain,fx].forEach(c=>{ c.width=Math.round(W*dpr); c.height=Math.round(H*dpr); });
+  const sx = stain.getContext('2d'), fc = fx.getContext('2d');
+  sx.setTransform(dpr,0,0,dpr,0,0); fc.setTransform(dpr,0,0,dpr,0,0);
+  sx.clearRect(0,0,W,H);
+  sw.style.opacity = 0; head.style.display = 'none';
+  dark.style.transition = 'none'; dark.style.opacity = 0;
+  ov.classList.add('show'); ov.classList.remove('shake');
+  void dark.offsetWidth;
+  dark.style.transition = 'opacity .9s ease-in'; dark.style.opacity = 0.95;
+
+  // cut line from the top-right edge to the bottom-left edge
+  const L0 = {x:W*1.05, y:-H*0.05}, L1 = {x:-W*0.05, y:H*1.05};
+  const dx = L1.x-L0.x, dy = L1.y-L0.y, dl = Math.hypot(dx,dy);
+  const dir = {x:dx/dl, y:dy/dl}, nrm = {x:-dir.y, y:dir.x};
+  const at = s=>({x:L0.x+dx*s, y:L0.y+dy*s});
+  const SWORD_HALF = 190, S_START = 0.27, S_END = 1.18;
+  const rotDeg = Math.atan2(dir.y,dir.x)*180/Math.PI + 90;
+  function placeSword(sTip, jitter){
+    const tip = at(sTip);
+    const c = {x: tip.x - dir.x*SWORD_HALF + (jitter||0), y: tip.y - dir.y*SWORD_HALF + (jitter||0)};
+    sw.style.transform = 'translate('+(c.x-32)+'px,'+(c.y-190)+'px) rotate('+rotDeg+'deg)';
+  }
+
+  const T_SWORD = 1050, T_SLASH = 1750, SLASH_MS = 140, T_HEAD = 2500, HEAD_MS = 2300, T_END = 5300;
+  const headW = Math.min(150, W*0.3), headR = headW*0.40;
+  head.style.width = headW+'px';
+  const groundY = H*0.80;
+  let particles = [], drips = [];
+  let burst = false, shook = false, headStarted = false, lastC = null, lastHead = null, flashT = 0;
+  let ended = false, raf = 0;
+  const t0 = performance.now();
+
+  function spawnSpray(){
+    for(let i=0;i<150;i++){
+      const s = Math.random();
+      const p = at(s);
+      const side = Math.random()<0.5 ? -1 : 1;
+      const sp = 250 + Math.random()*900;
+      particles.push({x:p.x, y:p.y, vx:nrm.x*side*sp + (Math.random()-.5)*200, vy:nrm.y*side*sp - Math.random()*250,
+        r:2+Math.random()*6, life:1.0+Math.random()*1.2, age:0, px:p.x, py:p.y});
+    }
+    for(let i=0;i<26;i++){
+      const p = at(Math.random());
+      const r = 8+Math.random()*34;
+      sx.fillStyle='rgba(150,6,20,.85)'; sx.beginPath(); sx.arc(p.x+(Math.random()-.5)*50, p.y+(Math.random()-.5)*50, r, 0, 6.3); sx.fill();
+    }
+    for(let i=0;i<30;i++){
+      const p = at(Math.random());
+      drips.push({x:p.x+(Math.random()-.5)*30, y:p.y, w:3+Math.random()*7, v:60+Math.random()*180, max:H*(0.15+Math.random()*0.45), len:0});
+    }
+  }
+  function spawnStump(x,y,vx){
+    for(let i=0;i<3;i++) particles.push({x:x,y:y, vx:-vx*0.3+(Math.random()-.5)*260, vy:-Math.random()*380-60, r:2+Math.random()*5, life:.7+Math.random()*.6, age:0, px:x, py:y});
+  }
+
+  function frame(now){
+    if(ended) return;
+    const t = now - t0, dt = Math.min(0.05, (now - (frame.last||now))/1000); frame.last = now;
+    fc.clearRect(0,0,W,H);
+
+    // sword appears, trembles, then slashes
+    if(t>=T_SWORD && t<T_SLASH){
+      const a = Math.min(1,(t-T_SWORD)/350);
+      sw.style.opacity = a;
+      placeSword(S_START, Math.sin(t/38)*1.8);
+    }
+    let sTip = null;
+    if(t>=T_SLASH && t<T_SLASH+SLASH_MS){
+      const q = (t-T_SLASH)/SLASH_MS; const e = q*q;
+      sTip = S_START + (S_END-S_START)*e; placeSword(sTip); sw.style.opacity = 1;
+    } else if(t>=T_SLASH+SLASH_MS){ sw.style.opacity = 0; }
+    // white slash line
+    if(sTip!==null){
+      const a = at(0), b = at(Math.min(sTip,1));
+      fc.lineCap='round'; fc.strokeStyle='rgba(255,255,255,.95)'; fc.lineWidth=7; fc.shadowColor='#fff'; fc.shadowBlur=24;
+      fc.beginPath(); fc.moveTo(a.x,a.y); fc.lineTo(b.x,b.y); fc.stroke(); fc.shadowBlur=0;
+    }
+    if(t>=T_SLASH+SLASH_MS && !burst){
+      burst = true; spawnSpray(); flashT = now;
+      if(!shook){ shook=true; ov.classList.remove('shake'); void ov.offsetWidth; ov.classList.add('shake'); }
+    }
+    // gaping cut in the picture
+    if(burst){
+      const g = Math.min(1,(now-flashT)/450), w = 3+g*15;
+      const a = at(0), b = at(1);
+      fc.lineCap='butt';
+      fc.strokeStyle='rgba(200,10,28,.9)'; fc.lineWidth=w+7; fc.beginPath(); fc.moveTo(a.x,a.y); fc.lineTo(b.x,b.y); fc.stroke();
+      fc.strokeStyle='#050001'; fc.lineWidth=w; fc.beginPath(); fc.moveTo(a.x,a.y); fc.lineTo(b.x,b.y); fc.stroke();
+      const fl = Math.max(0, 1-(now-flashT)/130);
+      if(fl>0){ fc.fillStyle='rgba(255,255,255,'+(0.85*fl)+')'; fc.fillRect(0,0,W,H); }
+    }
+
+    // severed head rolling left -> right, leaving a trail
+    if(t>=T_HEAD && t<T_HEAD+HEAD_MS){
+      const p = (t-T_HEAD)/HEAD_MS;
+      const x = -headW + (W+2*headW)*p;
+      const bounce = Math.abs(Math.sin(p*Math.PI*4.5))*H*0.09*(1-p*0.55);
+      const cy = groundY - headR - bounce;
+      const rot = x/headR*57.3;
+      head.style.display='block';
+      head.style.transform = 'translate('+(x-headW/2)+'px,'+(cy-headW*0.56)+'px) rotate('+rot+'deg)';
+      head.style.transformOrigin = '50% 56%';
+      const onGround = bounce < H*0.012;
+      if(lastHead){
+        const vx = (x-lastHead.x)/Math.max(dt,0.001);
+        spawnStump(x, cy, vx);
+        if(onGround || lastHead.ground){
+          sx.lineCap='round'; sx.strokeStyle='rgba(140,5,18,.92)'; sx.lineWidth=12+Math.random()*7;
+          sx.beginPath(); sx.moveTo(lastHead.x, groundY); sx.lineTo(x, groundY+(Math.random()-.5)*5); sx.stroke();
+          sx.fillStyle='rgba(120,4,14,.9)';
+          for(let k=0;k<2;k++){ sx.beginPath(); sx.arc(x-Math.random()*40, groundY+(Math.random()-.4)*22, 2+Math.random()*5, 0, 6.3); sx.fill(); }
+        }
+      }
+      lastHead = {x:x, ground:onGround};
+    } else if(t>=T_HEAD+HEAD_MS){ head.style.display='none'; }
+
+    // particles (spray + stump blood), stamped onto the stain layer as they fly
+    particles = particles.filter(q=>q.age<q.life);
+    particles.forEach(q=>{
+      q.age += dt; q.vy += 1500*dt; q.px=q.x; q.py=q.y; q.x += q.vx*dt; q.y += q.vy*dt;
+      if(q.y>groundY+8){ q.y=groundY+8; q.vy=0; q.vx*=0.6; }
+      const al = Math.max(0,1-q.age/q.life);
+      fc.fillStyle='rgba(205,12,30,'+al+')'; fc.beginPath(); fc.arc(q.x,q.y,q.r,0,6.3); fc.fill();
+      sx.strokeStyle='rgba(130,4,16,.35)'; sx.lineWidth=q.r*0.9; sx.lineCap='round';
+      sx.beginPath(); sx.moveTo(q.px,q.py); sx.lineTo(q.x,q.y); sx.stroke();
+    });
+    // dripping streaks
+    drips.forEach(d=>{
+      if(d.len<d.max){
+        const step = d.v*dt; sx.fillStyle='rgba(150,6,20,.9)';
+        sx.fillRect(d.x-d.w/2, d.y+d.len, d.w, step+1);
+        sx.beginPath(); sx.arc(d.x, d.y+d.len+step, d.w*0.6, 0, 6.3); sx.fill();
+        d.len += step; d.v *= 0.995;
+      }
+    });
+
+    if(t>=T_END){ finish(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  function finish(){
+    if(ended) return; ended = true; cancelAnimationFrame(raf);
+    dark.style.transition = 'opacity .5s ease-out'; dark.style.opacity = 0;
+    stain.style.transition = fx.style.transition = 'opacity .5s ease-out'; stain.style.opacity = 0; fx.style.opacity = 0;
+    setTimeout(()=>{
+      ov.classList.remove('show','shake'); head.style.display='none'; sw.style.opacity=0;
+      stain.style.transition = fx.style.transition = 'none'; stain.style.opacity = 1; fx.style.opacity = 1;
+      slashRunning = false; if(onDone) onDone();
+    }, 550);
+  }
+  ov.onclick = ()=>{ if(performance.now()-t0 > 2000) finish(); };
+  raf = requestAnimationFrame(frame);
+}
+
+
+/* éclaboussure de sang plein écran (le dino fait exploser le chat) */
+function screenBloodSplash(){
+  const W = window.innerWidth, H = window.innerHeight, dpr = Math.min(window.devicePixelRatio||1,2);
+  const cv = document.createElement('canvas');
+  cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+  cv.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:9000;pointer-events:none;opacity:1;transition:opacity .9s ease-out;';
+  document.body.appendChild(cv);
+  const c = cv.getContext('2d'); c.setTransform(dpr,0,0,dpr,0,0);
+  const cx = W*0.5, cy = H*0.55;
+  const blobs = [], drips = [];
+  for(let i=0;i<46;i++){
+    const ang = Math.random()*6.283, dist = Math.pow(Math.random(),0.7)*Math.hypot(W,H)*0.55;
+    blobs.push({x:cx+Math.cos(ang)*dist, y:cy+Math.sin(ang)*dist*0.8, r:10+Math.random()*(i<8?90:44), delay:Math.random()*260, drawn:false, tone:Math.random()<0.3?'#6e050f':'#b0081a'});
+  }
+  const t0 = performance.now();
+  let flashed = false, alive = true;
+  function draw(now){
+    if(!alive) return;
+    const t = now-t0;
+    if(!flashed){ flashed = true; c.fillStyle='rgba(200,10,25,.55)'; c.fillRect(0,0,W,H); }
+    blobs.forEach(b=>{
+      if(!b.drawn && t>=b.delay){
+        b.drawn = true;
+        c.fillStyle=b.tone; c.beginPath(); c.arc(b.x,b.y,b.r,0,6.283); c.fill();
+        for(let k=0;k<7;k++){ const a=Math.random()*6.283, d=b.r*(0.9+Math.random()*1.4);
+          c.beginPath(); c.arc(b.x+Math.cos(a)*d, b.y+Math.sin(a)*d, b.r*(0.1+Math.random()*0.22), 0, 6.283); c.fill(); }
+        c.strokeStyle=b.tone; c.lineWidth=b.r*0.25; c.lineCap='round';
+        const a2 = Math.atan2(b.y-cy,b.x-cx); c.beginPath(); c.moveTo(b.x,b.y); c.lineTo(b.x+Math.cos(a2)*b.r*2.4, b.y+Math.sin(a2)*b.r*2.4); c.stroke();
+        if(b.r>24 && Math.random()<0.8) drips.push({x:b.x+(Math.random()-.5)*b.r, y:b.y+b.r*0.6, w:Math.max(4,b.r*0.22), len:0, v:50+Math.random()*120, max:H*(0.12+Math.random()*0.35), tone:b.tone});
+      }
+    });
+    drips.forEach(d=>{ if(d.len<d.max){ const st=d.v*0.016; c.fillStyle=d.tone; c.fillRect(d.x-d.w/2,d.y+d.len,d.w,st+1); c.beginPath(); c.arc(d.x,d.y+d.len+st,d.w*0.6,0,6.283); c.fill(); d.len+=st; d.v*=0.996; } });
+    if(t<3000) requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+  setTimeout(()=>{ cv.style.opacity = 0; }, 2900);
+  setTimeout(()=>{ alive=false; cv.remove(); }, 3900);
+}
+
 /* ===================== "pas tout de suite !" (tab 2) ===================== */
 let notNowTimer = null;
 function showNotNow(){
@@ -2820,6 +3220,19 @@ function showNotNow(){
   if(notNowTimer) clearTimeout(notNowTimer);
   notNowTimer = setTimeout(()=> o.classList.remove('show'), 1800);
 }
+/* ===== onglet 2 : ballon trop gonflé -> orc furieux + rat décapité ===== */
+let burstOrcTimer = null;
+function hideBurstOrc(){
+  document.getElementById('burstOrcOverlay').classList.remove('show');
+  if(burstOrcTimer){ clearTimeout(burstOrcTimer); burstOrcTimer=null; }
+}
+function showBurstOrc(){
+  document.getElementById('burstOrcOverlay').classList.add('show');
+  if(burstOrcTimer) clearTimeout(burstOrcTimer);
+  burstOrcTimer = setTimeout(hideBurstOrc, 3600);
+}
+document.getElementById('burstOrcOverlay').addEventListener('click', hideBurstOrc);
+
 document.getElementById('notNowOverlay').addEventListener('click', ()=>{
   document.getElementById('notNowOverlay').classList.remove('show');
   if(notNowTimer){ clearTimeout(notNowTimer); notNowTimer=null; }
